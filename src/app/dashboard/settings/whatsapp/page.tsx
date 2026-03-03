@@ -3,7 +3,10 @@
  *
  * Allows users to link their WhatsApp number.
  * Flow: User enters phone → Backend sends 6-digit code via WA → User confirms code.
- * This calls the backend Python API (POST /auth/verify-whatsapp).
+ *
+ * Backend endpoints (Python FastAPI on Railway):
+ *   - POST /auth/verify-whatsapp/send-code  { user_id, phone_number }
+ *   - POST /auth/verify-whatsapp/confirm    { user_id, code }
  *
  * @module app/dashboard/settings/whatsapp/page
  */
@@ -27,6 +30,20 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type Step = "phone" | "code" | "success";
 
+/**
+ * Normalize a phone input to E.164 format.
+ * Strips spaces, dashes, and parentheses. Ensures leading '+'.
+ *
+ * Examples:
+ *   "+51 942 961 598" → "+51942961598"
+ *   "51942961598"     → "+51942961598"
+ *   "+51-942-961-598" → "+51942961598"
+ */
+function normalizePhone(raw: string): string {
+  const cleaned = raw.replace(/[\s\-().]/g, "");
+  return cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
+}
+
 export default function WhatsAppPage() {
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
@@ -46,26 +63,35 @@ export default function WhatsAppPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session) {
+      if (!session?.user?.id) {
         setError("Sesión expirada. Recarga la página.");
         return;
       }
 
-      const res = await fetch(`${API_URL}/auth/verify-whatsapp/send`, {
+      const normalizedPhone = normalizePhone(phone);
+
+      const res = await fetch(`${API_URL}/auth/verify-whatsapp/send-code`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ phone_number: phone }),
+        body: JSON.stringify({
+          user_id: session.user.id,
+          phone_number: normalizedPhone,
+        }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.detail ?? "Error al enviar el código");
+        const data = await res.json().catch(() => ({}));
+        setError(
+          data.detail ?? `Error al enviar el código (${res.status})`
+        );
         return;
       }
 
+      // Store the normalized version for display
+      setPhone(normalizedPhone);
       setStep("code");
     } catch {
       setError("Error de conexión con el servidor");
@@ -84,7 +110,7 @@ export default function WhatsAppPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session) {
+      if (!session?.user?.id) {
         setError("Sesión expirada. Recarga la página.");
         return;
       }
@@ -95,11 +121,14 @@ export default function WhatsAppPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ phone_number: phone, code }),
+        body: JSON.stringify({
+          user_id: session.user.id,
+          code,
+        }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         setError(data.detail ?? "Código incorrecto");
         return;
       }
@@ -161,7 +190,8 @@ export default function WhatsAppPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  pattern="\+[0-9]{10,15}"
+                  pattern="[+]?[0-9\s\-]{8,20}"
+                  title="Ingresa un número válido con código de país (ej: +51987654321)"
                 />
               </div>
 
