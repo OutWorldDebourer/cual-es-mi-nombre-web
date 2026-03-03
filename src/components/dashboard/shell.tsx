@@ -25,6 +25,9 @@ interface DashboardShellProps {
 
 const navItems = [
   { href: "/dashboard", label: "Inicio", icon: "🏠" },
+  { href: "/dashboard/notes", label: "Notas", icon: "📝" },
+  { href: "/dashboard/reminders", label: "Recordatorios", icon: "🔔" },
+  { href: "/dashboard/credits", label: "Créditos", icon: "💳" },
   { href: "/dashboard/settings", label: "Configuración", icon: "⚙️" },
   {
     href: "/dashboard/settings/whatsapp",

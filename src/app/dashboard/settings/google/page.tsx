@@ -5,13 +5,16 @@
  * The backend handles the OAuth2 dance and stores the refresh token
  * in Supabase Vault.
  *
+ * Auth: Uses JWT auth via `backendApi` helper.
+ *
  * @module app/dashboard/settings/google/page
  */
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { backendApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,13 +24,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
-
 export default function GoogleCalendarPage() {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
+  const api = useMemo(() => backendApi(supabase), [supabase]);
 
   useEffect(() => {
     async function checkConnection() {
@@ -50,18 +52,12 @@ export default function GoogleCalendarPage() {
   }, [supabase]);
 
   async function handleConnect() {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
+    try {
+      const url = await api.google.getConnectUrl();
+      window.location.href = url;
+    } catch {
       alert("Sesión expirada. Recarga la página.");
-      return;
     }
-
-    // Redirect to backend OAuth2 flow — backend handles Google OAuth
-    // and stores refresh_token in Supabase Vault
-    window.location.href = `${API_URL}/auth/google/connect?token=${session.access_token}`;
   }
 
   if (loading) {

@@ -63,28 +63,56 @@ export interface Subscription {
 export interface Note {
   id: string;
   profile_id: string;
-  title: string;
+  title: string | null;
   content: string;
-  is_deleted: boolean;
+  tags: string[];
+  is_pinned: boolean;
+  is_archived: boolean;
   created_at: string;
   updated_at: string;
 }
 
+export type ReminderStatus =
+  | "pending"
+  | "processing"
+  | "sent"
+  | "failed"
+  | "cancelled";
+
 export interface Reminder {
   id: string;
   profile_id: string;
-  title: string;
-  remind_at: string; // UTC timestamp
-  is_sent: boolean;
-  is_deleted: boolean;
+  content: string;
+  trigger_at: string; // UTC timestamp
+  original_text: string | null;
+  status: ReminderStatus;
+  retry_count: number;
+  max_retries: number;
+  channel: "whatsapp" | "web";
+  sent_at: string | null;
+  failed_reason: string | null;
   created_at: string;
 }
+
+export type CreditAction =
+  | "message"
+  | "calendar_op"
+  | "note"
+  | "reminder"
+  | "audio_transcription"
+  | "complex_query"
+  | "monthly_reset"
+  | "admin_adjustment"
+  | "bonus";
 
 export interface CreditTransaction {
   id: string;
   profile_id: string;
   amount: number;
-  operation: "deduct" | "add" | "reset";
-  reason: string;
+  action: CreditAction;
+  balance_after: number;
+  description: string | null;
+  reference_id: string | null;
+  reference_type: string | null;
   created_at: string;
 }

@@ -4,17 +4,22 @@
  * Allows users to link their WhatsApp number.
  * Flow: User enters phone → Backend sends 6-digit code via WA → User confirms code.
  *
- * Backend endpoints (Python FastAPI on Railway):
- *   - POST /auth/verify-whatsapp/send-code  { user_id, phone_number }
- *   - POST /auth/verify-whatsapp/confirm    { user_id, code }
+ * Auth: Uses JWT auth via `backendApi` helper (Authorization: Bearer <token>).
+ * The user_id is NEVER sent in the request body — it's extracted from the
+ * JWT on the backend side via `get_current_user_id` dependency.
+ *
+ * Routes:
+ *   POST /auth/verify-whatsapp/send-code  — request verification code
+ *   POST /auth/verify-whatsapp/confirm    — submit code to link phone
  *
  * @module app/dashboard/settings/whatsapp/page
  */
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { backendApi, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,8 +30,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type Step = "phone" | "code" | "success";
 
@@ -52,6 +55,7 @@ export default function WhatsAppPage() {
   const [error, setError] = useState<string | null>(null);
 
   const supabase = createClient();
+  const api = useMemo(() => backendApi(supabase), [supabase]);
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -59,42 +63,16 @@ export default function WhatsAppPage() {
     setLoading(true);
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user?.id) {
-        setError("Sesión expirada. Recarga la página.");
-        return;
-      }
-
       const normalizedPhone = normalizePhone(phone);
-
-      const res = await fetch(`${API_URL}/auth/verify-whatsapp/send-code`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          user_id: session.user.id,
-          phone_number: normalizedPhone,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(
-          data.detail ?? `Error al enviar el código (${res.status})`
-        );
-        return;
-      }
-
-      // Store the normalized version for display
+      await api.whatsapp.sendCode(normalizedPhone);
       setPhone(normalizedPhone);
       setStep("code");
-    } catch {
-      setError("Error de conexión con el servidor");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.detail);
+      } else {
+        setError("Error de conexión con el servidor");
+      }
     } finally {
       setLoading(false);
     }
@@ -106,36 +84,14 @@ export default function WhatsAppPage() {
     setLoading(true);
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user?.id) {
-        setError("Sesión expirada. Recarga la página.");
-        return;
-      }
-
-      const res = await fetch(`${API_URL}/auth/verify-whatsapp/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          user_id: session.user.id,
-          code,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.detail ?? "Código incorrecto");
-        return;
-      }
-
+      await api.whatsapp.confirmCode(code);
       setStep("success");
-    } catch {
-      setError("Error de conexión con el servidor");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.detail);
+      } else {
+        setError("Error de conexión con el servidor");
+      }
     } finally {
       setLoading(false);
     }
