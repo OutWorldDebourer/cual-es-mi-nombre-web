@@ -116,3 +116,27 @@ export interface CreditTransaction {
   reference_type: string | null;
   created_at: string;
 }
+
+// ── Plans / Checkout (Step 9) ──────────────────────────────────────────────
+
+export interface PlanInfo {
+  key: string;
+  label: string;
+  price_pen: number;
+  credits_per_month: number;
+  description: string;
+  features: string[];
+  badge: string;
+  is_highlighted: boolean;
+}
+
+export interface PlansListResponse {
+  plans: PlanInfo[];
+  currency: string;
+  currency_symbol: string;
+}
+
+export interface CheckoutPreferenceResponse {
+  init_point: string;
+  preference_id: string;
+}

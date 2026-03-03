@@ -9,6 +9,7 @@
 
 "use client";
 
+import Link from "next/link";
 import type { SubscriptionPlan } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -84,8 +85,8 @@ export function CreditBalance({
             <span className="capitalize font-medium">{plan}</span>
           </p>
           {canUpgrade && (
-            <Button variant="outline" size="sm" disabled>
-              Mejorar plan
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/plans">Mejorar plan</Link>
             </Button>
           )}
         </div>

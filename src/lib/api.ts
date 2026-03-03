@@ -19,6 +19,10 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type {
+  CheckoutPreferenceResponse,
+  PlansListResponse,
+} from "@/types/database";
 
 // ── Configuration ──────────────────────────────────────────────────────────
 
@@ -147,6 +151,41 @@ function googleApi(supabase: SupabaseClient) {
   };
 }
 
+// ── Payments / Checkout API (Step 9) ───────────────────────────────────────
+
+/**
+ * Fetch the public plan catalog — no auth needed.
+ */
+export async function getPlans(): Promise<PlansListResponse> {
+  const res = await fetch(`${API_URL}/api/plans`);
+  if (!res.ok) {
+    throw new ApiError(res.status, "Error al obtener planes.");
+  }
+  return res.json() as Promise<PlansListResponse>;
+}
+
+function paymentsApi(supabase: SupabaseClient) {
+  return {
+    /**
+     * POST /api/checkout/create-preference
+     * Creates a MercadoPago Checkout Pro preference for the given plan.
+     * Returns { init_point, preference_id }.
+     */
+    async createPreference(
+      plan: string,
+    ): Promise<CheckoutPreferenceResponse> {
+      return authFetch<CheckoutPreferenceResponse>(
+        supabase,
+        "/api/checkout/create-preference",
+        {
+          method: "POST",
+          body: JSON.stringify({ plan }),
+        },
+      );
+    },
+  };
+}
+
 // ── Factory ────────────────────────────────────────────────────────────────
 
 /**
@@ -163,6 +202,6 @@ export function backendApi(supabase: SupabaseClient) {
   return {
     whatsapp: whatsappApi(supabase),
     google: googleApi(supabase),
-    // Future: notes, reminders, credits — added in Steps 4-5
+    payments: paymentsApi(supabase),
   };
 }
