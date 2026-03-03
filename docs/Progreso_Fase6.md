@@ -2,7 +2,7 @@
 
 **Documento maestro:** `Proyecto_Cual es mi nombre/docs/Fase6_Hardening_Frontend_Beta.md`  
 **Este archivo:** Resumen orientado al frontend de dónde estamos y qué falta  
-**Última Actualización:** 2026-03-03
+**Última Actualización:** 2026-03-04
 
 ---
 
@@ -19,13 +19,13 @@ Step  4 [F]   Frontend: Notas CRUD                       ███████�
 Step  5 [F]   Frontend: Recordatorios + Créditos         ████████████ ✅ COMPLETADO
 Step  6 [F]   Frontend: Tests (Vitest + RTL)             ████████████ ✅ COMPLETADO
 Step  7 [B]   Smoke test E2E (5 escenarios)              ████████████ ✅ COMPLETADO
-Step  8 [B+F] Validar onboarding completo                ░░░░░░░░░░░░ 💤 PENDIENTE
-Step  9 [B+F] MercadoPago producción                     ░░░░░░░░░░░░ 💤 PENDIENTE
+Step  8 [B+F] Validar onboarding completo                ████████████ ✅ COMPLETADO
+Step  9 [B+F] MercadoPago producción                     ████████████ ✅ COMPLETADO (9.1-9.10)
 Step 10 [B]   Calendar: Cache Redis + CRUD               ░░░░░░░░░░░░ 💤 PENDIENTE
 Step 11 [B]   Optimizaciones P2/P3                       ░░░░░░░░░░░░ 💤 FUTURO
 Step 12 [B]   Docs audit final                           ░░░░░░░░░░░░ 💤 FUTURO
 
-Progreso global: ~54% (6.5/12 Steps)
+Progreso global: ~75% (9/12 Steps)
 ```
 
 **Labels:** `[B]` = Backend only, `[F]` = Frontend only, `[B+F]` = Ambos repos, `[I]` = Infraestructura
@@ -91,34 +91,41 @@ Progreso global: ~54% (6.5/12 Steps)
 
 ---
 
-## 💤 Steps Pendientes (próximos)
+## ✅ Step 8 — Validar Onboarding Completo `[B+F]` ✅
 
-### Step 8 — Validar Onboarding Completo `[B+F]` ← **EN PROGRESO**
+**Completado:** 8.A-8.F (CRUD WA Agents) + 8.1-8.6 (Onboarding E2E)
+- 8.A: Classifier hardened con 4 intents faltantes, `_extract_intent_from_text()` fallback
+- 8.B-8.D: Notes UPDATE/DELETE/ARCHIVE + Reminders LIST/CANCEL implementados
+- 8.E: Router `_INTENT_TO_AGENT` mapeado completo
+- 8.F: 138 nuevos tests (total 626 backend tests post Step 8)
+- Identidad dual resuelta en 8.2 (WA + Web users vinculados)
+- 644 backend tests total (post Step 8.6 + Step 9 additions)
 
-**Sub-steps 8.A-F (CRUD WA Agents):**
-- **8.A** — Classifier: agregar 4 intents faltantes (`note_delete`, `reminder_read`, `reminder_update`, `reminder_cancel`) a `VALID_INTENTS` + categorías en prompt — **PARCIAL** (prompt hardened con REGLA CRÍTICA + `_extract_intent_from_text()` fallback, pero intents NOT in frozenset aún)
-- **8.B** — Notes Agent UPDATE: implementar búsqueda por título → `update_note()` real
-- **8.C** — Notes Agent DELETE/ARCHIVE: implementar `archive_note()` real
-- **8.D** — Reminders Agent: agregar LIST + CANCEL
-- **8.E** — Router: mapear nuevos intents en `_INTENT_TO_AGENT` dict
-- **8.F** — Tests: ≥ 15 nuevos tests
+---
 
-**Sub-steps 8.1-8.6 (Onboarding E2E):**
-- 8.1 — Crear usuario test desde frontend (signup + email)
-- 8.2 — Vincular WhatsApp desde dashboard (JWT)
-- 8.3 — Enviar mensajes WA → verificar agentes
-- 8.4 — Probar flujo de pago (si MP sandbox)
-- 8.5 — Bidireccionalidad WA↔Web (notas visibles)
-- 8.6 — Documentar resultados
+## 🚧 Steps Pendientes (próximos)
 
-**Bloqueante:** 2 auth.users separados sin vincular (WA `ba441ed5` vs Web `ad01b992`). Resolver en 8.2.
+### Step 9 — MercadoPago Producción `[B+F]` ✅ COMPLETADO (9.1-9.10)
 
-### Step 9 — MercadoPago Producción `[B+F]`
+**Backend (9.1-9.9):**
+- 9.2A: `PlanConfig` en `constants.py` con description, features, badge, is_highlighted
+- 9.2B: `mercadopago_service.py` hardened (PEN, dynamic back_urls, `create_plan_preference()`)
+- 9.2C: `checkout.py` — `GET /api/plans` (público) + `POST /api/checkout/create-preference` (JWT)
+- 9.2D: 18 tests en `test_checkout.py`
+- 9.7: Webhook IPN pipeline audited, 2 bugs P0/P1 corregidos (reference parser + notification_url)
+- 9.8: E2E payment pipeline verified (23/23 checks), API_PUBLIC_URL configured
+- 9.9: Production readiness hardening (token detection, health check MP section)
 
-**Impacto frontend importante:**
-- Crear página `/dashboard/plans` o `/payment` con pricing
-- Conectar botón de pago con API de preapproval
-- Verificar que créditos se acreditan post-pago
+**Frontend (9.5-9.6, 9.10):**
+- 9.5A: **Página `/dashboard/plans`** — `PlanCard` + `PlanGrid` components + Server Component page
+- 9.5B: **Checkout flow** — `paymentsApi` module en `api.ts`, redirect a MercadoPago `init_point`
+- Nav: "Planes 💎" en sidebar, "Mejorar plan" button en credit-balance
+- 9.10: Commit `92cf99a` — `feat(payments): add checkout/pricing page`
+- Types: `PlanInfo`, `PlansListResponse`, `CheckoutPreferenceResponse` en `database.ts`
+
+**Baseline:** 666 backend tests, 32 frontend tests, build 0 errors
+
+**Nota:** Railway `MERCADOPAGO_ACCESS_TOKEN` sigue en sandbox (`TEST-`). Swap a producción es solo env-var. Guía: `docs/MP_Credenciales_Produccion.md`.
 
 ### Step 10 — Calendar: Cache + CRUD `[B]`
 Backend only — sin impacto directo en frontend actual.
@@ -133,8 +140,8 @@ Mayormente backend.
 | # | Tema | Prioridad | Step | Estado |
 |---|------|-----------|------|--------|
 | 1 | ~~Test manual WA linking con JWT~~ | ~~Alta~~ | ~~3.6~~ | ✅ Validado (E2E: Railway JWT 401, Vercel env vars, build 0 errors) |
-| 2 | Página de pricing/checkout (MercadoPago) | Crítica | 9.5-9.6 | No iniciado |
-| 3 | Bidireccionalidad WA↔Web (notas visibles) | Alta | 8.5 | Bloqueado por identidad dual |
+| 2 | Página de pricing/checkout (MercadoPago) | Crítica | 9.5-9.6 | ✅ Código completo (`/dashboard/plans`) |
+| 3 | Bidireccionalidad WA↔Web (notas visibles) | Alta | 8.5 | ✅ Resuelto en Step 8 |
 | 4 | Tests de integración (forms submit, API calls) | Media | Futuro | No iniciado |
 | 5 | Responsive/mobile optimization | Media | Futuro | No iniciado |
 | 6 | Loading states y error boundaries | Media | Futuro | No iniciado |
@@ -146,6 +153,8 @@ Mayormente backend.
 
 | Fecha | Commit | Descripción |
 |-------|--------|-------------|
+| 2026-03-03 | `92cf99a` | feat(payments): add checkout/pricing page (Step 9.10) |
+| 2026-03-03 | `8dc341a` | docs: orientation update Steps 7/8 status |
 | 2026-03-03 | `faf16fb` | docs: update Progreso_Fase6 with Step 3 completion, Step 7/8 status |
 | 2026-03-02 | `e3b3308` | test(frontend): Vitest + RTL test suite (32 tests) |
 | 2026-03-02 | `62d770a` | feat(frontend): Reminders and Credits History pages |
@@ -160,14 +169,15 @@ Mayormente backend.
 
 ## 🎯 Siguiente Acción Recomendada
 
-**Para el frontend:** El trabajo de Steps 4-6 está completado. Los próximos Steps con impacto frontend son:
+**Para el frontend:** Steps 4-6 y 9 completados. Pricing page (`/dashboard/plans`) funcional con checkout redirect a MercadoPago.
 
-1. **Step 8.5** (Bidireccionalidad WA↔Web) — Verificar que notas/recordatorios creados vía WhatsApp aparecen en dashboard. Bloqueado por identidad dual.
-2. **Step 9** (MercadoPago) — Crear página `/dashboard/plans` o `/payment` con pricing
+1. **Step 10** — Calendar Cache + CRUD (backend only, sin impacto directo frontend)
+2. **Futuro** — Tests de integración (forms submit, API calls), responsive/mobile
+3. **Futuro** — Calendar dashboard page (post Step 10)
 
-**Para el backend:** Step 8.A (intents faltantes en classifier) es la siguiente acción inmediata.
+**Para el backend:** Step 10 (Calendar Cache + CRUD completo) → Step 11 (Optimizaciones) → Step 12 (Docs audit).
 
 ```
-Ruta crítica:    1✅ → 2✅ → 3✅ → 7✅ → 8🚧 → 9💤
-Frontend done:   4✅ → 5✅ → 6✅
+Ruta crítica:    1✅ → 2✅ → 3✅ → 7✅ → 8✅ → 9✅ → 10💤
+Frontend done:   4✅ → 5✅ → 6✅ → 9.5+9.10✅
 ```
