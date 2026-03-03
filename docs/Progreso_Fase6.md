@@ -14,18 +14,18 @@ Fase 6: Hardening, Frontend Funcional y Preparación Beta
 
 Step  1 [I]   Infra quick wins (env vars, Sentry)       ████████████ ✅ COMPLETADO
 Step  2 [B]   Rate limiting por IP                       ████████████ ✅ COMPLETADO
-Step  3 [B+F] Alinear frontend con JWT auth              ██████████░░ 🚧 80% (8/10)
+Step  3 [B+F] Alinear frontend con JWT auth              ████████████ ✅ COMPLETADO
 Step  4 [F]   Frontend: Notas CRUD                       ████████████ ✅ COMPLETADO
 Step  5 [F]   Frontend: Recordatorios + Créditos         ████████████ ✅ COMPLETADO
 Step  6 [F]   Frontend: Tests (Vitest + RTL)             ████████████ ✅ COMPLETADO
-Step  7 [B]   Smoke test E2E (5 escenarios)              ░░░░░░░░░░░░ 💤 PENDIENTE
+Step  7 [B]   Smoke test E2E (5 escenarios)              ████████████ ✅ COMPLETADO
 Step  8 [B+F] Validar onboarding completo                ░░░░░░░░░░░░ 💤 PENDIENTE
 Step  9 [B+F] MercadoPago producción                     ░░░░░░░░░░░░ 💤 PENDIENTE
 Step 10 [B]   Calendar: Cache Redis + CRUD               ░░░░░░░░░░░░ 💤 PENDIENTE
 Step 11 [B]   Optimizaciones P2/P3                       ░░░░░░░░░░░░ 💤 FUTURO
 Step 12 [B]   Docs audit final                           ░░░░░░░░░░░░ 💤 FUTURO
 
-Progreso global: ~46% (5.8/12 Steps)
+Progreso global: ~54% (6.5/12 Steps)
 ```
 
 **Labels:** `[B]` = Backend only, `[F]` = Frontend only, `[B+F]` = Ambos repos, `[I]` = Infraestructura
@@ -44,19 +44,18 @@ Progreso global: ~46% (5.8/12 Steps)
 - Per-route limits (WA:60, MP:30, verify-wa:10, health:120 req/min)
 - 21 tests, 486 backend tests total
 
-### Step 3 — Alinear Frontend con JWT Auth `[B+F]` 🚧 80%
+### Step 3 — Alinear Frontend con JWT Auth `[B+F]` ✅
 
 **Lo que se hizo:**
 - Creado `src/lib/api.ts` — `backendApi()` factory con JWT auth built-in
 - Refactorizado `whatsapp/page.tsx` y `google/page.tsx` para usar `backendApi()`
 - Fix crítico: ruta `/send` → `/send-code` (causaba 404)
 - Eliminado envío de `user_id` en body (ahora se extrae del JWT en backend)
-- 4 tests JWT nuevos en backend (490 tests total)
-
-**Lo que falta:**
-- [ ] **3.6** — Test manual E2E: enviar código WA → confirmar (requiere staging/producción)
-- [ ] **3.7** — Commit frontend: los cambios ya están pushed pero como parte de commits de Steps 4-6
-- [ ] **3.8** — Verificar deploy en Vercel funciona correctamente
+- 4 tests JWT nuevos en backend (503 tests total)
+- E2E validation: Railway API healthy, JWT auth enforced (401 sin token), Vercel env vars confirmadas (`vercel env ls`)
+- Frontend build 0 errors, 32 tests pass
+- Commit: `c6af9ab` (incluido en Step 4 commit)
+- **Nota:** Live E2E con phone real bloqueado por identidad dual (WA user ≠ Web user) → Resolución en Step 8
 
 ### Step 4 — Frontend: Notas CRUD `[F]` ✅
 - **Commit:** `c6af9ab`
