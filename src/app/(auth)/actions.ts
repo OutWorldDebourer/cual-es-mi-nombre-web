@@ -13,6 +13,30 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Resolve the canonical site URL for redirects.
+ *
+ * Priority:
+ *   1. NEXT_PUBLIC_SITE_URL (explicit — must be set in Vercel env vars for prod)
+ *   2. NEXT_PUBLIC_VERCEL_URL (auto-injected by Vercel on every deployment)
+ *   3. Fallback to localhost for local dev
+ *
+ * @see https://supabase.com/docs/guides/auth/redirect-urls#vercel-preview-urls
+ */
+function getSiteURL(): string {
+  let url =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_URL ??
+    "http://localhost:3000";
+
+  // NEXT_PUBLIC_VERCEL_URL does not include the protocol
+  url = url.startsWith("http") ? url : `https://${url}`;
+  // Ensure trailing slash for consistent URL concatenation
+  url = url.endsWith("/") ? url : `${url}/`;
+
+  return url;
+}
+
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
@@ -47,11 +71,13 @@ export async function signup(formData: FormData) {
     return { error: "La contraseña debe tener al menos 6 caracteres" };
   }
 
+  const siteURL = getSiteURL();
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`,
+      emailRedirectTo: `${siteURL}auth/callback`,
     },
   });
 
