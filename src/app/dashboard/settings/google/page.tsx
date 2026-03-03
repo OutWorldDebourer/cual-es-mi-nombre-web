@@ -38,11 +38,11 @@ export default function GoogleCalendarPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("google_calendar_connected")
+        .select("google_token_vault_id")
         .eq("id", user.id)
         .single();
 
-      setConnected(profile?.google_calendar_connected ?? false);
+      setConnected(!!profile?.google_token_vault_id);
       setLoading(false);
     }
 

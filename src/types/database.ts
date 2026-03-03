@@ -12,23 +12,39 @@
 
 export type SubscriptionPlan = "free" | "basic" | "pro" | "premium";
 export type SubscriptionStatus =
+  | "trial"
   | "active"
+  | "past_due"
   | "cancelled"
-  | "expired"
-  | "pending";
-export type OnboardingStatus = "new" | "in_progress" | "completed";
+  | "expired";
+export type OnboardingStatus =
+  | "new"
+  | "payment_pending"
+  | "payment_confirmed"
+  | "name_chosen"
+  | "google_connected"
+  | "completed";
 
 export interface Profile {
   id: string; // UUID — matches auth.users.id
   phone_number: string | null;
+  display_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
   assistant_name: string;
   timezone: string;
   locale: string;
   onboarding_status: OnboardingStatus;
-  subscription_plan: SubscriptionPlan;
+  plan: SubscriptionPlan; // DB column is "plan", not "subscription_plan"
   credits_remaining: number;
-  google_calendar_connected: boolean;
-  vault_secret_id: string | null;
+  credits_total: number;
+  google_token_vault_id: string | null; // non-null = Google connected
+  google_calendar_id: string;
+  channel_origin: "whatsapp" | "web" | null;
+  is_active: boolean;
+  wa_verification_code: string | null;
+  wa_verification_expires_at: string | null;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

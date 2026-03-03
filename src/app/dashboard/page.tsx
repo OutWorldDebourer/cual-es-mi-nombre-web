@@ -34,10 +34,10 @@ export default async function DashboardPage() {
     .single();
 
   const assistantName = profile?.assistant_name ?? "Asistente";
-  const plan = profile?.subscription_plan ?? "free";
+  const plan = profile?.plan ?? "free";
   const credits = profile?.credits_remaining ?? 0;
   const hasPhone = !!profile?.phone_number;
-  const hasGoogle = !!profile?.google_calendar_connected;
+  const hasGoogle = !!profile?.google_token_vault_id;
   const onboarding = profile?.onboarding_status ?? "new";
 
   return (

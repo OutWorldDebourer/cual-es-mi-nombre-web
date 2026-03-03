@@ -46,7 +46,7 @@ export function DashboardShell({
   const pathname = usePathname();
 
   const assistantName = profile?.assistant_name ?? "Asistente";
-  const plan = profile?.subscription_plan ?? "free";
+  const plan = profile?.plan ?? "free";
   const credits = profile?.credits_remaining ?? 0;
 
   return (
