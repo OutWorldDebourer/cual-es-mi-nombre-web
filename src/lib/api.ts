@@ -163,14 +163,41 @@ function googleApi(supabase: SupabaseClient) {
 // ── Payments / Checkout API (Step 9) ───────────────────────────────────────
 
 /**
+ * Execute a fetch to the backend WITHOUT JWT auth.
+ * Used for pre-authentication endpoints (recovery, set-password, plans).
+ * Throws ApiError on non-2xx responses.
+ */
+async function publicFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+  if (!res.ok) {
+    let detail = `Error ${res.status}`;
+    try {
+      const body = await res.json();
+      detail = body.detail ?? detail;
+    } catch {
+      // response body wasn't JSON — keep the generic message
+    }
+    throw new ApiError(res.status, detail);
+  }
+
+  return res.json() as Promise<T>;
+}
+
+/**
  * Fetch the public plan catalog — no auth needed.
  */
 export async function getPlans(): Promise<PlansListResponse> {
-  const res = await fetch(`${API_URL}/api/plans`);
-  if (!res.ok) {
-    throw new ApiError(res.status, "Error al obtener planes.");
-  }
-  return res.json() as Promise<PlansListResponse>;
+  return publicFetch<PlansListResponse>("/api/plans");
 }
 
 function paymentsApi(supabase: SupabaseClient) {
@@ -194,6 +221,50 @@ function paymentsApi(supabase: SupabaseClient) {
     },
   };
 }
+
+// ── Phone Auth API (pre-authentication, no JWT) ──────────────────────────
+
+export interface PhoneAuthResponse {
+  status: string;
+  message: string;
+}
+
+export type PhoneAuthPurpose = "recovery" | "set_password";
+
+export const phoneAuthApi = {
+  /**
+   * POST /auth/phone/request-otp
+   * Request an OTP for password recovery or WA-first set-password.
+   */
+  async requestOtp(phone: string, purpose: PhoneAuthPurpose): Promise<PhoneAuthResponse> {
+    return publicFetch<PhoneAuthResponse>("/auth/phone/request-otp", {
+      method: "POST",
+      body: JSON.stringify({ phone, purpose }),
+    });
+  },
+
+  /**
+   * POST /auth/phone/set-password
+   * WA-first user sets their first password after OTP verification.
+   */
+  async setPassword(phone: string, otp: string, password: string): Promise<PhoneAuthResponse> {
+    return publicFetch<PhoneAuthResponse>("/auth/phone/set-password", {
+      method: "POST",
+      body: JSON.stringify({ phone, otp, password }),
+    });
+  },
+
+  /**
+   * POST /auth/phone/reset-password
+   * Existing user resets their password after OTP verification.
+   */
+  async resetPassword(phone: string, otp: string, password: string): Promise<PhoneAuthResponse> {
+    return publicFetch<PhoneAuthResponse>("/auth/phone/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ phone, otp, password }),
+    });
+  },
+};
 
 // ── Factory ────────────────────────────────────────────────────────────────
 

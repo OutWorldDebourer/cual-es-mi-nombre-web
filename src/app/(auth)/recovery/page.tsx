@@ -1,14 +1,10 @@
 /**
- * Signup Page — "Cuál es mi nombre" Web
+ * Recovery Page — "Cuál es mi nombre" Web
  *
- * Phone + password registration using Supabase Auth with
- * OTP verification delivered via WhatsApp (SMS Hook).
+ * Phone-based password recovery using custom OTP (backend API).
+ * Uses RecoveryForm with purpose="recovery".
  *
- * Multi-step flow:
- *   1. Phone + password → Supabase signUp → SMS Hook → WhatsApp OTP
- *   2. OTP verification → Supabase verifyOtp → session → /dashboard
- *
- * @module app/(auth)/signup/page
+ * @module app/(auth)/recovery/page
  */
 
 "use client";
@@ -16,27 +12,27 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SignupForm } from "@/components/auth/signup-form";
+import { RecoveryForm } from "@/components/auth/recovery-form";
 
-export default function SignupPage() {
+export default function RecoveryPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+          <CardTitle className="text-2xl">Recuperar Contraseña</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Registra tu asistente virtual
+            Te enviaremos un código a tu WhatsApp
           </p>
         </CardHeader>
         <CardContent>
-          <SignupForm />
+          <RecoveryForm purpose="recovery" />
 
           <Separator className="my-6" />
 
           <p className="text-center text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{" "}
+            ¿Recordaste tu contraseña?{" "}
             <Link href="/login" className="text-primary underline">
-              Inicia sesión
+              Iniciar sesión
             </Link>
           </p>
         </CardContent>

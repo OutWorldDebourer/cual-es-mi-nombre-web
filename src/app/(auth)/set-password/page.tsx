@@ -1,14 +1,12 @@
 /**
- * Signup Page — "Cuál es mi nombre" Web
+ * Set Password Page — "Cuál es mi nombre" Web
  *
- * Phone + password registration using Supabase Auth with
- * OTP verification delivered via WhatsApp (SMS Hook).
+ * WA-first users who have an account via WhatsApp but no web password
+ * can set their first password here using phone OTP verification.
  *
- * Multi-step flow:
- *   1. Phone + password → Supabase signUp → SMS Hook → WhatsApp OTP
- *   2. OTP verification → Supabase verifyOtp → session → /dashboard
+ * Uses RecoveryForm with purpose="set_password".
  *
- * @module app/(auth)/signup/page
+ * @module app/(auth)/set-password/page
  */
 
 "use client";
@@ -16,27 +14,27 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SignupForm } from "@/components/auth/signup-form";
+import { RecoveryForm } from "@/components/auth/recovery-form";
 
-export default function SignupPage() {
+export default function SetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+          <CardTitle className="text-2xl">Crear Contraseña</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Registra tu asistente virtual
+            Crea una contraseña para acceder desde la web
           </p>
         </CardHeader>
         <CardContent>
-          <SignupForm />
+          <RecoveryForm purpose="set_password" />
 
           <Separator className="my-6" />
 
           <p className="text-center text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{" "}
+            ¿Ya tienes contraseña?{" "}
             <Link href="/login" className="text-primary underline">
-              Inicia sesión
+              Iniciar sesión
             </Link>
           </p>
         </CardContent>
