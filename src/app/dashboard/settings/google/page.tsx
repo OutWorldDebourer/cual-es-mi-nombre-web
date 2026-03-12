@@ -1,21 +1,20 @@
 /**
  * Google Calendar Connection Page — "Cuál es mi nombre" Web
  *
- * Redirects the user to the backend OAuth2 flow for Google Calendar.
- * The backend handles the OAuth2 dance and stores the refresh token
- * in Supabase Vault.
- *
- * Auth: Uses JWT auth via `backendApi` helper.
+ * A7.3.3 moves the page to server rendering so the dashboard re-reads the
+ * canonical profile row in the same post-callback redirect cycle, instead of
+ * relying on pre-existing client state.
  *
  * @module app/dashboard/settings/google/page
  */
 
-"use client";
-
-import { useState, useEffect, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { backendApi } from "@/lib/api";
-import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import {
+  buildGoogleAuthCallbackBanner,
+  isGoogleCalendarConnected,
+} from "@/lib/google-auth";
+import { GoogleConnectButton } from "@/components/dashboard/google-connect-button";
 import {
   Card,
   CardContent,
@@ -24,50 +23,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function GoogleCalendarPage() {
-  const [connected, setConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
+type GoogleCalendarPageProps = {
+  searchParams: Promise<{
+    google_auth?: string | string[] | undefined;
+    reason?: string | string[] | undefined;
+  }>;
+};
 
-  const supabase = createClient();
-  const api = useMemo(() => backendApi(supabase), [supabase]);
+export default async function GoogleCalendarPage(
+  props: GoogleCalendarPageProps,
+) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    async function checkConnection() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("google_token_vault_id")
-        .eq("id", user.id)
-        .single();
-
-      setConnected(!!profile?.google_token_vault_id);
-      setLoading(false);
-    }
-
-    checkConnection();
-  }, [supabase]);
-
-  async function handleConnect() {
-    try {
-      const url = await api.google.getConnectUrl();
-      window.location.href = url;
-    } catch {
-      alert("Sesión expirada. Recarga la página.");
-    }
+  if (!user) {
+    redirect("/login");
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Google Calendar</h1>
-        <p className="text-muted-foreground">Cargando...</p>
-      </div>
-    );
-  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("google_token_vault_id")
+    .eq("id", user.id)
+    .single();
+
+  const connected = isGoogleCalendarConnected(profile);
+  const callbackBanner = buildGoogleAuthCallbackBanner(searchParams, connected);
 
   return (
     <div className="space-y-6">
@@ -77,6 +60,17 @@ export default function GoogleCalendarPage() {
           Conecta tu Google Calendar para que el asistente gestione tus eventos.
         </p>
       </div>
+
+      {callbackBanner.tone !== "idle" && callbackBanner.title && callbackBanner.description && (
+        <Card className={callbackBannerClassName(callbackBanner.tone)}>
+          <CardHeader>
+            <CardTitle>{callbackBanner.title}</CardTitle>
+            <CardDescription className="text-current opacity-90">
+              {callbackBanner.description}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -96,17 +90,25 @@ export default function GoogleCalendarPage() {
                 El asistente puede crear y consultar eventos en tu calendario
                 principal.
               </p>
-              <Button variant="outline" onClick={handleConnect}>
-                Reconectar
-              </Button>
+              <GoogleConnectButton connected={connected} variant="outline" />
             </div>
           ) : (
-            <Button onClick={handleConnect}>
-              Conectar con Google
-            </Button>
+            <GoogleConnectButton connected={connected} />
           )}
         </CardContent>
       </Card>
     </div>
   );
+}
+
+function callbackBannerClassName(tone: "success" | "warning" | "error"): string {
+  if (tone === "success") {
+    return "border-emerald-200 bg-emerald-50";
+  }
+
+  if (tone === "warning") {
+    return "border-amber-200 bg-amber-50";
+  }
+
+  return "border-red-200 bg-red-50";
 }

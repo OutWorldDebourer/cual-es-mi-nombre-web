@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Read(//c/Users/masah/.claude/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://mcp.supabase.com/mcp?project_ref=iknuuplnizdlaidjpwdh\" -H \"Authorization: Bearer sbp_ad0a974fb8c7562dfe0e13d6eb42f3ae7a009f15\" -X GET 2>&1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://mcp.mercadopago.com/mcp\" -X GET 2>&1)",
+      "Bash(npx --yes @upstash/context7-mcp --version 2>&1 | head -5)",
+      "Bash(npx --yes @railway/mcp-server --version 2>&1 | head -5)",
+      "Bash(npx --yes @sentry/mcp-server@latest --version 2>&1 | head -5)",
+      "Bash(uvx --version 2>&1 && uvx -qq --from redis-mcp-server@latest redis-mcp-server --help 2>&1 | head -5)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://mcp.supabase.com/mcp?project_ref=iknuuplnizdlaidjpwdh\" -H \"Authorization: Bearer sbp_ad0a974fb8c7562dfe0e13d6eb42f3ae7a009f15\" -X POST -H \"Content-Type: application/json\" -d '{\"method\":\"initialize\"}' 2>&1)",
+      "Bash(redis-cli -u \"redis://default:QJkGsswXdabZlgNLBWojvNyjaUovHXvU@centerbeam.proxy.rlwy.net:40494\" ping 2>&1 || echo \"redis-cli not in PATH, testing via node\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\" \"https://mcp.supabase.com/mcp?project_ref=iknuuplnizdlaidjpwdh\" \\\\\n  -H \"Authorization: Bearer sbp_ad0a974fb8c7562dfe0e13d6eb42f3ae7a009f15\" \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -X POST \\\\\n  -d '{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1.0\"}}}' 2>&1 | tail -3)",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\" \"https://mcp.mercadopago.com/mcp\" \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -X POST \\\\\n  -d '{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1.0\"}}}' 2>&1 | tail -3)",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\" \"https://mcp.supabase.com/mcp?project_ref=iknuuplnizdlaidjpwdh\" \\\\\n  -H \"Authorization: Bearer sbp_ad0a974fb8c7562dfe0e13d6eb42f3ae7a009f15\" \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -H \"Accept: application/json, text/event-stream\" \\\\\n  -X POST \\\\\n  -d '{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1.0\"}}}' 2>&1 | head -5)",
+      "WebSearch",
+      "WebFetch(domain:mcp.mercadopago.com)",
+      "WebFetch(domain:www.mercadopago.com.mx)",
+      "WebFetch(domain:www.mercadopago.com.br)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.mercadopago.cl)",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\" \"https://mcp.mercadopago.com/mcp\" \\\\\n  -H \"Authorization: Bearer APP_USR-7494705839264764-030405-1903ccf51cda1288faf1672cbfa24b99-3241148305\" \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -H \"Accept: application/json, text/event-stream\" \\\\\n  -X POST \\\\\n  -d '{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1.0\"}}}' 2>&1)"
+    ]
+  }
+}

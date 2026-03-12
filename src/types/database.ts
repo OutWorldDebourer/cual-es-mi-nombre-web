@@ -22,6 +22,7 @@ export type OnboardingStatus =
   | "payment_pending"
   | "payment_confirmed"
   | "name_chosen"
+  | "timezone_set"
   | "google_connected"
   | "completed";
 

@@ -23,6 +23,7 @@ import type {
   CheckoutPreferenceResponse,
   PlansListResponse,
 } from "@/types/database";
+import { buildGoogleConnectContractUrl } from "@/lib/google-auth";
 
 // ── Configuration ──────────────────────────────────────────────────────────
 
@@ -146,7 +147,15 @@ function googleApi(supabase: SupabaseClient) {
      */
     async getConnectUrl(): Promise<string> {
       const token = await getAccessToken(supabase);
-      return `${API_URL}/auth/google/connect?token=${token}`;
+
+      try {
+        return buildGoogleConnectContractUrl(API_URL, token);
+      } catch (error) {
+        const detail = error instanceof Error
+          ? error.message
+          : "No se pudo iniciar Google OAuth.";
+        throw new ApiError(500, detail);
+      }
     },
   };
 }
