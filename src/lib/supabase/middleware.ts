@@ -53,12 +53,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages to dashboard
-  if (
-    user &&
-    (request.nextUrl.pathname === "/login" ||
-      request.nextUrl.pathname === "/signup")
-  ) {
+  // Redirect authenticated users away from auth pages to dashboard.
+  // All public auth routes — if a user already has a session, these are unreachable states.
+  const AUTH_ROUTES = ["/login", "/signup", "/recovery", "/set-password"];
+  if (user && AUTH_ROUTES.includes(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

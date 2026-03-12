@@ -1,7 +1,7 @@
 /**
  * Auth Callback Route — "Cuál es mi nombre" Web
  *
- * Handles the OAuth/email-confirmation callback from Supabase.
+ * Handles the OAuth callback from Supabase (e.g. Google sign-in).
  * Exchanges the auth code for a session, then redirects to dashboard.
  *
  * @module app/auth/callback/route
