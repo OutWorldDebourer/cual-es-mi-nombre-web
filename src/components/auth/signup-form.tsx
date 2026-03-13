@@ -251,17 +251,26 @@ export function SignupForm() {
       <div className="space-y-4">
         <div className="rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4 text-sm space-y-2">
           <p className="font-medium text-blue-900 dark:text-blue-100">
-            Ya tienes una cuenta desde WhatsApp
+            Ya tienes una cuenta
           </p>
           <p className="text-blue-800 dark:text-blue-200">
-            Tu número ya está registrado. Para acceder desde la web, establece
-            una contraseña usando tu WhatsApp para verificación.
+            Este número ya está registrado. Si ya creaste una contraseña,
+            inicia sesión directamente. Si no la recuerdas, puedes recuperarla.
           </p>
         </div>
 
         <Button asChild className="w-full">
-          <Link href="/set-password">Establecer contraseña</Link>
+          <Link href="/login">Iniciar sesión</Link>
         </Button>
+
+        <div className="flex gap-2">
+          <Button asChild variant="outline" className="flex-1">
+            <Link href="/recovery">Recuperar contraseña</Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-1">
+            <Link href="/set-password">Crear contraseña</Link>
+          </Button>
+        </div>
 
         <Button
           type="button"

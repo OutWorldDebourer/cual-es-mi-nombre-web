@@ -366,11 +366,14 @@ describe("SignupForm — Existing user detection", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Ya tienes una cuenta desde WhatsApp"),
+        screen.getByText("Ya tienes una cuenta"),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Establecer contraseña" }),
-      ).toHaveAttribute("href", "/set-password");
+        screen.getByRole("link", { name: "Iniciar sesión" }),
+      ).toHaveAttribute("href", "/login");
+      expect(
+        screen.getByRole("link", { name: "Recuperar contraseña" }),
+      ).toHaveAttribute("href", "/recovery");
     });
   });
 
@@ -406,7 +409,7 @@ describe("SignupForm — Existing user detection", () => {
     await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Ya tienes una cuenta desde WhatsApp")).toBeInTheDocument();
+      expect(screen.getByText("Ya tienes una cuenta")).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Usar otro número" }));
