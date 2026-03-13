@@ -41,7 +41,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockSupabaseClient.auth.signUp = mockSignUp;
   mockSupabaseClient.auth.verifyOtp = mockVerifyOtp;
-  mockSignUp.mockResolvedValue({ data: { user: { id: "u1" }, session: null }, error: null });
+  mockSignUp.mockResolvedValue({
+    data: { user: { id: "u1", identities: [{ id: "i1" }] }, session: null },
+    error: null,
+  });
   mockVerifyOtp.mockResolvedValue({
     data: {
       user: { id: "u1", phone: "+51999888777" },
@@ -340,6 +343,76 @@ describe("SignupForm — Step 2 (OTP Verification)", () => {
 
     const verifyBtn = screen.getByRole("button", { name: "Verificar código" });
     expect(verifyBtn).toBeDisabled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Existing user detection (WA-first)
+// ---------------------------------------------------------------------------
+
+describe("SignupForm — Existing user detection", () => {
+  it("shows existing user message when identities array is empty", async () => {
+    mockSignUp.mockResolvedValueOnce({
+      data: { user: { id: "u1", identities: [] }, session: null },
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Ya tienes una cuenta desde WhatsApp"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Establecer contraseña" }),
+      ).toHaveAttribute("href", "/set-password");
+    });
+  });
+
+  it("does NOT transition to OTP step for existing users", async () => {
+    mockSignUp.mockResolvedValueOnce({
+      data: { user: { id: "u1", identities: [] }, session: null },
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/código de verificación/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it("allows going back to signup form via 'Usar otro número'", async () => {
+    mockSignUp.mockResolvedValueOnce({
+      data: { user: { id: "u1", identities: [] }, session: null },
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Ya tienes una cuenta desde WhatsApp")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Usar otro número" }));
+
+    expect(screen.getByLabelText("Contraseña")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Crear cuenta" })).toBeInTheDocument();
   });
 });
 

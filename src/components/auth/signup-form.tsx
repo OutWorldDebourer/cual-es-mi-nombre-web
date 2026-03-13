@@ -14,6 +14,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { OTPInput, useOTPTimer } from "@/components/auth/otp-input";
@@ -104,6 +105,7 @@ export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [existingUser, setExistingUser] = useState(false);
 
   // --- OTP timer (starts when step transitions to verify_otp) ---
   const timer = useOTPTimer({
@@ -141,7 +143,7 @@ export function SignupForm() {
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         phone,
         password,
         options: {
@@ -151,6 +153,14 @@ export function SignupForm() {
 
       if (authError) {
         setError(mapSignupError(authError.message));
+        return;
+      }
+
+      // Detect existing user (WA-first or previous signup with confirmed phone).
+      // Supabase returns user with empty identities array for repeated signups
+      // of already-confirmed users — no OTP is sent in this case.
+      if (data?.user?.identities?.length === 0) {
+        setExistingUser(true);
         return;
       }
 
@@ -230,6 +240,42 @@ export function SignupForm() {
     setStep("phone_password");
     setOtp("");
     setError(null);
+  }
+
+  // =========================================================================
+  // Render — Existing user detected (WA-first)
+  // =========================================================================
+
+  if (existingUser) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4 text-sm space-y-2">
+          <p className="font-medium text-blue-900 dark:text-blue-100">
+            Ya tienes una cuenta desde WhatsApp
+          </p>
+          <p className="text-blue-800 dark:text-blue-200">
+            Tu número ya está registrado. Para acceder desde la web, establece
+            una contraseña usando tu WhatsApp para verificación.
+          </p>
+        </div>
+
+        <Button asChild className="w-full">
+          <Link href="/set-password">Establecer contraseña</Link>
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full"
+          onClick={() => {
+            setExistingUser(false);
+            setError(null);
+          }}
+        >
+          Usar otro número
+        </Button>
+      </div>
+    );
   }
 
   // =========================================================================
