@@ -284,19 +284,31 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### ~~M7 — Dashboard Home~~ ✅ PARCIALMENTE COMPLETO
+### ~~M7 — Dashboard Home~~ ✅ COMPLETO
 
 **Implementado:**
 - ✅ M7.1 — Iconos Lucide en cards (Coins, Gem, MessageCircle, Calendar)
 - ✅ M7.1 — Status con CheckCircle2/XCircle + semantic colors
 - ✅ M7.1 — Links de accion con ArrowRight hacia configuracion
-- ✅ Onboarding card con Rocket icon + semantic warning colors
+- ✅ M7.1 — Count-up animado en creditos (ease-out cubic, 800ms)
+- ✅ M7.1 — Hover effect sutil en cards (translate-y + shadow)
+- ✅ M7.2 — Onboarding stepper visual con progress bar y 4 pasos interactivos
+- ✅ M7.3 — Actividad reciente unificada (notas + recordatorios + creditos)
 
-**Pendiente:**
-- [ ] M7.1 — Numeros con animacion count-up
-- [ ] M7.1 — Hover effect sutil en cards
-- [ ] M7.2 — Stepper visual de onboarding con progreso
-- [ ] M7.3 — Seccion de actividad reciente
+#### M7.2 — Onboarding Stepper ✅
+**Archivos creados:**
+- `src/components/dashboard/onboarding-stepper.tsx` — NUEVO: 4 pasos (WhatsApp, nombre, Google, plan), progress bar, step highlighting, completed strikethrough
+
+**Archivos modificados:**
+- `src/app/dashboard/page.tsx` — Onboarding card reemplazada por OnboardingStepper
+
+#### M7.3 — Actividad Reciente ✅
+**Archivos creados:**
+- `src/components/dashboard/recent-activity.tsx` — NUEVO: timeline unificado de notas, recordatorios y creditos con iconos contextuales y timestamps relativos
+- `src/components/dashboard/count-up.tsx` — NUEVO: CountUp animado con requestAnimationFrame + ease-out cubic
+
+**Archivos modificados:**
+- `src/app/dashboard/page.tsx` — Queries paralelas (notes, reminders, credit_transactions), normalización, RecentActivity + CountUp + hover en cards
 
 ---
 
@@ -413,11 +425,11 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M6.1: Auth pages con branding (split layout + gradient panel + glass feature cards)
 - ✅ M9: Pricing page completo (ribbon + plan destacado + staggered animation + badge "Tu plan")
 
-### Ola 3 — Polish (EN PROGRESO)
+### Ola 3 — Polish ✅ COMPLETA
 - ✅ M5: Skeletons y loading states
 - ✅ M4: Feedback y notificaciones (FormError + toast migration + undo)
-- M7.2-7.3: Onboarding stepper, actividad reciente
-- M8: Notas con views y tags
+- ✅ M7: Dashboard Home completo (stepper + actividad reciente + count-up + hover)
+- M8: Notas con views y tags (movido a Ola 4)
 
 ### Ola 4 — Refinamiento (PENDIENTE)
 - M3.4: Breadcrumbs

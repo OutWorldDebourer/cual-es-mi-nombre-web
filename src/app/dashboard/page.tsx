@@ -15,9 +15,14 @@ import {
   Calendar,
   CheckCircle2,
   XCircle,
-  Rocket,
   ArrowRight,
 } from "lucide-react";
+import { CountUp } from "@/components/dashboard/count-up";
+import { OnboardingStepper } from "@/components/dashboard/onboarding-stepper";
+import {
+  RecentActivity,
+  type ActivityItem,
+} from "@/components/dashboard/recent-activity";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -35,11 +40,72 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
+  // Fetch recent activity in parallel
+  const [recentNotes, recentReminders, recentCredits] = await Promise.all([
+    supabase
+      .from("notes")
+      .select("id, title, content, created_at")
+      .order("created_at", { ascending: false })
+      .limit(3),
+    supabase
+      .from("reminders")
+      .select("id, content, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(3),
+    supabase
+      .from("credit_transactions")
+      .select("id, amount, action, description, created_at")
+      .order("created_at", { ascending: false })
+      .limit(3),
+  ]);
+
+  // Normalize into unified activity items
+  const activityItems: ActivityItem[] = [];
+
+  for (const note of recentNotes.data ?? []) {
+    activityItems.push({
+      id: `note-${note.id}`,
+      type: "note",
+      title: note.title || "Nota sin título",
+      detail: note.content.length > 60 ? note.content.slice(0, 60) + "..." : note.content,
+      timestamp: note.created_at,
+    });
+  }
+
+  for (const rem of recentReminders.data ?? []) {
+    const statusLabel =
+      rem.status === "sent" ? "entregado" :
+      rem.status === "failed" ? "fallido" :
+      "pendiente";
+    activityItems.push({
+      id: `rem-${rem.id}`,
+      type: "reminder",
+      title: rem.content.length > 50 ? rem.content.slice(0, 50) + "..." : rem.content,
+      detail: `Recordatorio ${statusLabel}`,
+      timestamp: rem.created_at,
+    });
+  }
+
+  for (const tx of recentCredits.data ?? []) {
+    activityItems.push({
+      id: `tx-${tx.id}`,
+      type: "credit",
+      title: tx.description || (tx.action === "credit" ? "Créditos añadidos" : "Créditos usados"),
+      detail: `${tx.action === "credit" ? "+" : ""}${tx.amount} créditos`,
+      timestamp: tx.created_at,
+    });
+  }
+
+  // Sort by timestamp descending, take top 6
+  activityItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const recentActivity = activityItems.slice(0, 6);
+
   const assistantName = profile?.assistant_name ?? "Asistente";
   const plan = profile?.plan ?? "free";
   const credits = profile?.credits_remaining ?? 0;
   const hasPhone = !!profile?.phone_number;
   const hasGoogle = !!profile?.google_token_vault_id;
+  const hasCustomName = assistantName !== "Asistente";
   const onboarding = profile?.onboarding_status ?? "new";
 
   return (
@@ -55,13 +121,15 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Credits */}
-        <Card>
+        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>Creditos restantes</CardDescription>
               <Coins className="h-4 w-4 text-muted-foreground" />
             </div>
-            <CardTitle className="text-4xl tabular-nums">{credits}</CardTitle>
+            <CardTitle className="text-4xl tabular-nums">
+              <CountUp end={credits} />
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
@@ -71,7 +139,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Plan */}
-        <Card>
+        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>Plan actual</CardDescription>
@@ -93,7 +161,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* WhatsApp */}
-        <Card>
+        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>WhatsApp</CardDescription>
@@ -127,7 +195,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Google Calendar */}
-        <Card>
+        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>Google Calendar</CardDescription>
@@ -161,25 +229,18 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Onboarding notice */}
+      {/* Onboarding stepper */}
       {onboarding !== "completed" && (
-        <Card className="border-warning/40 bg-warning/5">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Rocket className="h-5 w-5 text-warning" />
-              Completa tu configuracion
-            </CardTitle>
-            <CardDescription>
-              {!hasPhone &&
-                "Vincula tu numero de WhatsApp para empezar a usar el asistente. "}
-              {!hasGoogle &&
-                "Conecta Google Calendar para gestionar tus eventos. "}
-              {plan === "free" &&
-                "Suscribete a un plan para obtener mas creditos."}
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <OnboardingStepper
+          hasPhone={hasPhone}
+          hasCustomName={hasCustomName}
+          hasGoogle={hasGoogle}
+          hasPaidPlan={plan !== "free"}
+        />
       )}
+
+      {/* Recent activity */}
+      <RecentActivity items={recentActivity} />
     </div>
   );
 }
