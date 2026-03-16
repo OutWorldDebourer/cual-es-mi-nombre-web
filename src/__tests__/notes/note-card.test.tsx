@@ -11,7 +11,16 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NoteCard } from "@/components/notes/note-card";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Note } from "@/types/database";
+
+function renderCard(ui: React.ReactElement) {
+  return render(ui, {
+    wrapper: ({ children }: { children: React.ReactNode }) => (
+      <TooltipProvider>{children}</TooltipProvider>
+    ),
+  });
+}
 
 function makeNote(overrides: Partial<Note> = {}): Note {
   return {
@@ -37,26 +46,26 @@ const defaultProps = {
 
 describe("NoteCard", () => {
   it("renders title and content", () => {
-    render(<NoteCard note={makeNote()} {...defaultProps} />);
+    renderCard(<NoteCard note={makeNote()} {...defaultProps} />);
 
     expect(screen.getByText("Test Note")).toBeInTheDocument();
     expect(screen.getByText("This is a test note content")).toBeInTheDocument();
   });
 
   it("renders 'Sin título' when title is null", () => {
-    render(<NoteCard note={makeNote({ title: null })} {...defaultProps} />);
+    renderCard(<NoteCard note={makeNote({ title: null })} {...defaultProps} />);
 
     expect(screen.getByText("Sin título")).toBeInTheDocument();
   });
 
   it("renders pinned indicator for pinned notes", () => {
-    render(<NoteCard note={makeNote({ is_pinned: true })} {...defaultProps} />);
+    renderCard(<NoteCard note={makeNote({ is_pinned: true })} {...defaultProps} />);
 
     expect(screen.getByLabelText("Fijada")).toBeInTheDocument();
   });
 
   it("renders tags as badges", () => {
-    render(
+    renderCard(
       <NoteCard
         note={makeNote({ tags: ["work", "important"] })}
         {...defaultProps}
@@ -69,7 +78,7 @@ describe("NoteCard", () => {
 
   it("truncates long content to 200 chars", () => {
     const longContent = "a".repeat(250);
-    render(<NoteCard note={makeNote({ content: longContent })} {...defaultProps} />);
+    renderCard(<NoteCard note={makeNote({ content: longContent })} {...defaultProps} />);
 
     const displayed = screen.getByText(/^a+…$/);
     expect(displayed.textContent).toHaveLength(201); // 200 chars + "…"
@@ -78,7 +87,7 @@ describe("NoteCard", () => {
   it("shows delete confirmation dialog and calls onDelete", async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn();
-    render(
+    renderCard(
       <NoteCard note={makeNote()} {...defaultProps} onDelete={onDelete} />,
     );
 
@@ -97,7 +106,7 @@ describe("NoteCard", () => {
     const user = userEvent.setup();
     const note = makeNote();
     const onEdit = vi.fn();
-    render(<NoteCard note={note} {...defaultProps} onEdit={onEdit} />);
+    renderCard(<NoteCard note={note} {...defaultProps} onEdit={onEdit} />);
 
     await user.click(screen.getByLabelText("Acciones de nota"));
     await user.click(screen.getByText("✏️ Editar"));
@@ -107,7 +116,7 @@ describe("NoteCard", () => {
   it("calls onTogglePin when pin action is clicked", async () => {
     const user = userEvent.setup();
     const onTogglePin = vi.fn();
-    render(
+    renderCard(
       <NoteCard note={makeNote()} {...defaultProps} onTogglePin={onTogglePin} />,
     );
 

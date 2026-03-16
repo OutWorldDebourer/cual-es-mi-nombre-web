@@ -17,7 +17,7 @@ en un producto SaaS de pago.
 | ~~Animaciones~~ | ~~Casi ninguna (solo las de Radix por defecto)~~ | ✅ PARCIAL — Landing con staggered animations + hover effects |
 | ~~Mobile~~ | ~~Sidebar oculta sin hamburger menu~~ | ✅ RESUELTO — Drawer mobile con backdrop |
 | ~~Iconos~~ | ~~Emojis como iconos de navegacion~~ | ✅ RESUELTO — Lucide icons en toda la nav |
-| Loading states | Texto plano "Cargando..." | Sin feedback visual |
+| ~~Loading states~~ | ~~Texto plano "Cargando..."~~ | ✅ RESUELTO — Skeletons + Spinner + loading.tsx boundaries |
 | ~~Dark mode~~ | ~~Variables CSS existen, sin toggle~~ | ✅ RESUELTO — next-themes + ThemeToggle |
 | ~~HTML lang~~ | ~~`lang="en"` en app 100% espanol~~ | ✅ RESUELTO — `lang="es"` |
 | ~~Toast/feedback~~ | ~~`setTimeout` inline para confirmaciones~~ | ✅ RESUELTO — Sonner instalado y configurado |
@@ -59,7 +59,7 @@ en un producto SaaS de pago.
 - `next-themes@0.4.6` — Dark mode provider
 - `sonner@2.0.7` — Toast notification system
 
-### Ola 2 — Conversion (EN PROGRESO)
+### Ola 2 — Conversion ✅ COMPLETA
 
 #### M2 Landing Page ✅
 **Archivos modificados:**
@@ -76,7 +76,7 @@ en un producto SaaS de pago.
 - `src/app/(auth)/recovery/page.tsx` — Removido wrapper externo
 - `src/app/(auth)/set-password/page.tsx` — Removido wrapper externo
 
-### Ola 3 — Polish (EN PROGRESO)
+### Ola 3 — Polish ✅ COMPLETA
 
 #### M5 Loading States y Skeletons ✅
 **Archivos creados:**
@@ -385,16 +385,16 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M13 — Componentes UI Faltantes
+### ~~M13 — Componentes UI Faltantes~~ ✅ COMPLETO
 
 **Prioridad:** BAJA-MEDIA
 
 - [x] M13.1 — shadcn Select ✅ (reemplazar `<select>` nativo en settings)
-- [ ] M13.2 — shadcn Tooltip (para icon buttons)
-- [ ] M13.3 — shadcn Sheet (para mobile drawer alternativo)
+- [x] M13.2 — shadcn Tooltip ✅ (TooltipProvider global + tooltips en icon buttons)
+- [x] M13.3 — shadcn Sheet ✅ (componente base disponible, side variants top/bottom/left/right)
 - [x] M13.4 — shadcn Skeleton ✅ (implementado en M5)
 - [x] M13.5 — shadcn Progress ✅ (reemplazar div en credit-balance)
-- [ ] M13.6 — shadcn Avatar (perfil en sidebar/header)
+- [x] M13.6 — shadcn Avatar ✅ (perfil con iniciales en header)
 
 #### M13.1 — shadcn Select ✅
 **Archivos creados:**
@@ -402,6 +402,27 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Archivos modificados:**
 - `src/app/dashboard/settings/page.tsx` — `<select>` nativo reemplazado por `<Select>` shadcn con dropdown animado, check icon en item seleccionado, estilos consistentes con design system
+
+#### M13.2 — shadcn Tooltip ✅
+**Archivos creados:**
+- `src/components/ui/tooltip.tsx` — NUEVO: shadcn Tooltip (TooltipProvider, Tooltip, TooltipTrigger, TooltipContent) con Radix primitives, data-slot pattern, animaciones entrada/salida, delayDuration=300ms
+
+**Archivos modificados:**
+- `src/app/layout.tsx` — `<TooltipProvider>` global envolviendo children (disponible en toda la app)
+- `src/components/dashboard/theme-toggle.tsx` — Tooltip "Cambiar tema" en icon button del theme toggle
+- `src/components/notes/note-card.tsx` — Tooltip "Acciones" en icon button del dropdown de acciones
+- `src/__tests__/notes/note-card.test.tsx` — `renderCard()` wrapper con TooltipProvider para tests
+
+#### M13.3 — shadcn Sheet ✅
+**Archivos creados:**
+- `src/components/ui/sheet.tsx` — NUEVO: shadcn Sheet (Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription) con Dialog primitive, cva side variants (top/bottom/left/right), slide animations, overlay con backdrop
+
+#### M13.6 — shadcn Avatar ✅
+**Archivos creados:**
+- `src/components/ui/avatar.tsx` — NUEVO: shadcn Avatar (Avatar, AvatarImage, AvatarFallback) con Radix primitives, data-slot pattern, fallback con iniciales en primary/10
+
+**Archivos modificados:**
+- `src/components/dashboard/shell.tsx` — Header: email text plano reemplazado por Avatar con inicial + email al lado
 
 #### M13.5 — shadcn Progress ✅
 **Archivos creados:**
@@ -445,29 +466,30 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M7: Dashboard Home completo (stepper + actividad reciente + count-up + hover)
 - M8: Notas con views y tags (movido a Ola 4)
 
-### Ola 4 — Refinamiento (PENDIENTE)
+### Ola 4 — Refinamiento (EN PROGRESO)
+- ✅ M13: Componentes UI completos (Select, Tooltip, Sheet, Skeleton, Progress, Avatar)
 - M8: Notas UX polish (views, tags, empty state)
 - M3.4: Breadcrumbs
 - M6.2: Auth form polish (transitions, progress, password strength)
 - M10.2-10.4: Skip nav, focus, reduced-motion
 - M12: Performance y optimización
-- M13: Componentes UI faltantes (Select, Tooltip, Progress, Avatar)
 - M14: Micro-interacciones restantes (page transitions, active:scale-95)
 
 ---
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
-| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
+| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | Completo |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

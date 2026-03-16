@@ -23,6 +23,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -78,15 +83,20 @@ export function NoteCard({
               </p>
             </div>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Acciones de nota"
-                >
-                  ⋮
-                </Button>
-              </DropdownMenuTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label="Acciones de nota"
+                    >
+                      ⋮
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Acciones</TooltipContent>
+              </Tooltip>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onEdit(note)}>
                   ✏️ Editar
