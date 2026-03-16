@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { UserMenu } from "@/components/dashboard/user-menu";
+import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb-nav";
 import {
   Home,
   StickyNote,
@@ -52,6 +53,9 @@ const navItems: NavItem[] = [
 
 const mainNav = navItems.filter((i) => i.group === "main");
 const settingsNav = navItems.filter((i) => i.group === "settings");
+const routeLabels = Object.fromEntries(
+  navItems.map((item) => [item.href, item.label])
+);
 
 const PLAN_STYLES: Record<SubscriptionPlan, string> = {
   free: "bg-muted text-muted-foreground",
@@ -214,23 +218,26 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
       {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Header */}
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background/80 backdrop-blur-md px-4 md:px-6">
-          <div className="flex items-center gap-3">
-            {/* Mobile hamburger */}
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="md:hidden"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Cerrar menu" : "Abrir menu"}
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-            <UserMenu email={user.email ?? user.phone ?? "Usuario"} />
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+          <div className="flex h-14 items-center justify-between border-b px-4 md:px-6">
+            <div className="flex items-center gap-3">
+              {/* Mobile hamburger */}
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="md:hidden"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label={mobileOpen ? "Cerrar menu" : "Abrir menu"}
+              >
+                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+              <UserMenu email={user.email ?? user.phone ?? "Usuario"} />
+            </div>
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <ThemeToggle />
-          </div>
+          <DashboardBreadcrumb pathname={pathname} routeLabels={routeLabels} />
         </header>
 
         {/* Page content */}

@@ -194,8 +194,16 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M3.5 — Avatar con dropdown menu (configuracion, planes, cerrar sesion)
 
 **Pendiente:**
-- [ ] M3.4 — Breadcrumbs para paginas anidadas (`Configuracion > Google Calendar`)
+- ✅ M3.4 — Breadcrumbs para paginas anidadas (`Configuracion > Google Calendar`)
 - [ ] M3.3 — Sidebar collapsible en desktop (solo iconos)
+
+#### M3.4 — Breadcrumbs ✅
+**Archivos creados:**
+- `src/components/ui/breadcrumb.tsx` — NUEVO: shadcn Breadcrumb (Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator) con data-slot pattern, Radix Slot asChild, ChevronRight separator
+- `src/components/dashboard/breadcrumb-nav.tsx` — NUEVO: DashboardBreadcrumb que construye cadena de migas desde pathname + routeLabels derivado de navItems
+
+**Archivos modificados:**
+- `src/components/dashboard/shell.tsx` — Header reestructurado: outer header sticky+backdrop-blur, inner div para toolbar, DashboardBreadcrumb como segunda fila condicional (oculto en /dashboard raiz)
 
 ---
 
@@ -581,8 +589,10 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M12: Performance y optimización (client audit + bundle analysis + auth pages Static SSR)
 - ✅ M14: Micro-interacciones completas (stagger page transitions, active:scale-[0.97], Framer Motion evaluado/diferido)
 
+### Ola 5 — Navegacion avanzada
+- ✅ M3.4: Breadcrumbs para paginas anidadas
+
 ### Backlog (baja prioridad, independientes)
-- M3.4: Breadcrumbs para paginas anidadas
 - M3.3: Sidebar collapsible en desktop (solo iconos)
 - M1.3: Spacing tokens consistentes
 - M2.2: Scroll-triggered reveal animations (IntersectionObserver)
