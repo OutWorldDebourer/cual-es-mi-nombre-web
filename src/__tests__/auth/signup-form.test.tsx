@@ -351,7 +351,7 @@ describe("SignupForm — Step 2 (OTP Verification)", () => {
 // ---------------------------------------------------------------------------
 
 describe("SignupForm — Existing user detection", () => {
-  it("shows existing user message when identities array is empty", async () => {
+  it("shows existing user message with set-password CTA when identities array is empty", async () => {
     mockSignUp.mockResolvedValueOnce({
       data: { user: { id: "u1", identities: [] }, session: null },
       error: null,
@@ -366,8 +366,11 @@ describe("SignupForm — Existing user detection", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Ya tienes una cuenta"),
+        screen.getByText("Tu asistente de WhatsApp ya está activo"),
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Crear contraseña para la web" }),
+      ).toHaveAttribute("href", "/set-password?phone=%2B51999888777&from=signup");
       expect(
         screen.getByRole("link", { name: "Iniciar sesión" }),
       ).toHaveAttribute("href", "/login");
@@ -409,7 +412,7 @@ describe("SignupForm — Existing user detection", () => {
     await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Ya tienes una cuenta")).toBeInTheDocument();
+      expect(screen.getByText("Tu asistente de WhatsApp ya está activo")).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "Usar otro número" }));

@@ -439,6 +439,24 @@ describe("RecoveryForm — Password step (recovery)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// initialPhone pre-fill
+// ---------------------------------------------------------------------------
+
+describe("RecoveryForm — initialPhone pre-fill", () => {
+  it("pre-fills phone when initialPhone is provided", () => {
+    render(<RecoveryForm purpose="set_password" initialPhone="+51999888777" />);
+    const telInput = screen.getByLabelText("Número de WhatsApp") as HTMLInputElement;
+    expect(telInput.value).toBe("999888777");
+  });
+
+  it("leaves phone empty when initialPhone is not provided", () => {
+    render(<RecoveryForm purpose="set_password" />);
+    const telInput = screen.getByLabelText("Número de WhatsApp") as HTMLInputElement;
+    expect(telInput.value).toBe("");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Resend OTP
 // ---------------------------------------------------------------------------
 

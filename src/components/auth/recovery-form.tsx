@@ -36,6 +36,8 @@ type RecoveryStep = "phone" | "otp" | "new_password";
 export interface RecoveryFormProps {
   /** Flow purpose — determines backend endpoint and UI copy */
   purpose: PhoneAuthPurpose;
+  /** Pre-fill the phone field (e.g. when redirected from signup) */
+  initialPhone?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,12 +138,12 @@ function mapPasswordError(status: number, detail: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function RecoveryForm({ purpose }: RecoveryFormProps) {
+export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
   const router = useRouter();
   const copy = COPY[purpose];
 
   // --- Form fields ---
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialPhone ?? "");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

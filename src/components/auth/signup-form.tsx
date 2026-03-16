@@ -247,28 +247,30 @@ export function SignupForm() {
   // =========================================================================
 
   if (existingUser) {
+    const setPasswordHref = `/set-password?phone=${encodeURIComponent(phone)}&from=signup`;
+
     return (
       <div className="space-y-4">
-        <div className="rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4 text-sm space-y-2">
-          <p className="font-medium text-blue-900 dark:text-blue-100">
-            Ya tienes una cuenta
+        <div className="rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 text-sm space-y-2">
+          <p className="font-medium text-green-900 dark:text-green-100">
+            Tu asistente de WhatsApp ya está activo
           </p>
-          <p className="text-blue-800 dark:text-blue-200">
-            Este número ya está registrado. Si ya creaste una contraseña,
-            inicia sesión directamente. Si no la recuerdas, puedes recuperarla.
+          <p className="text-green-800 dark:text-green-200">
+            Tu asistente de WhatsApp ya está activo con este número.
+            Para acceder desde la web, necesitas crear una contraseña.
           </p>
         </div>
 
         <Button asChild className="w-full">
-          <Link href="/login">Iniciar sesión</Link>
+          <Link href={setPasswordHref}>Crear contraseña para la web</Link>
         </Button>
 
         <div className="flex gap-2">
           <Button asChild variant="outline" className="flex-1">
-            <Link href="/recovery">Recuperar contraseña</Link>
+            <Link href="/login">Iniciar sesión</Link>
           </Button>
           <Button asChild variant="outline" className="flex-1">
-            <Link href="/set-password">Crear contraseña</Link>
+            <Link href="/recovery">Recuperar contraseña</Link>
           </Button>
         </div>
 
