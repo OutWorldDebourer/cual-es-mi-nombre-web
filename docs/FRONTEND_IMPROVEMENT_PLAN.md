@@ -298,9 +298,14 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Prioridad:** MEDIA
 
-- [ ] M9.1 — Plan destacado mas grande + ribbon "Mas popular"
+- [x] M9.1 — Plan destacado mas grande + ribbon "Mas popular"
 - [ ] M9.2 — Staggered entrance animation + hover scale
 - [ ] M9.3 — Badge "Tu plan" con check icon
+
+#### M9.1 — Plan destacado + ribbon ✅
+**Archivos modificados:**
+- `src/components/plans/plan-card.tsx` — Rediseñado: gradient ribbon banner, Crown icon, Lucide Check icons, larger price/button for highlighted, hover translate-y + shadow, Button loading prop
+- `src/components/plans/plan-grid.tsx` — Grid `items-center` para que el plan destacado sobresalga verticalmente
 
 ---
 
@@ -379,7 +384,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 ### Ola 2 — Conversion (EN PROGRESO)
 - ✅ M2: Landing page completa (hero, features, pricing, how-it-works, footer)
 - ✅ M6.1: Auth pages con branding (split layout + gradient panel + glass feature cards)
-- M9.1: Pricing page premium
+- ✅ M9.1: Pricing page premium (ribbon + plan destacado + hover)
 
 ### Ola 3 — Polish (EN PROGRESO)
 - ✅ M5: Skeletons y loading states
@@ -396,14 +401,15 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Premium |
-| Error pages | Genericas | Genericas | Genericas | Genericas | Branded 404+Error | Premium |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error pages | Genericas | Genericas | Genericas | Genericas | Branded 404+Error | Branded 404+Error | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+hover | Premium |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

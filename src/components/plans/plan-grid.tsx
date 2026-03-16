@@ -54,7 +54,7 @@ export function PlanGrid({
         </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
         {plans.map((plan) => (
           <PlanCard
             key={plan.key}

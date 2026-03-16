@@ -2,7 +2,8 @@
  * Plan Card Component — "Cuál es mi nombre" Web
  *
  * Displays a single subscription plan in a card format for the
- * pricing / plans page. Highlighted plans get a visual emphasis.
+ * pricing / plans page. Highlighted plans get a prominent ribbon,
+ * larger sizing, and premium visual treatment.
  *
  * @module components/plans/plan-card
  */
@@ -10,6 +11,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Crown, Sparkles } from "lucide-react";
 import type { PlanInfo } from "@/types/database";
 import {
   Card,
@@ -18,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -53,22 +54,38 @@ export function PlanCard({
   return (
     <Card
       className={cn(
-        "flex flex-col relative",
-        plan.is_highlighted &&
-          "border-primary shadow-lg ring-2 ring-primary/20",
+        "flex flex-col relative overflow-hidden transition-all duration-300",
+        "hover:-translate-y-1 hover:shadow-lg",
+        plan.is_highlighted
+          ? "border-primary shadow-xl ring-2 ring-primary/20 pb-2"
+          : "hover:border-primary/30",
       )}
     >
-      {/* Badge */}
-      {plan.badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Badge variant={plan.is_highlighted ? "default" : "secondary"}>
-            {plan.badge}
-          </Badge>
+      {/* Highlighted: gradient ribbon banner */}
+      {plan.is_highlighted && plan.badge && (
+        <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-center py-2 text-xs font-semibold flex items-center justify-center gap-1.5">
+          <Sparkles className="size-3" />
+          {plan.badge}
         </div>
       )}
 
-      <CardHeader className="text-center pt-8">
-        <CardTitle className="text-lg">{plan.label}</CardTitle>
+      <CardHeader
+        className={cn(
+          "text-center",
+          plan.is_highlighted ? "pt-6" : "pt-8",
+        )}
+      >
+        <CardTitle
+          className={cn(
+            "flex items-center justify-center gap-2",
+            plan.is_highlighted ? "text-xl" : "text-lg",
+          )}
+        >
+          {plan.is_highlighted && (
+            <Crown className="size-5 text-accent" />
+          )}
+          {plan.label}
+        </CardTitle>
         <CardDescription>{plan.description}</CardDescription>
       </CardHeader>
 
@@ -79,7 +96,12 @@ export function PlanCard({
             <span className="text-sm text-muted-foreground">
               {currencySymbol}
             </span>
-            <span className="text-4xl font-bold tabular-nums">
+            <span
+              className={cn(
+                "font-bold tabular-nums",
+                plan.is_highlighted ? "text-5xl" : "text-4xl",
+              )}
+            >
               {plan.price_pen % 1 === 0
                 ? plan.price_pen
                 : plan.price_pen.toFixed(2)}
@@ -94,10 +116,17 @@ export function PlanCard({
         </div>
 
         {/* Features */}
-        <ul className="flex-1 space-y-2 text-sm">
+        <ul className="flex-1 space-y-2.5 text-sm">
           {plan.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2">
-              <span className="mt-0.5 text-primary">✓</span>
+              <Check
+                className={cn(
+                  "mt-0.5 size-4 shrink-0",
+                  plan.is_highlighted
+                    ? "text-primary"
+                    : "text-muted-foreground",
+                )}
+              />
               <span>{feature}</span>
             </li>
           ))}
@@ -105,18 +134,21 @@ export function PlanCard({
 
         {/* Action button */}
         <Button
-          className="w-full"
+          className={cn(
+            "w-full",
+            plan.is_highlighted && "shadow-md shadow-primary/25",
+          )}
+          size={plan.is_highlighted ? "lg" : "default"}
           variant={plan.is_highlighted ? "default" : "outline"}
-          disabled={!canSelect || loading}
+          disabled={!canSelect}
+          loading={loading}
           onClick={handleClick}
         >
-          {loading
-            ? "Procesando..."
-            : isCurrent
-              ? "Plan actual"
-              : isFree
-                ? "Plan gratuito"
-                : "Elegir plan"}
+          {isCurrent
+            ? "Plan actual"
+            : isFree
+              ? "Plan gratuito"
+              : "Elegir plan"}
         </Button>
       </CardContent>
     </Card>
