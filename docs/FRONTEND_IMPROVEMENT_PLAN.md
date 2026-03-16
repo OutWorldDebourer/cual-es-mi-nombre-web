@@ -393,7 +393,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - [ ] M13.2 — shadcn Tooltip (para icon buttons)
 - [ ] M13.3 — shadcn Sheet (para mobile drawer alternativo)
 - [x] M13.4 — shadcn Skeleton ✅ (implementado en M5)
-- [ ] M13.5 — shadcn Progress (reemplazar div en credit-balance)
+- [x] M13.5 — shadcn Progress ✅ (reemplazar div en credit-balance)
 - [ ] M13.6 — shadcn Avatar (perfil en sidebar/header)
 
 #### M13.1 — shadcn Select ✅
@@ -402,6 +402,13 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Archivos modificados:**
 - `src/app/dashboard/settings/page.tsx` — `<select>` nativo reemplazado por `<Select>` shadcn con dropdown animado, check icon en item seleccionado, estilos consistentes con design system
+
+#### M13.5 — shadcn Progress ✅
+**Archivos creados:**
+- `src/components/ui/progress.tsx` — NUEVO: shadcn Progress con Radix ProgressPrimitive, data-slot pattern, transición 300ms ease-in-out
+
+**Archivos modificados:**
+- `src/components/credits/credit-balance.tsx` — `<div>` manual reemplazado por `<Progress />` con color dinámico via data-slot selector (warning/success/primary), aria-label para accesibilidad
 
 ---
 

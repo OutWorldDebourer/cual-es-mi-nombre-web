@@ -13,6 +13,7 @@ import Link from "next/link";
 import type { SubscriptionPlan } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface CreditBalanceProps {
   creditsRemaining: number;
@@ -59,20 +60,18 @@ export function CreditBalance({
           )}
         </div>
 
-        {/* Progress bar */}
         {maxCredits > 0 && (
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${
-                isLow
-                  ? "bg-warning"
-                  : usagePercent > 50
-                    ? "bg-primary"
-                    : "bg-success"
-              }`}
-              style={{ width: `${Math.min(usagePercent, 100)}%` }}
-            />
-          </div>
+          <Progress
+            value={Math.min(usagePercent, 100)}
+            className={
+              isLow
+                ? "[&>[data-slot=progress-indicator]]:bg-warning"
+                : usagePercent > 50
+                  ? ""
+                  : "[&>[data-slot=progress-indicator]]:bg-success"
+            }
+            aria-label={`${usagePercent}% de créditos restantes`}
+          />
         )}
 
         <div className="flex items-center justify-between">
