@@ -107,12 +107,12 @@ export default async function GoogleCalendarPage(
 
 function callbackBannerClassName(tone: "success" | "warning" | "error"): string {
   if (tone === "success") {
-    return "border-emerald-200 bg-emerald-50";
+    return "border-success/40 bg-success/5";
   }
 
   if (tone === "warning") {
-    return "border-amber-200 bg-amber-50";
+    return "border-warning/40 bg-warning/5";
   }
 
-  return "border-red-200 bg-red-50";
+  return "border-destructive/40 bg-destructive/5";
 }

@@ -40,11 +40,7 @@ export function CreditBalance({
 
   return (
     <Card
-      className={`${
-        isLow
-          ? "border-amber-500/40 bg-amber-50/50 dark:bg-amber-950/20"
-          : ""
-      }`}
+      className={isLow ? "border-warning/40 bg-warning/5" : ""}
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -69,10 +65,10 @@ export function CreditBalance({
             <div
               className={`h-full rounded-full transition-all ${
                 isLow
-                  ? "bg-amber-500"
+                  ? "bg-warning"
                   : usagePercent > 50
                     ? "bg-primary"
-                    : "bg-green-500"
+                    : "bg-success"
               }`}
               style={{ width: `${Math.min(usagePercent, 100)}%` }}
             />
@@ -92,7 +88,7 @@ export function CreditBalance({
         </div>
 
         {isLow && creditsRemaining > 0 && (
-          <p className="text-xs text-amber-600 dark:text-amber-400">
+          <p className="text-xs text-warning-foreground">
             ⚠️ Te quedan pocos créditos. Considera mejorar tu plan.
           </p>
         )}

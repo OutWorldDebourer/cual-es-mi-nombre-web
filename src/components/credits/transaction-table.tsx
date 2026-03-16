@@ -133,9 +133,7 @@ export function TransactionTable({
                       </TableCell>
                       <TableCell
                         className={`text-right font-mono text-sm ${
-                          isPositive
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-destructive"
+                          isPositive ? "text-success" : "text-destructive"
                         }`}
                       >
                         {isPositive ? "+" : ""}

@@ -47,7 +47,7 @@ export function ReminderCard({
         overdue
           ? "border-destructive/40 bg-destructive/5"
           : reminder.status === "sent"
-            ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20"
+            ? "border-success/30 bg-success/5"
             : ""
       }`}
     >

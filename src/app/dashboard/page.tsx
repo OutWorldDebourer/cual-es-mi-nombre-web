@@ -1,14 +1,6 @@
-/**
- * Dashboard Home Page — "Cuál es mi nombre" Web
- *
- * Shows a summary: credits remaining, current plan, WhatsApp status,
- * Google Calendar connection status.
- *
- * @module app/dashboard/page
- */
-
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -16,6 +8,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Coins,
+  Gem,
+  MessageCircle,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  Rocket,
+  ArrowRight,
+} from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -43,11 +45,11 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">
-          Hola, soy {assistantName} 👋
+        <h1 className="text-3xl font-bold tracking-tight">
+          Hola, soy {assistantName}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Aquí tienes el resumen de tu asistente virtual.
+          Aqui tienes el resumen de tu asistente virtual.
         </p>
       </div>
 
@@ -55,13 +57,15 @@ export default async function DashboardPage() {
         {/* Credits */}
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Créditos restantes</CardDescription>
-            <CardTitle className="text-4xl">{credits}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardDescription>Creditos restantes</CardDescription>
+              <Coins className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-4xl tabular-nums">{credits}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              Plan{" "}
-              <span className="capitalize font-medium">{plan}</span>
+              Plan <span className="capitalize font-medium text-foreground">{plan}</span>
             </p>
           </CardContent>
         </Card>
@@ -69,14 +73,21 @@ export default async function DashboardPage() {
         {/* Plan */}
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Plan actual</CardDescription>
+            <div className="flex items-center justify-between">
+              <CardDescription>Plan actual</CardDescription>
+              <Gem className="h-4 w-4 text-muted-foreground" />
+            </div>
             <CardTitle className="text-2xl capitalize">{plan}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {plan === "free"
-                ? "Actualiza para más créditos"
-                : "Suscripción activa"}
+              {plan === "free" ? (
+                <Link href="/dashboard/plans" className="text-primary hover:underline inline-flex items-center gap-1">
+                  Actualiza para mas creditos <ArrowRight className="h-3 w-3" />
+                </Link>
+              ) : (
+                "Suscripcion activa"
+              )}
             </p>
           </CardContent>
         </Card>
@@ -84,16 +95,33 @@ export default async function DashboardPage() {
         {/* WhatsApp */}
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>WhatsApp</CardDescription>
-            <CardTitle className="text-2xl">
-              {hasPhone ? "✅ Vinculado" : "❌ No vinculado"}
+            <div className="flex items-center justify-between">
+              <CardDescription>WhatsApp</CardDescription>
+              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              {hasPhone ? (
+                <>
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  Vinculado
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-5 w-5 text-destructive" />
+                  No vinculado
+                </>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {hasPhone
-                ? profile?.phone_number
-                : "Vincula tu número en Configuración"}
+              {hasPhone ? (
+                profile?.phone_number
+              ) : (
+                <Link href="/dashboard/settings/whatsapp" className="text-primary hover:underline inline-flex items-center gap-1">
+                  Vincular numero <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
             </p>
           </CardContent>
         </Card>
@@ -101,16 +129,33 @@ export default async function DashboardPage() {
         {/* Google Calendar */}
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Google Calendar</CardDescription>
-            <CardTitle className="text-2xl">
-              {hasGoogle ? "✅ Conectado" : "❌ No conectado"}
+            <div className="flex items-center justify-between">
+              <CardDescription>Google Calendar</CardDescription>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              {hasGoogle ? (
+                <>
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  Conectado
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-5 w-5 text-destructive" />
+                  No conectado
+                </>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {hasGoogle
-                ? "Sincronización activa"
-                : "Conecta en Configuración"}
+              {hasGoogle ? (
+                "Sincronizacion activa"
+              ) : (
+                <Link href="/dashboard/settings/google" className="text-primary hover:underline inline-flex items-center gap-1">
+                  Conectar calendario <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
             </p>
           </CardContent>
         </Card>
@@ -118,18 +163,19 @@ export default async function DashboardPage() {
 
       {/* Onboarding notice */}
       {onboarding !== "completed" && (
-        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+        <Card className="border-warning/40 bg-warning/5">
           <CardHeader>
-            <CardTitle className="text-lg">
-              🚀 Completa tu configuración
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Rocket className="h-5 w-5 text-warning" />
+              Completa tu configuracion
             </CardTitle>
             <CardDescription>
               {!hasPhone &&
-                "Vincula tu número de WhatsApp para empezar a usar el asistente. "}
+                "Vincula tu numero de WhatsApp para empezar a usar el asistente. "}
               {!hasGoogle &&
                 "Conecta Google Calendar para gestionar tus eventos. "}
               {plan === "free" &&
-                "Suscríbete a un plan para obtener más créditos."}
+                "Suscribete a un plan para obtener mas creditos."}
             </CardDescription>
           </CardHeader>
         </Card>

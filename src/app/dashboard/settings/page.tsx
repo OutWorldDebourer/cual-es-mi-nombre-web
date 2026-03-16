@@ -160,8 +160,8 @@ export default function SettingsPage() {
             )}
 
             {saved && (
-              <div className="rounded-md bg-green-50 dark:bg-green-950 p-3 text-sm text-green-700 dark:text-green-300">
-                ✅ Cambios guardados correctamente
+              <div className="rounded-md bg-success/10 p-3 text-sm text-success">
+                Cambios guardados correctamente
               </div>
             )}
 
