@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
@@ -8,6 +8,7 @@ import type { Profile, SubscriptionPlan } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb-nav";
@@ -24,6 +25,8 @@ import {
   X,
   Sparkles,
   Coins,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -69,99 +72,181 @@ function SidebarContent({
   assistantName,
   plan,
   credits,
+  collapsed = false,
+  showToggle = false,
   onNavigate,
+  onToggle,
 }: {
   pathname: string;
   assistantName: string;
   plan: SubscriptionPlan;
   credits: number;
+  collapsed?: boolean;
+  showToggle?: boolean;
   onNavigate?: () => void;
+  onToggle?: () => void;
 }) {
   return (
     <>
       {/* Brand */}
-      <div className="flex h-14 items-center border-b border-sidebar-border px-4">
+      <div className={cn(
+        "flex h-14 items-center border-b border-sidebar-border",
+        collapsed ? "justify-center px-2" : "justify-between px-4"
+      )}>
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 font-display font-bold text-base tracking-tight"
+          className={cn(
+            "flex items-center font-display font-bold text-base tracking-tight",
+            collapsed ? "justify-center" : "gap-2"
+          )}
           onClick={onNavigate}
         >
-          <Sparkles className="h-5 w-5 text-primary" />
-          <span>Cual es mi nombre</span>
+          <Sparkles className="h-5 w-5 shrink-0 text-primary" />
+          {!collapsed && <span>Cual es mi nombre</span>}
         </Link>
+        {showToggle && !collapsed && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onToggle}
+            aria-label="Colapsar sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        )}
       </div>
+      {showToggle && collapsed && (
+        <div className="flex justify-center py-2">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onToggle}
+            aria-label="Expandir sidebar"
+          >
+            <PanelLeftOpen className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+      <nav className={cn(
+        "flex-1 py-4 space-y-6 overflow-y-auto",
+        collapsed ? "px-2" : "px-3"
+      )}>
         {/* Main */}
         <div className="space-y-1">
           {mainNav.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            return (
+            const link = (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={onNavigate}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+                  "flex items-center rounded-lg text-sm font-medium transition-all duration-150",
+                  collapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                {item.label}
+                {!collapsed && item.label}
               </Link>
             );
+            if (collapsed) {
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>{link}</TooltipTrigger>
+                  <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
+              );
+            }
+            return link;
           })}
         </div>
 
         {/* Settings separator */}
         <div>
-          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-            Ajustes
-          </p>
+          {collapsed ? (
+            <hr className="border-t border-sidebar-border my-2 mx-2" />
+          ) : (
+            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+              Ajustes
+            </p>
+          )}
           <div className="space-y-1">
             {settingsNav.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-              return (
+              const link = (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+                    "flex items-center rounded-lg text-sm font-medium transition-all duration-150",
+                    collapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  {item.label}
+                  {!collapsed && item.label}
                 </Link>
               );
+              if (collapsed) {
+                return (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger asChild>{link}</TooltipTrigger>
+                    <TooltipContent side="right">{item.label}</TooltipContent>
+                  </Tooltip>
+                );
+              }
+              return link;
             })}
           </div>
         </div>
       </nav>
 
       {/* Footer — user info */}
-      <div className="border-t border-sidebar-border p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium truncate">{assistantName}</p>
-          <Badge className={cn("text-[10px] font-semibold uppercase", PLAN_STYLES[plan])}>
-            {plan}
-          </Badge>
+      {collapsed ? (
+        <div className="border-t border-sidebar-border p-2 space-y-2 flex flex-col items-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge className={cn("text-[10px] font-semibold uppercase cursor-default", PLAN_STYLES[plan])}>
+                {plan}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="right">{assistantName} — Plan {plan}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center text-muted-foreground cursor-default">
+                <Coins className="h-3.5 w-3.5" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">{credits} creditos</TooltipContent>
+          </Tooltip>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Coins className="h-3.5 w-3.5" />
-          <span>
-            <strong className="text-foreground">{credits}</strong> creditos
-          </span>
+      ) : (
+        <div className="border-t border-sidebar-border p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium truncate">{assistantName}</p>
+            <Badge className={cn("text-[10px] font-semibold uppercase", PLAN_STYLES[plan])}>
+              {plan}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Coins className="h-3.5 w-3.5" />
+            <span>
+              <strong className="text-foreground">{credits}</strong> creditos
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
@@ -169,6 +254,16 @@ function SidebarContent({
 export function DashboardShell({ user, profile, children }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("sidebar-collapsed") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", String(collapsed));
+  }, [collapsed]);
+
+  const toggleSidebar = () => setCollapsed((prev) => !prev);
 
   const assistantName = profile?.assistant_name ?? "Asistente";
   const plan = (profile?.plan ?? "free") as SubscriptionPlan;
@@ -185,12 +280,18 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
       </a>
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
+      <aside className={cn(
+        "hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex overflow-hidden transition-[width] duration-200 ease-in-out",
+        collapsed ? "w-16" : "w-64"
+      )}>
         <SidebarContent
           pathname={pathname}
           assistantName={assistantName}
           plan={plan}
           credits={credits}
+          collapsed={collapsed}
+          showToggle
+          onToggle={toggleSidebar}
         />
       </aside>
 

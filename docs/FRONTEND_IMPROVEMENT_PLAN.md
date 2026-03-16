@@ -34,7 +34,7 @@ en un producto SaaS de pago.
 | M1.3 Spacing tokens | Pendiente (mejora incremental) |
 | M3.1 Iconos Lucide en nav | ✅ Home, StickyNote, Bell, CreditCard, Gem, Settings, etc. |
 | M3.2 Mobile navigation | ✅ Hamburger + drawer con backdrop blur |
-| M3.3 Sidebar refinada | ✅ Secciones separadas, plan badge con color, brand mark |
+| M3.3 Sidebar refinada | ✅ Secciones separadas, plan badge con color, brand mark, collapsible desktop (icon-only) |
 | M4.1 Toast system (Sonner) | ✅ Instalado en root layout, richColors, bottom-right |
 | M10.1 `lang="es"` | ✅ Corregido |
 | M11.1 Theme provider | ✅ next-themes con system default |
@@ -195,7 +195,11 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Pendiente:**
 - ✅ M3.4 — Breadcrumbs para paginas anidadas (`Configuracion > Google Calendar`)
-- [ ] M3.3 — Sidebar collapsible en desktop (solo iconos)
+- ✅ M3.3 — Sidebar collapsible en desktop (solo iconos)
+
+#### M3.3 — Sidebar collapsible en desktop ✅
+**Archivos modificados:**
+- `src/components/dashboard/shell.tsx` — Estado `collapsed` con persistencia localStorage, SidebarContent acepta `collapsed`/`showToggle`/`onToggle` props, nav items envueltos en Tooltip cuando collapsed, footer condensado con tooltips, aside con `transition-[width] duration-200`, toggle con PanelLeftClose/PanelLeftOpen icons. Mobile drawer sin cambios.
 
 #### M3.4 — Breadcrumbs ✅
 **Archivos creados:**
@@ -593,7 +597,6 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M3.4: Breadcrumbs para paginas anidadas
 
 ### Backlog (baja prioridad, independientes)
-- M3.3: Sidebar collapsible en desktop (solo iconos)
 - M1.3: Spacing tokens consistentes
 - M2.2: Scroll-triggered reveal animations (IntersectionObserver)
 - M2.4: Testimonios reales o estadisticas de uso
