@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { LucideIcon } from "lucide-react";
 import {
   Calendar,
@@ -313,36 +314,37 @@ export default async function HomePage() {
       {/* ── Features — M2.2 ── */}
       <section className="border-t bg-card/50 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Todo lo que necesitas, en un chat
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Un solo asistente que entiende lenguaje natural y se conecta
-              con tus herramientas favoritas.
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Todo lo que necesitas, en un chat
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Un solo asistente que entiende lenguaje natural y se conecta
+                con tus herramientas favoritas.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {features.map(
-              ({ icon: Icon, title, description, iconBg, iconColor }) => (
-                <div
-                  key={title}
-                  className="rounded-2xl border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5"
-                >
-                  <div
-                    className={cn(
-                      "mb-4 inline-flex size-12 items-center justify-center rounded-xl",
-                      iconBg,
-                    )}
-                  >
-                    <Icon className={cn("size-6", iconColor)} />
+              ({ icon: Icon, title, description, iconBg, iconColor }, i) => (
+                <ScrollReveal key={title} delay={i * 100}>
+                  <div className="rounded-2xl border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
+                    <div
+                      className={cn(
+                        "mb-4 inline-flex size-12 items-center justify-center rounded-xl",
+                        iconBg,
+                      )}
+                    >
+                      <Icon className={cn("size-6", iconColor)} />
+                    </div>
+                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {description}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {description}
-                  </p>
-                </div>
+                </ScrollReveal>
               ),
             )}
           </div>
@@ -352,11 +354,13 @@ export default async function HomePage() {
       {/* ── How it works — M2.4 ── */}
       <section className="py-20 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Empieza en 3 simples pasos
-            </h2>
-          </div>
+          <ScrollReveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Empieza en 3 simples pasos
+              </h2>
+            </div>
+          </ScrollReveal>
 
           <div className="relative mt-16 grid gap-12 sm:grid-cols-3 sm:gap-8">
             {/* Connector line between step circles */}
@@ -365,30 +369,34 @@ export default async function HomePage() {
               aria-hidden="true"
             />
 
-            {steps.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="relative text-center">
-                <div className="relative mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-                  <Icon className="size-7" />
+            {steps.map(({ icon: Icon, title, description }, i) => (
+              <ScrollReveal key={title} delay={i * 150}>
+                <div className="relative text-center">
+                  <div className="relative mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
+                    <Icon className="size-7" />
+                  </div>
+                  <h3 className="text-lg font-semibold">{title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold">{title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {description}
-                </p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
 
           {/* Trust badges */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              Integrado con:
-            </span>
-            {["WhatsApp", "Google Calendar", "MercadoPago"].map((name) => (
-              <Badge key={name} variant="outline" className="text-sm">
-                {name}
-              </Badge>
-            ))}
-          </div>
+          <ScrollReveal delay={500}>
+            <div className="mt-16 flex flex-wrap items-center justify-center gap-4">
+              <span className="text-sm text-muted-foreground">
+                Integrado con:
+              </span>
+              {["WhatsApp", "Google Calendar", "MercadoPago"].map((name) => (
+                <Badge key={name} variant="outline" className="text-sm">
+                  {name}
+                </Badge>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -398,25 +406,27 @@ export default async function HomePage() {
         className="scroll-mt-20 border-t bg-card/50 py-20 sm:py-24"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Planes simples, sin sorpresas
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Empieza gratis. Escala cuando estes listo.
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Planes simples, sin sorpresas
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Empieza gratis. Escala cuando estes listo.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <div className="mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={cn(
-                  "relative rounded-2xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
-                  plan.highlighted &&
-                    "border-primary shadow-lg ring-2 ring-primary/20",
-                )}
-              >
+            {plans.map((plan, i) => (
+              <ScrollReveal key={plan.name} delay={i * 100}>
+                <div
+                  className={cn(
+                    "relative rounded-2xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
+                    plan.highlighted &&
+                      "border-primary shadow-lg ring-2 ring-primary/20",
+                  )}
+                >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge>{plan.badge}</Badge>
@@ -454,6 +464,7 @@ export default async function HomePage() {
                   <Link href="/signup">{plan.cta}</Link>
                 </Button>
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -462,16 +473,18 @@ export default async function HomePage() {
       {/* ── Footer — M2.5 ── */}
       <footer className="border-t py-12">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <Sparkles className="size-5 text-primary" />
-              <span className="font-semibold">Cual es mi nombre</span>
+          <ScrollReveal>
+            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-5 text-primary" />
+                <span className="font-semibold">Cual es mi nombre</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                &copy; {new Date().getFullYear()} Cual es mi nombre. Todos los
+                derechos reservados.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} Cual es mi nombre. Todos los
-              derechos reservados.
-            </p>
-          </div>
+          </ScrollReveal>
         </div>
       </footer>
     </div>

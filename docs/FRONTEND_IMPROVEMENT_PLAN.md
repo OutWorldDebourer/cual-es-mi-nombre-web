@@ -178,9 +178,16 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ Layout responsive (column mobile, row desktop)
 
 **Pendiente (mejora futura):**
-- [ ] M2.2 — Scroll-triggered reveal animations (IntersectionObserver)
+- [x] M2.2 — Scroll-triggered reveal animations (IntersectionObserver)
 - [ ] M2.4 — Testimonios reales o estadisticas de uso
 - [ ] M2.5 — Links legales, contacto, redes sociales
+
+#### M2.2 — Scroll-triggered reveal animations ✅
+**Archivos creados:**
+- `src/components/ui/scroll-reveal.tsx` — NUEVO: Client component con IntersectionObserver, CSS transitions (opacity + translateY), props: delay/once/threshold
+
+**Archivos modificados:**
+- `src/app/page.tsx` — ScrollReveal en 4 secciones: Features (heading + 4 cards stagger 100ms), How it works (heading + 3 steps stagger 150ms + trust badges delay 500ms), Pricing (heading + 3 plans stagger 100ms), Footer (contenido sin delay)
 
 ---
 
@@ -598,7 +605,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ### Backlog (baja prioridad, independientes)
 - M1.3: Spacing tokens consistentes
-- M2.2: Scroll-triggered reveal animations (IntersectionObserver)
+- ~~M2.2: Scroll-triggered reveal animations (IntersectionObserver)~~ ✅
 - M2.4: Testimonios reales o estadisticas de uso
 - M2.5: Links legales, contacto, redes sociales
 
