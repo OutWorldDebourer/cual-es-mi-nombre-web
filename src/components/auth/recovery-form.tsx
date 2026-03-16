@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/ui/form-error";
+import { PasswordStrength } from "@/components/auth/password-strength";
+import { StepIndicator } from "@/components/auth/step-indicator";
 import { isValidE164 } from "@/lib/phone-utils";
 import { phoneAuthApi, ApiError } from "@/lib/api";
 import type { PhoneAuthPurpose } from "@/lib/api";
@@ -138,6 +140,12 @@ function mapPasswordError(status: number, detail: string): string {
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
+
+const RECOVERY_STEPS = [
+  { label: "Teléfono" },
+  { label: "Código" },
+  { label: "Contraseña" },
+];
 
 export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
   const router = useRouter();
@@ -281,10 +289,14 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
     );
   }
 
+  // --- Step index for progress indicator ---
+  const stepIndex = step === "phone" ? 0 : step === "otp" ? 1 : 2;
+
   // --- Step: PHONE ---
   if (step === "phone") {
     return (
       <form onSubmit={handleRequestOtp} className="space-y-4">
+        <StepIndicator steps={RECOVERY_STEPS} currentStep={stepIndex} />
         <p className="text-sm text-muted-foreground">{copy.phoneDescription}</p>
 
         <div className="space-y-2">
@@ -310,7 +322,8 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
   // --- Step: OTP ---
   if (step === "otp") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 animate-[slide-in-right_0.3s_ease-out_both]">
+        <StepIndicator steps={RECOVERY_STEPS} currentStep={stepIndex} />
         <p className="text-sm text-muted-foreground">{copy.otpDescription}</p>
 
         <div className="flex justify-center">
@@ -358,7 +371,8 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
 
   // --- Step: NEW_PASSWORD ---
   return (
-    <form onSubmit={handleSetPassword} className="space-y-4">
+    <form onSubmit={handleSetPassword} className="space-y-4 animate-[slide-in-right_0.3s_ease-out_both]">
+      <StepIndicator steps={RECOVERY_STEPS} currentStep={stepIndex} />
       <p className="text-sm text-muted-foreground">{copy.passwordDescription}</p>
 
       <div className="space-y-2">
@@ -374,6 +388,7 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
           minLength={PASSWORD_MIN_LENGTH}
           disabled={loading}
         />
+        <PasswordStrength password={password} />
       </div>
 
       <div className="space-y-2">
@@ -391,11 +406,7 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
         />
       </div>
 
-      {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      <FormError message={error} />
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Guardando..." : copy.passwordButton}

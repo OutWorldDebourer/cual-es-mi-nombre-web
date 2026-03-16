@@ -4,10 +4,11 @@
  * Phone + password login using Supabase Auth.
  * Uses signInWithPassword({ phone, password }) for direct authentication.
  *
+ * Server Component — renders Card shell server-side, delegates interactivity
+ * to LoginForm (client component).
+ *
  * @module app/(auth)/login/page
  */
-
-"use client";
 
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

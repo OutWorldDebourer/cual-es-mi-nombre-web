@@ -4,10 +4,11 @@
  * Phone-based password recovery using custom OTP (backend API).
  * Uses RecoveryForm with purpose="recovery".
  *
+ * Server Component — renders Card shell server-side, delegates interactivity
+ * to RecoveryForm (client component).
+ *
  * @module app/(auth)/recovery/page
  */
-
-"use client";
 
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

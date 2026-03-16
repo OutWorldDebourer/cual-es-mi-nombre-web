@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/ui/form-error";
+import { PasswordStrength } from "@/components/auth/password-strength";
+import { StepIndicator } from "@/components/auth/step-indicator";
 import { isValidE164 } from "@/lib/phone-utils";
 
 // ---------------------------------------------------------------------------
@@ -93,6 +95,11 @@ function mapVerifyError(message: string): string {
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
+
+const SIGNUP_STEPS = [
+  { label: "Datos" },
+  { label: "Verificación" },
+];
 
 export function SignupForm() {
   const router = useRouter();
@@ -336,6 +343,7 @@ export function SignupForm() {
   if (step === "phone_password") {
     return (
       <form onSubmit={handleSignup} className="space-y-4">
+        <StepIndicator steps={SIGNUP_STEPS} currentStep={0} />
         <div className="space-y-2">
           <Label htmlFor="phone">Número de WhatsApp</Label>
           <PhoneInput
@@ -363,6 +371,7 @@ export function SignupForm() {
             minLength={PASSWORD_MIN_LENGTH}
             disabled={loading}
           />
+          <PasswordStrength password={password} />
         </div>
 
         <div className="space-y-2">
@@ -396,7 +405,9 @@ export function SignupForm() {
   const canResend = !timer.isActive && !resending;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-[slide-in-right_0.3s_ease-out_both]">
+      <StepIndicator steps={SIGNUP_STEPS} currentStep={1} />
+
       <div className="text-center space-y-2">
         <p className="text-sm text-muted-foreground">
           Enviamos un código de verificación a tu WhatsApp
@@ -415,11 +426,7 @@ export function SignupForm() {
         />
       </div>
 
-      {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      <FormError message={error} />
 
       {/* Timer & resend */}
       <div className="text-center text-sm text-muted-foreground">

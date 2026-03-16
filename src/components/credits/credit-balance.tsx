@@ -4,10 +4,10 @@
  * Displays the user's current credit balance in a prominent card
  * with plan info and a CTA to upgrade if on a lower plan.
  *
+ * Server Component — pure display with data props, no hooks or event handlers.
+ *
  * @module components/credits/credit-balance
  */
-
-"use client";
 
 import Link from "next/link";
 import type { SubscriptionPlan } from "@/types/database";

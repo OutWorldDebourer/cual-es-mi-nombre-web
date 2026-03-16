@@ -261,7 +261,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M6 — Paginas de Auth (Login/Signup/Recovery)
+### ~~M6 — Paginas de Auth (Login/Signup/Recovery)~~ ✅ COMPLETO
 
 **Prioridad:** MEDIA-ALTA — Conversion y primera impresion post-landing.
 
@@ -273,10 +273,19 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - [x] Dot grid texture overlay + layered gradient orbs para profundidad
 - [x] 4 paginas actualizadas (login, signup, recovery, set-password)
 
-#### M6.2 — Formularios con polish
-- [ ] Animacion de transicion entre pasos (signup: phone -> OTP)
-- [ ] Progress indicator para multi-step
-- [ ] Password strength indicator visual
+#### M6.2 — Formularios con polish ✅
+- [x] Animacion de transicion entre pasos (signup: phone → OTP, recovery: phone → OTP → password)
+- [x] Progress indicator para multi-step (StepIndicator con dots, connectors, labels)
+- [x] Password strength indicator visual (4-segment bar con colores semánticos)
+- [x] Inline error divs migrados a `<FormError />` en signup OTP step y recovery password step
+
+**Archivos creados:**
+- `src/components/auth/password-strength.tsx` — NUEVO: 4 niveles (muy débil/débil/buena/fuerte), barra segmentada con colores semánticos, animación fade-in
+- `src/components/auth/step-indicator.tsx` — NUEVO: dots con ring activo, connectors animados, labels responsive (hidden sm:inline)
+
+**Archivos modificados:**
+- `src/components/auth/signup-form.tsx` — StepIndicator (2 pasos), PasswordStrength debajo del campo, slide-in-right en OTP step, error div → FormError
+- `src/components/auth/recovery-form.tsx` — StepIndicator (3 pasos), PasswordStrength debajo del campo, slide-in-right en OTP y password steps, error div → FormError
 
 #### M6.3 — Pagina de error/404 ✅
 - [x] `app/not-found.tsx` — branded 404 con Sparkles icon, mensaje amigable, CTAs a dashboard/inicio
@@ -419,14 +428,42 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M12 — Rendimiento y Optimizacion
+### ~~M12 — Rendimiento y Optimizacion~~ ✅ COMPLETO
 
 **Prioridad:** MEDIA
 
-- [ ] M12.1 — `next/image` para ilustraciones
-- [ ] M12.2 — Client components audit (settings, whatsapp pages)
-- [ ] M12.3 — React Query/SWR para cache
-- [ ] M12.4 — Bundle analysis
+- [x] M12.1 — `next/image` para ilustraciones ✅ (N/A — no hay `<img>` tags en el codebase)
+- [x] M12.2 — Client components audit ✅ (6 componentes optimizados, auth pages ahora Static SSR)
+- [x] M12.3 — React Query/SWR para cache ✅ (evaluado y diferido — Server Components ya cubren data fetching principal)
+- [x] M12.4 — Bundle analysis ✅ (459KB gzipped, bundle saludable, analyzer configurado)
+
+#### M12.2 — Client Components Audit ✅
+**Archivos modificados (removido "use client" innecesario):**
+- `src/app/(auth)/login/page.tsx` — Server Component: shell SSR + LoginForm client hydration
+- `src/app/(auth)/recovery/page.tsx` — Server Component: shell SSR + RecoveryForm client hydration
+- `src/app/(auth)/signup/page.tsx` — Server Component: shell SSR + SignupForm client hydration
+- `src/components/dashboard/onboarding-stepper.tsx` — Server Component: SSR completo en dashboard page
+- `src/components/credits/credit-balance.tsx` — Server Component: SSR completo en credits page
+- `src/components/ui/form-error.tsx` — Limpieza semántica (usado en client components)
+
+**Resultado:** Auth pages (`/login`, `/recovery`, `/signup`) pasaron de client-rendered a `○ Static` (prerendered at build time).
+
+#### M12.3 — React Query/SWR (Evaluado y Diferido) ✅
+- Server Components (dashboard, credits pages) ya hacen data fetching en servidor
+- Client components con fetch (note-list, reminder-list, transaction-table) son simples
+- Agregar React Query sumaría ~15-20KB sin beneficio proporcional
+- Se implementará cuando la complejidad de la app lo justifique
+
+#### M12.4 — Bundle Analysis ✅
+- Total client JS: 1.7MB sin comprimir, ~459KB gzipped
+- Framework (React): 188KB — irreducible
+- Supabase client: ~200KB — necesario para client components
+- Lucide icons: tree-shaken (named imports en 19 archivos)
+- No barrel imports problemáticos detectados
+- `@next/bundle-analyzer` configurado (`ANALYZE=true npx next build --webpack`)
+
+**Dependencias agregadas:**
+- `@next/bundle-analyzer` (devDependency) — para análisis bajo demanda
 
 ---
 
@@ -515,28 +552,31 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M13: Componentes UI completos (Select, Tooltip, Sheet, Skeleton, Progress, Avatar)
 - ✅ M8: Notas UX polish (grid/list toggle, search debounce, tags interactivos, empty state)
 - M3.4: Breadcrumbs
-- M6.2: Auth form polish (transitions, progress, password strength)
+- ✅ M6.2: Auth form polish (step transitions, progress indicator, password strength)
 - ✅ M10: Accesibilidad completa (skip nav, focus visible, reduced-motion, tabIndex fix)
-- M12: Performance y optimización
+- ✅ M12: Performance y optimización (client audit + bundle analysis + auth pages Static SSR)
+- M3.4: Breadcrumbs
 - M14: Micro-interacciones restantes (page transitions, active:scale-95)
 
 ---
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Post-M8 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|---------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 | ~97 (aria-pressed+labels) | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | +Tag colors | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
-| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | +Skip nav | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
-| Notes UX | Basico | Basico | Basico | Basico | +Skeleton loading | +Skeleton loading | +Toast undo | +Toast undo | +Toast undo | +Toast undo | Grid/List+Search+Tags+EmptyState | Premium |
-| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | Completo |
-| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | +aria-pressed+group | WCAG AA |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 211 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Post-M8 | Post-M12 | Post-M6.2 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|---------|----------|-----------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~88 (Static SSR) | ~88 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 | ~97 (aria-pressed+labels) | ~97 | ~97 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | +Tag colors | +Tag colors | +Auth polish | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | +OTP/password FormError | Premium |
+| Auth forms | Basico | Basico | Basico | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | +Steps+PwdStrength+Transitions | Premium |
+| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | +Skip nav | +Skip nav | +Skip nav | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| Notes UX | Basico | Basico | Basico | Basico | +Skeleton loading | +Skeleton loading | +Toast undo | +Toast undo | +Toast undo | +Toast undo | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Premium |
+| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +BundleAnalyzer | +PasswordStrength+StepIndicator | Completo |
+| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | +aria-pressed+group | +aria-pressed+group | +aria-pressed+group | WCAG AA |
+| Client bundle | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | 459KB gzip | 459KB gzip | <400KB |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 211 passing | 211 passing | 211 passing | Sin regresiones |

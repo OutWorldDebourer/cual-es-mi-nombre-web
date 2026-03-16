@@ -8,10 +8,11 @@
  *   1. Phone + password → Supabase signUp → SMS Hook → WhatsApp OTP
  *   2. OTP verification → Supabase verifyOtp → session → /dashboard
  *
+ * Server Component — renders Card shell server-side, delegates interactivity
+ * to SignupForm (client component).
+ *
  * @module app/(auth)/signup/page
  */
-
-"use client";
 
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
