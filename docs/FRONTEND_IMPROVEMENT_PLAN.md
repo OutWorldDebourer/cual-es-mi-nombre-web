@@ -389,12 +389,19 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Prioridad:** BAJA-MEDIA
 
-- [ ] M13.1 — shadcn Select (reemplazar `<select>` nativo en settings)
+- [x] M13.1 — shadcn Select ✅ (reemplazar `<select>` nativo en settings)
 - [ ] M13.2 — shadcn Tooltip (para icon buttons)
 - [ ] M13.3 — shadcn Sheet (para mobile drawer alternativo)
 - [x] M13.4 — shadcn Skeleton ✅ (implementado en M5)
 - [ ] M13.5 — shadcn Progress (reemplazar div en credit-balance)
 - [ ] M13.6 — shadcn Avatar (perfil en sidebar/header)
+
+#### M13.1 — shadcn Select ✅
+**Archivos creados:**
+- `src/components/ui/select.tsx` — NUEVO: shadcn Select completo (Select, SelectTrigger, SelectContent, SelectItem, SelectGroup, SelectValue, SelectLabel, SelectSeparator) con Radix primitives, data-slot, animaciones entrada/salida
+
+**Archivos modificados:**
+- `src/app/dashboard/settings/page.tsx` — `<select>` nativo reemplazado por `<Select>` shadcn con dropdown animado, check icon en item seleccionado, estilos consistentes con design system
 
 ---
 
