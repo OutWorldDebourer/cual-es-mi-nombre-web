@@ -15,6 +15,7 @@ import {
   isGoogleCalendarConnected,
 } from "@/lib/google-auth";
 import { GoogleConnectButton } from "@/components/dashboard/google-connect-button";
+import { GoogleDisconnectButton } from "@/components/dashboard/google-disconnect-button";
 import {
   Card,
   CardContent,
@@ -90,7 +91,10 @@ export default async function GoogleCalendarPage(
                 El asistente puede crear y consultar eventos en tu calendario
                 principal.
               </p>
-              <GoogleConnectButton connected={connected} variant="outline" />
+              <div className="flex gap-3">
+                <GoogleConnectButton connected={connected} variant="outline" />
+                <GoogleDisconnectButton />
+              </div>
             </div>
           ) : (
             <GoogleConnectButton connected={connected} />

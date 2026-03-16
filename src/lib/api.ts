@@ -157,6 +157,12 @@ function googleApi(supabase: SupabaseClient) {
         throw new ApiError(500, detail);
       }
     },
+
+    async disconnect(): Promise<void> {
+      await authFetch(supabase, "/auth/google/disconnect", {
+        method: "DELETE",
+      });
+    },
   };
 }
 
