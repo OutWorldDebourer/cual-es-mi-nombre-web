@@ -76,12 +76,47 @@ describe("NoteCard", () => {
     expect(screen.getByText("important")).toBeInTheDocument();
   });
 
-  it("truncates long content to 200 chars", () => {
+  it("truncates long content to 200 chars in grid mode", () => {
     const longContent = "a".repeat(250);
     renderCard(<NoteCard note={makeNote({ content: longContent })} {...defaultProps} />);
 
     const displayed = screen.getByText(/^a+…$/);
     expect(displayed.textContent).toHaveLength(201); // 200 chars + "…"
+  });
+
+  it("truncates long content to 120 chars in list mode", () => {
+    const longContent = "b".repeat(200);
+    renderCard(
+      <NoteCard note={makeNote({ content: longContent })} layout="list" {...defaultProps} />,
+    );
+
+    const displayed = screen.getByText(/^b+…$/);
+    expect(displayed.textContent).toHaveLength(121); // 120 chars + "…"
+  });
+
+  it("renders horizontal layout in list mode", () => {
+    renderCard(
+      <NoteCard note={makeNote()} layout="list" {...defaultProps} />,
+    );
+
+    expect(screen.getByText("Test Note")).toBeInTheDocument();
+    expect(screen.getByText("This is a test note content")).toBeInTheDocument();
+  });
+
+  it("shows max 3 tags with overflow count in list mode", () => {
+    renderCard(
+      <NoteCard
+        note={makeNote({ tags: ["a", "b", "c", "d", "e"] })}
+        layout="list"
+        {...defaultProps}
+      />,
+    );
+
+    expect(screen.getByText("a")).toBeInTheDocument();
+    expect(screen.getByText("b")).toBeInTheDocument();
+    expect(screen.getByText("c")).toBeInTheDocument();
+    expect(screen.getByText("+2")).toBeInTheDocument();
+    expect(screen.queryByText("d")).not.toBeInTheDocument();
   });
 
   it("shows delete confirmation dialog and calls onDelete", async () => {

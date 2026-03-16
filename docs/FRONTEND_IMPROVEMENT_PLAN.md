@@ -312,15 +312,49 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M8 — Notas (UI/UX Polish)
+### ~~M8 — Notas (UI/UX Polish)~~ ✅ COMPLETO
 
 **Prioridad:** MEDIA
 
-- [ ] M8.1 — Toggle grid/list view
-- [ ] M8.2 — Icono de busqueda + debounce
-- [ ] M8.3 — Tags interactivos (click filtra, colores por hash)
+- [x] M8.1 — Toggle grid/list view
+- [x] M8.2 — Icono de busqueda + debounce
+- [x] M8.3 — Tags interactivos (click filtra, colores por hash)
 - [ ] M8.4 — Drag and drop (futuro)
-- [ ] M8.5 — Empty state ilustrado
+- [x] M8.5 — Empty state ilustrado
+
+**Implementado:**
+
+#### M8.1 — Toggle grid/list view ✅
+- ✅ Botones toggle LayoutGrid/List con tooltips en la toolbar
+- ✅ Grid mode: multi-columna (2 cols sm, 3 cols lg)
+- ✅ List mode: horizontal compacto (título + preview + tags + actions en fila)
+- ✅ NoteCard `layout` prop con preview truncado a 120 chars en lista
+- ✅ Tags limitados a 3 con overflow badge "+N" en lista
+- ✅ `aria-pressed` + `role="group"` para accesibilidad
+
+#### M8.2 — Icono de búsqueda + debounce ✅
+- ✅ Icono Search (Lucide) dentro del input
+- ✅ Debounce de 300ms en búsqueda (searchInput inmediato, search debounced)
+- ✅ Botón X para limpiar búsqueda
+- ✅ `aria-label` en input y botón clear
+
+#### M8.3 — Tags interactivos ✅
+- ✅ 6 colores por hash determinístico (primary, chart-4, success, info, chart-3, destructive)
+- ✅ Tags clickeables en NoteCard (grid y list mode)
+- ✅ Filtro por tag activo con indicador visual (Tag icon + Badge con X)
+- ✅ Click en badge del filtro para limpiar
+- ✅ Empty state adaptado para filtro por tag
+
+#### M8.5 — Empty state ilustrado ✅
+- ✅ Icono StickyNote en contenedor rounded con bg-primary/10
+- ✅ Tipografía mejorada (font-semibold, max-w-sm)
+- ✅ Padding aumentado (py-16) para mejor presencia visual
+
+**Archivos modificados:**
+- `src/components/notes/note-card.tsx` — layout prop, tagColor hash, onTagClick callback, list layout horizontal
+- `src/components/notes/note-list.tsx` — viewMode toggle, debounced search con icono, selectedTag filter, empty state ilustrado
+
+**Tests:** 15 tests (12 existentes + 3 nuevos para list layout y tags overflow)
 
 ---
 
@@ -475,11 +509,11 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M5: Skeletons y loading states
 - ✅ M4: Feedback y notificaciones (FormError + toast migration + undo)
 - ✅ M7: Dashboard Home completo (stepper + actividad reciente + count-up + hover)
-- M8: Notas con views y tags (movido a Ola 4)
+- ✅ M8: Notas UX polish (grid/list, search, tags, empty state)
 
 ### Ola 4 — Refinamiento (EN PROGRESO)
 - ✅ M13: Componentes UI completos (Select, Tooltip, Sheet, Skeleton, Progress, Avatar)
-- M8: Notas UX polish (views, tags, empty state)
+- ✅ M8: Notas UX polish (grid/list toggle, search debounce, tags interactivos, empty state)
 - M3.4: Breadcrumbs
 - M6.2: Auth form polish (transitions, progress, password strength)
 - ✅ M10: Accesibilidad completa (skip nav, focus visible, reduced-motion, tabIndex fix)
@@ -490,18 +524,19 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 (skip-nav+focus+reduced-motion) | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
-| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
-| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | Completo |
-| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | WCAG AA |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Post-M8 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|---------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 | ~97 (aria-pressed+labels) | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | +Tag colors | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
+| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | +Skip nav | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| Notes UX | Basico | Basico | Basico | Basico | +Skeleton loading | +Skeleton loading | +Toast undo | +Toast undo | +Toast undo | +Toast undo | Grid/List+Search+Tags+EmptyState | Premium |
+| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | Completo |
+| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | +aria-pressed+group | WCAG AA |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 211 passing | Sin regresiones |

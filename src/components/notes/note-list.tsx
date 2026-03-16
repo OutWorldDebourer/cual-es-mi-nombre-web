@@ -22,6 +22,9 @@ import { NotesGridSkeleton } from "@/components/skeletons/note-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { LayoutGrid, List, Search, StickyNote, Tag, X } from "lucide-react";
 
 interface NoteListProps {
   /** Initial notes from server-side fetch (SSR hydration) */
@@ -29,14 +32,20 @@ interface NoteListProps {
 }
 
 type NoteTab = "active" | "archived";
+type ViewMode = "grid" | "list";
 
 export function NoteList({ initialNotes }: NoteListProps) {
   const [notes, setNotes] = useState<Note[]>(initialNotes);
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<NoteTab>("active");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const supabase = createClient();
   const pendingDeleteRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
@@ -180,9 +189,26 @@ export function NoteList({ initialNotes }: NoteListProps) {
     });
   }
 
+  // ── Debounced search ─────────────────────────────────────────────────
+
+  function handleSearchChange(value: string) {
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearch(value), 300);
+  }
+
+  function handleClearSearch() {
+    setSearchInput("");
+    setSearch("");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }
+
   // ── Derived state ──────────────────────────────────────────────────────
 
   const filteredNotes = notes.filter((note) => {
+    // Tag filter
+    if (selectedTag && !note.tags.some((t) => t === selectedTag)) return false;
+    // Text search
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
@@ -196,50 +222,117 @@ export function NoteList({ initialNotes }: NoteListProps) {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar: tabs + search + create */}
+      {/* Toolbar: tabs + view toggle + search + create */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs
-          value={tab}
-          onValueChange={(v) => setTab(v as NoteTab)}
-        >
-          <TabsList>
-            <TabsTrigger value="active">Activas</TabsTrigger>
-            <TabsTrigger value="archived">Archivadas</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-2">
+          <Tabs
+            value={tab}
+            onValueChange={(v) => setTab(v as NoteTab)}
+          >
+            <TabsList>
+              <TabsTrigger value="active">Activas</TabsTrigger>
+              <TabsTrigger value="archived">Archivadas</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="flex border rounded-md" role="group" aria-label="Vista de notas">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setViewMode("grid")}
+                  className={`rounded-r-none ${viewMode === "grid" ? "bg-muted" : ""}`}
+                  aria-label="Vista cuadrícula"
+                  aria-pressed={viewMode === "grid"}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Cuadrícula</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setViewMode("list")}
+                  className={`rounded-l-none ${viewMode === "list" ? "bg-muted" : ""}`}
+                  aria-label="Vista lista"
+                  aria-pressed={viewMode === "list"}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Lista</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
         <div className="flex gap-2">
-          <Input
-            placeholder="Buscar notas..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64"
-          />
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar notas..."
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-8 pr-8"
+              aria-label="Buscar notas"
+            />
+            {searchInput && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Limpiar búsqueda"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <Button onClick={() => { setEditingNote(null); setFormOpen(true); }}>
             + Nueva
           </Button>
         </div>
       </div>
 
+      {/* Active tag filter */}
+      {selectedTag && (
+        <div className="flex items-center gap-2">
+          <Tag className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Filtrando por:</span>
+          <Badge
+            variant="secondary"
+            className="text-xs cursor-pointer gap-1"
+            onClick={() => setSelectedTag(null)}
+          >
+            {selectedTag}
+            <X className="h-3 w-3" />
+          </Badge>
+        </div>
+      )}
+
       {/* Loading */}
       {isLoading && <NotesGridSkeleton count={6} />}
 
       {/* Empty state */}
       {!isLoading && filteredNotes.length === 0 && (
-        <div className="text-center py-12 space-y-3">
-          <p className="text-4xl">📝</p>
-          <h3 className="text-lg font-medium">
+        <div className="text-center py-16 space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <StickyNote className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold">
             {tab === "archived"
               ? "No hay notas archivadas"
-              : search
+              : search || selectedTag
                 ? "No se encontraron notas"
                 : "No tienes notas aún"}
           </h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {tab === "active" && !search
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            {tab === "active" && !search && !selectedTag
               ? 'Envía un mensaje por WhatsApp como "Guarda una nota: comprar leche" o crea una aquí.'
-              : "Intenta con otro término de búsqueda."}
+              : selectedTag
+                ? "No hay notas con esta etiqueta."
+                : "Intenta con otro término de búsqueda."}
           </p>
-          {tab === "active" && !search && (
+          {tab === "active" && !search && !selectedTag && (
             <Button
               onClick={() => {
                 setEditingNote(null);
@@ -253,13 +346,20 @@ export function NoteList({ initialNotes }: NoteListProps) {
         </div>
       )}
 
-      {/* Notes grid */}
+      {/* Notes grid/list */}
       {!isLoading && filteredNotes.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              : "flex flex-col gap-3"
+          }
+        >
           {filteredNotes.map((note) => (
             <NoteCard
               key={note.id}
               note={note}
+              layout={viewMode}
               onEdit={(n) => {
                 setEditingNote(n);
                 setFormOpen(true);
@@ -267,6 +367,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
               onDelete={handleDelete}
               onTogglePin={handleTogglePin}
               onArchive={handleArchive}
+              onTagClick={setSelectedTag}
             />
           ))}
         </div>
