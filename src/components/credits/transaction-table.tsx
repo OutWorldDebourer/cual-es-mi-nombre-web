@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TransactionTableSkeleton } from "@/components/skeletons/credits-skeleton";
 
 interface TransactionTableProps {
   /** Initial transactions from server-side fetch */
@@ -179,11 +180,7 @@ export function TransactionTable({
         </>
       )}
 
-      {isLoading && (
-        <p className="text-sm text-muted-foreground text-center">
-          Cargando...
-        </p>
-      )}
+      {isLoading && <TransactionTableSkeleton rows={5} />}
     </div>
   );
 }

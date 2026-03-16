@@ -15,6 +15,7 @@ import { useState, useCallback, useEffect } from "react";
 import type { Reminder, ReminderStatus } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { ReminderCard } from "@/components/reminders/reminder-card";
+import { RemindersListSkeleton } from "@/components/skeletons/reminder-card-skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ReminderListProps {
@@ -97,11 +98,7 @@ export function ReminderList({
       </Tabs>
 
       {/* Loading */}
-      {isLoading && (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          Cargando recordatorios...
-        </p>
-      )}
+      {isLoading && <RemindersListSkeleton count={4} />}
 
       {/* Empty state */}
       {!isLoading && count === 0 && (

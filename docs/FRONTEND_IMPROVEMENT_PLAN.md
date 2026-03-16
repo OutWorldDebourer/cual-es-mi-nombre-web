@@ -76,6 +76,27 @@ en un producto SaaS de pago.
 - `src/app/(auth)/recovery/page.tsx` — Removido wrapper externo
 - `src/app/(auth)/set-password/page.tsx` — Removido wrapper externo
 
+### Ola 3 — Polish (EN PROGRESO)
+
+#### M5 Loading States y Skeletons ✅
+**Archivos creados:**
+- `src/components/ui/skeleton.tsx` — NUEVO: shadcn Skeleton base (animate-pulse)
+- `src/components/ui/spinner.tsx` — NUEVO: Lucide LoaderIcon con animate-spin
+- `src/components/skeletons/dashboard-card-skeleton.tsx` — NUEVO: DashboardCardSkeleton + DashboardSkeleton
+- `src/components/skeletons/note-card-skeleton.tsx` — NUEVO: NoteCardSkeleton + NotesGridSkeleton
+- `src/components/skeletons/reminder-card-skeleton.tsx` — NUEVO: ReminderCardSkeleton + RemindersListSkeleton
+- `src/components/skeletons/credits-skeleton.tsx` — NUEVO: CreditBalanceSkeleton + TransactionTableSkeleton + CreditsSkeleton
+- `src/app/dashboard/loading.tsx` — NUEVO: Suspense boundary (DashboardSkeleton)
+- `src/app/dashboard/notes/loading.tsx` — NUEVO: Suspense boundary (NotesGridSkeleton)
+- `src/app/dashboard/reminders/loading.tsx` — NUEVO: Suspense boundary (RemindersListSkeleton)
+- `src/app/dashboard/credits/loading.tsx` — NUEVO: Suspense boundary (CreditsSkeleton)
+
+**Archivos modificados:**
+- `src/components/ui/button.tsx` — Prop `loading` con Spinner + disabled automatico (compatible asChild)
+- `src/components/notes/note-list.tsx` — "Cargando notas..." reemplazado por NotesGridSkeleton
+- `src/components/reminders/reminder-list.tsx` — "Cargando recordatorios..." reemplazado por RemindersListSkeleton
+- `src/components/credits/transaction-table.tsx` — "Cargando..." reemplazado por TransactionTableSkeleton
+
 ---
 
 ## Modulos de Mejora
@@ -175,29 +196,35 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M5 — Loading States y Skeletons
+### ~~M5 — Loading States y Skeletons~~ ✅ COMPLETO
 
 **Prioridad:** ALTA — Percepcion de velocidad.
 
-**Mejoras:**
+**Implementado:**
 
-#### M5.1 — Skeleton components
-- [ ] Crear `<Skeleton />` generico (rectangulo animado shimmer)
-- [ ] `<NoteCardSkeleton />` — placeholder de card con lineas animadas
-- [ ] `<ReminderCardSkeleton />` — idem para reminders
-- [ ] `<TableRowSkeleton />` — fila placeholder para transaction table
-- [ ] `<DashboardCardSkeleton />` — para las 4 cards de dashboard home
+#### M5.1 — Skeleton components ✅
+- [x] `<Skeleton />` generico (shadcn standard con animate-pulse)
+- [x] `<NoteCardSkeleton />` + `<NotesGridSkeleton />` — replica estructura de NoteCard
+- [x] `<ReminderCardSkeleton />` + `<RemindersListSkeleton />` — replica ReminderCard
+- [x] `<TableRowSkeleton />` + `<TransactionTableSkeleton />` — replica tabla de transacciones
+- [x] `<CreditBalanceSkeleton />` — replica balance card
+- [x] `<DashboardCardSkeleton />` + `<DashboardSkeleton />` — replica las 4 cards + titulo
 
-#### M5.2 — Loading.tsx files (Suspense boundaries)
-- [ ] `/dashboard/loading.tsx` — skeleton de las 4 cards
-- [ ] `/dashboard/notes/loading.tsx` — grid de NoteCardSkeleton
-- [ ] `/dashboard/reminders/loading.tsx` — lista de ReminderCardSkeleton
-- [ ] `/dashboard/credits/loading.tsx` — skeleton de balance + tabla
+#### M5.2 — Loading.tsx files (Suspense boundaries) ✅
+- [x] `/dashboard/loading.tsx` — DashboardSkeleton (titulo + 4 cards)
+- [x] `/dashboard/notes/loading.tsx` — titulo + NotesGridSkeleton
+- [x] `/dashboard/reminders/loading.tsx` — titulo + RemindersListSkeleton
+- [x] `/dashboard/credits/loading.tsx` — titulo + CreditsSkeleton (balance + tabla)
 
-#### M5.3 — Spinner para acciones
-- [ ] Componente `<Spinner />` (SVG animado)
-- [ ] Usar en botones con `loading` state
-- [ ] Deshabilitar boton + mostrar spinner inline
+#### M5.3 — Spinner para acciones ✅
+- [x] `<Spinner />` componente (Lucide LoaderIcon con animate-spin)
+- [x] Button `loading` prop: muestra Spinner + deshabilita automaticamente
+- [x] Compatible con `asChild` (Slot single-child contract respetado)
+
+#### M5.4 — Migracion de loading states inline ✅
+- [x] `NoteList`: "Cargando notas..." → `<NotesGridSkeleton />`
+- [x] `ReminderList`: "Cargando recordatorios..." → `<RemindersListSkeleton />`
+- [x] `TransactionTable`: "Cargando..." → `<TransactionTableSkeleton />`
 
 ---
 
@@ -306,7 +333,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - [ ] M13.1 — shadcn Select (reemplazar `<select>` nativo en settings)
 - [ ] M13.2 — shadcn Tooltip (para icon buttons)
 - [ ] M13.3 — shadcn Sheet (para mobile drawer alternativo)
-- [ ] M13.4 — shadcn Skeleton
+- [x] M13.4 — shadcn Skeleton ✅ (implementado en M5)
 - [ ] M13.5 — shadcn Progress (reemplazar div en credit-balance)
 - [ ] M13.6 — shadcn Avatar (perfil en sidebar/header)
 
@@ -339,8 +366,8 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M6.1: Auth pages con branding (split layout + gradient panel + glass feature cards)
 - M9.1: Pricing page premium
 
-### Ola 3 — Polish (PENDIENTE)
-- M5: Skeletons y loading states
+### Ola 3 — Polish (EN PROGRESO)
+- ✅ M5: Skeletons y loading states
 - M7.2-7.3: Onboarding stepper, actividad reciente
 - M8: Notas con views y tags
 
@@ -354,14 +381,13 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Objetivo |
-|---------|----------|-----------|---------|-----------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo |
-| Landing conversion | Sin landing | Sin landing | Hero+Features+Pricing+Trust | Auth branded | Optimizada |
-| Auth pages | Cards genericas | Cards genericas | Cards genericas | Split layout + branding panel | Premium |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~75 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Auth con branding | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Premium |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

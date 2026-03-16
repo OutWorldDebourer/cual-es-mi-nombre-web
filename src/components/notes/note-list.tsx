@@ -17,6 +17,7 @@ import type { Note } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { NoteCard } from "@/components/notes/note-card";
 import { NoteForm } from "@/components/notes/note-form";
+import { NotesGridSkeleton } from "@/components/skeletons/note-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -177,11 +178,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
       </div>
 
       {/* Loading */}
-      {isLoading && (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          Cargando notas...
-        </p>
-      )}
+      {isLoading && <NotesGridSkeleton count={6} />}
 
       {/* Empty state */}
       {!isLoading && filteredNotes.length === 0 && (
