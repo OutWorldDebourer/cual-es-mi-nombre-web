@@ -55,12 +55,13 @@ export function PlanGrid({
       )}
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
-        {plans.map((plan) => (
+        {plans.map((plan, index) => (
           <PlanCard
             key={plan.key}
             plan={plan}
             currentPlan={currentPlan}
             currencySymbol={currencySymbol}
+            index={index}
             onSelectPlan={handleSelectPlan}
           />
         ))}

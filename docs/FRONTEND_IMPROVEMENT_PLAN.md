@@ -294,18 +294,27 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M9 — Planes y Pricing
+### ~~M9 — Planes y Pricing~~ ✅ COMPLETO
 
 **Prioridad:** MEDIA
 
 - [x] M9.1 — Plan destacado mas grande + ribbon "Mas popular"
-- [ ] M9.2 — Staggered entrance animation + hover scale
-- [ ] M9.3 — Badge "Tu plan" con check icon
+- [x] M9.2 — Staggered entrance animation + hover scale
+- [x] M9.3 — Badge "Tu plan" con check icon
 
 #### M9.1 — Plan destacado + ribbon ✅
 **Archivos modificados:**
 - `src/components/plans/plan-card.tsx` — Rediseñado: gradient ribbon banner, Crown icon, Lucide Check icons, larger price/button for highlighted, hover translate-y + shadow, Button loading prop
 - `src/components/plans/plan-grid.tsx` — Grid `items-center` para que el plan destacado sobresalga verticalmente
+
+#### M9.2 — Staggered entrance animation ✅
+**Archivos modificados:**
+- `src/components/plans/plan-card.tsx` — `animate-[fade-in-up_0.5s_ease-out_both]` con `animationDelay` basado en index (0ms, 100ms, 200ms, 300ms)
+- `src/components/plans/plan-grid.tsx` — Pasa `index` prop a cada PlanCard
+
+#### M9.3 — Badge "Tu plan" ✅
+**Archivos modificados:**
+- `src/components/plans/plan-card.tsx` — Badge absoluto top-right con CheckCircle icon + texto "Tu plan" en color success, ring success en card cuando es plan actual
 
 ---
 
@@ -384,7 +393,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 ### Ola 2 — Conversion (EN PROGRESO)
 - ✅ M2: Landing page completa (hero, features, pricing, how-it-works, footer)
 - ✅ M6.1: Auth pages con branding (split layout + gradient panel + glass feature cards)
-- ✅ M9.1: Pricing page premium (ribbon + plan destacado + hover)
+- ✅ M9: Pricing page completo (ribbon + plan destacado + staggered animation + badge "Tu plan")
 
 ### Ola 3 — Polish (EN PROGRESO)
 - ✅ M5: Skeletons y loading states
@@ -411,5 +420,5 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 | Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo |
 | Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Premium |
 | Error pages | Genericas | Genericas | Genericas | Genericas | Branded 404+Error | Branded 404+Error | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+hover | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Premium |
 | Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

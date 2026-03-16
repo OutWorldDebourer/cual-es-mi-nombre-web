@@ -11,7 +11,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Crown, Sparkles } from "lucide-react";
+import { Check, CheckCircle, Crown, Sparkles } from "lucide-react";
 import type { PlanInfo } from "@/types/database";
 import {
   Card,
@@ -27,6 +27,7 @@ interface PlanCardProps {
   plan: PlanInfo;
   currentPlan: string;
   currencySymbol: string;
+  index?: number;
   onSelectPlan: (planKey: string) => Promise<void>;
 }
 
@@ -34,6 +35,7 @@ export function PlanCard({
   plan,
   currentPlan,
   currencySymbol,
+  index = 0,
   onSelectPlan,
 }: PlanCardProps) {
   const [loading, setLoading] = useState(false);
@@ -56,16 +58,27 @@ export function PlanCard({
       className={cn(
         "flex flex-col relative overflow-hidden transition-all duration-300",
         "hover:-translate-y-1 hover:shadow-lg",
+        "animate-[fade-in-up_0.5s_ease-out_both]",
         plan.is_highlighted
           ? "border-primary shadow-xl ring-2 ring-primary/20 pb-2"
           : "hover:border-primary/30",
+        isCurrent && "ring-2 ring-success/30 border-success/50",
       )}
+      style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Highlighted: gradient ribbon banner */}
       {plan.is_highlighted && plan.badge && (
         <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-center py-2 text-xs font-semibold flex items-center justify-center gap-1.5">
           <Sparkles className="size-3" />
           {plan.badge}
+        </div>
+      )}
+
+      {/* Current plan badge */}
+      {isCurrent && (
+        <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+          <CheckCircle className="size-3.5" />
+          Tu plan
         </div>
       )}
 
