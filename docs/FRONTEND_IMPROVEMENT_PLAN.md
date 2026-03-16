@@ -403,9 +403,9 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 **Prioridad:** BAJA-MEDIA
 
 - [ ] M14.1 — Page transitions (fade-in, staggered reveal)
-- [ ] M14.2 — Hover states ricos (shadow + translate en cards)
+- [x] M14.2 — Hover states ricos (shadow + translate en cards) ✅ (implementado en M7.1)
 - [ ] M14.3 — Feedback tactil (active:scale-95 en botones)
-- [ ] M14.4 — Numbers animation (count-up en creditos)
+- [x] M14.4 — Numbers animation (count-up en creditos) ✅ (implementado en M7.1)
 - [ ] M14.5 — Evaluar `motion` (Framer Motion) para layout animations
 
 ---
@@ -420,7 +420,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M10.1: `lang="es"`
 - ✅ M11: Dark mode completo
 
-### Ola 2 — Conversion (EN PROGRESO)
+### Ola 2 — Conversion ✅ COMPLETA
 - ✅ M2: Landing page completa (hero, features, pricing, how-it-works, footer)
 - ✅ M6.1: Auth pages con branding (split layout + gradient panel + glass feature cards)
 - ✅ M9: Pricing page completo (ribbon + plan destacado + staggered animation + badge "Tu plan")
@@ -432,23 +432,28 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - M8: Notas con views y tags (movido a Ola 4)
 
 ### Ola 4 — Refinamiento (PENDIENTE)
+- M8: Notas UX polish (views, tags, empty state)
 - M3.4: Breadcrumbs
+- M6.2: Auth form polish (transitions, progress, password strength)
 - M10.2-10.4: Skip nav, focus, reduced-motion
-- M12-M14: Performance, components, animations
+- M12: Performance y optimización
+- M13: Componentes UI faltantes (Select, Tooltip, Progress, Avatar)
+- M14: Micro-interacciones restantes (page transitions, active:scale-95)
 
 ---
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
+| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
