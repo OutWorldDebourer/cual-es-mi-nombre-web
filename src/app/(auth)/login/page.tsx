@@ -16,27 +16,25 @@ import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            Accede a tu asistente virtual
-          </p>
-        </CardHeader>
-        <CardContent>
-          <LoginForm />
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Accede a tu asistente virtual
+        </p>
+      </CardHeader>
+      <CardContent>
+        <LoginForm />
 
-          <Separator className="my-6" />
+        <Separator className="my-6" />
 
-          <p className="text-center text-sm text-muted-foreground">
-            ¿No tienes cuenta?{" "}
-            <Link href="/signup" className="text-primary underline">
-              Regístrate
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        <p className="text-center text-sm text-muted-foreground">
+          ¿No tienes cuenta?{" "}
+          <Link href="/signup" className="text-primary underline">
+            Regístrate
+          </Link>
+        </p>
+      </CardContent>
+    </Card>
   );
 }

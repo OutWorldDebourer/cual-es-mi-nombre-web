@@ -68,20 +68,18 @@ function SetPasswordContent() {
 
 export default function SetPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Crear Contraseña</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            Crea una contraseña para acceder desde la web
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={null}>
-            <SetPasswordContent />
-          </Suspense>
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Crear Contraseña</CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Crea una contraseña para acceder desde la web
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Suspense fallback={null}>
+          <SetPasswordContent />
+        </Suspense>
+      </CardContent>
+    </Card>
   );
 }

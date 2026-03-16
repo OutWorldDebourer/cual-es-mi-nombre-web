@@ -59,11 +59,22 @@ en un producto SaaS de pago.
 - `next-themes@0.4.6` — Dark mode provider
 - `sonner@2.0.7` — Toast notification system
 
-### Ola 2 — Conversion (parcial) — M2 Landing Page
+### Ola 2 — Conversion (EN PROGRESO)
 
+#### M2 Landing Page ✅
 **Archivos modificados:**
 - `src/app/page.tsx` — Reescrito: 6 secciones (nav, hero, features, how-it-works, pricing, footer)
 - `src/app/globals.css` — Agregado: `scroll-behavior: smooth`, keyframes `fade-in-up` y `slide-in-right`
+
+#### M6.1 Auth Layout ✅
+**Archivos creados:**
+- `src/app/(auth)/layout.tsx` — NUEVO: split layout con branding panel + form panel
+
+**Archivos modificados:**
+- `src/app/(auth)/login/page.tsx` — Removido wrapper externo (delegado al layout)
+- `src/app/(auth)/signup/page.tsx` — Removido wrapper externo
+- `src/app/(auth)/recovery/page.tsx` — Removido wrapper externo
+- `src/app/(auth)/set-password/page.tsx` — Removido wrapper externo
 
 ---
 
@@ -194,10 +205,13 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Prioridad:** MEDIA-ALTA — Conversion y primera impresion post-landing.
 
-#### M6.1 — Layout de auth con branding
-- [ ] Split layout: branding panel izquierdo + form derecho (desktop)
-- [ ] Panel con gradient de marca + logo + tagline
-- [ ] Mobile: solo form con header de marca compacto
+#### M6.1 — Layout de auth con branding ✅
+- [x] Split layout: branding panel izquierdo + form derecho (desktop, lg:grid-cols-2)
+- [x] Panel con gradient mesh teal + logo Sparkles + tagline + 4 feature cards glass-morphism
+- [x] Mobile: gradient header compacto con logo + tagline, form centrado debajo
+- [x] Staggered fade-in-up animations en branding panel
+- [x] Dot grid texture overlay + layered gradient orbs para profundidad
+- [x] 4 paginas actualizadas (login, signup, recovery, set-password)
 
 #### M6.2 — Formularios con polish
 - [ ] Animacion de transicion entre pasos (signup: phone -> OTP)
@@ -322,7 +336,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ### Ola 2 — Conversion (EN PROGRESO)
 - ✅ M2: Landing page completa (hero, features, pricing, how-it-works, footer)
-- M6.1: Auth pages con branding
+- ✅ M6.1: Auth pages con branding (split layout + gradient panel + glass feature cards)
 - M9.1: Pricing page premium
 
 ### Ola 3 — Polish (PENDIENTE)
@@ -340,13 +354,14 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Objetivo |
-|---------|----------|-----------|---------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | 100 |
-| Mobile usability | FALLA | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo |
-| Landing conversion | Sin landing | Sin landing | Hero+Features+Pricing+Trust | Optimizada |
-| Test suite | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Objetivo |
+|---------|----------|-----------|---------|-----------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo |
+| Landing conversion | Sin landing | Sin landing | Hero+Features+Pricing+Trust | Auth branded | Optimizada |
+| Auth pages | Cards genericas | Cards genericas | Cards genericas | Split layout + branding panel | Premium |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

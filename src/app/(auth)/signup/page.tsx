@@ -20,27 +20,25 @@ import { SignupForm } from "@/components/auth/signup-form";
 
 export default function SignupPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            Registra tu asistente virtual
-          </p>
-        </CardHeader>
-        <CardContent>
-          <SignupForm />
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Registra tu asistente virtual
+        </p>
+      </CardHeader>
+      <CardContent>
+        <SignupForm />
 
-          <Separator className="my-6" />
+        <Separator className="my-6" />
 
-          <p className="text-center text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-primary underline">
-              Inicia sesión
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        <p className="text-center text-sm text-muted-foreground">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/login" className="text-primary underline">
+            Inicia sesión
+          </Link>
+        </p>
+      </CardContent>
+    </Card>
   );
 }
