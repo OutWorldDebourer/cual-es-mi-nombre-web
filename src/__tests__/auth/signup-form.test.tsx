@@ -33,6 +33,15 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
 }));
 
+// Mock phoneAuthApi.checkStatus — pre-signup phone check
+const mockCheckStatus = vi.fn();
+
+vi.mock("@/lib/api", () => ({
+  phoneAuthApi: {
+    checkStatus: (...args: unknown[]) => mockCheckStatus(...args),
+  },
+}));
+
 // Extend the shared mock with signUp and verifyOtp
 const mockSignUp = vi.fn();
 const mockVerifyOtp = vi.fn();
@@ -41,6 +50,12 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockSupabaseClient.auth.signUp = mockSignUp;
   mockSupabaseClient.auth.verifyOtp = mockVerifyOtp;
+
+  // Default: phone not registered → proceed with signup
+  mockCheckStatus.mockResolvedValue({
+    action: "signup",
+    channel_origin: null,
+  });
   mockSignUp.mockResolvedValue({
     data: { user: { id: "u1", identities: [{ id: "i1" }] }, session: null },
     error: null,
@@ -204,8 +219,8 @@ describe("SignupForm — Step 1 (Phone + Password)", () => {
   });
 
   it("disables submit button while loading", async () => {
-    // Make signUp hang
-    mockSignUp.mockReturnValue(new Promise(() => {}));
+    // Make checkStatus hang (first async call in the flow)
+    mockCheckStatus.mockReturnValue(new Promise(() => {}));
 
     const user = userEvent.setup();
     render(<SignupForm />);
@@ -214,7 +229,7 @@ describe("SignupForm — Step 1 (Phone + Password)", () => {
     await fillPasswordFields(user, "password123");
     await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
 
-    expect(screen.getByRole("button", { name: "Enviando código..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Verificando..." })).toBeDisabled();
   });
 });
 
@@ -347,14 +362,14 @@ describe("SignupForm — Step 2 (OTP Verification)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Existing user detection (WA-first)
+// Existing user detection (pre-signup check via check-status)
 // ---------------------------------------------------------------------------
 
 describe("SignupForm — Existing user detection", () => {
-  it("shows existing user message with set-password CTA when identities array is empty", async () => {
-    mockSignUp.mockResolvedValueOnce({
-      data: { user: { id: "u1", identities: [] }, session: null },
-      error: null,
+  it("shows set-password CTA when check-status returns set_password (WA-first, no password)", async () => {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: "whatsapp",
     });
 
     const user = userEvent.setup();
@@ -378,12 +393,41 @@ describe("SignupForm — Existing user detection", () => {
         screen.getByRole("link", { name: "Recuperar contraseña" }),
       ).toHaveAttribute("href", "/recovery");
     });
+
+    // signUp should NOT have been called
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
+  it("shows login CTA when check-status returns login (already has password)", async () => {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "login",
+      channel_origin: "whatsapp",
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Este número ya tiene una cuenta"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Iniciar sesión" }),
+      ).toHaveAttribute("href", "/login");
+    });
+
+    // signUp should NOT have been called
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("does NOT transition to OTP step for existing users", async () => {
-    mockSignUp.mockResolvedValueOnce({
-      data: { user: { id: "u1", identities: [] }, session: null },
-      error: null,
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: "whatsapp",
     });
 
     const user = userEvent.setup();
@@ -398,10 +442,30 @@ describe("SignupForm — Existing user detection", () => {
     });
   });
 
+  it("does NOT call signUp when check-status detects existing user", async () => {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "login",
+      channel_origin: "web",
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Este número ya tiene una cuenta")).toBeInTheDocument();
+    });
+
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
   it("allows going back to signup form via 'Usar otro número'", async () => {
-    mockSignUp.mockResolvedValueOnce({
-      data: { user: { id: "u1", identities: [] }, session: null },
-      error: null,
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: "whatsapp",
     });
 
     const user = userEvent.setup();
@@ -419,6 +483,32 @@ describe("SignupForm — Existing user detection", () => {
 
     expect(screen.getByLabelText("Contraseña")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Crear cuenta" })).toBeInTheDocument();
+  });
+
+  it("falls back to identities check if check-status says signup but Supabase returns empty identities", async () => {
+    // check-status says "signup" (race condition: user registered between check and signUp)
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "signup",
+      channel_origin: null,
+    });
+    // But Supabase detects existing confirmed user
+    mockSignUp.mockResolvedValueOnce({
+      data: { user: { id: "u1", identities: [] }, session: null },
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Este número ya tiene una cuenta"),
+      ).toBeInTheDocument();
+    });
   });
 });
 

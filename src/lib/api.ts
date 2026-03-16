@@ -231,7 +231,24 @@ export interface PhoneAuthResponse {
 
 export type PhoneAuthPurpose = "recovery" | "set_password";
 
+export interface CheckPhoneStatusResponse {
+  action: "signup" | "set_password" | "login";
+  channel_origin: "whatsapp" | "web" | null;
+}
+
 export const phoneAuthApi = {
+  /**
+   * POST /auth/phone/check-status
+   * Pre-signup check: determines the correct auth flow for a phone number.
+   * Prevents unnecessary OTP dispatch to already-registered phones.
+   */
+  async checkStatus(phone: string): Promise<CheckPhoneStatusResponse> {
+    return publicFetch<CheckPhoneStatusResponse>("/auth/phone/check-status", {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    });
+  },
+
   /**
    * POST /auth/phone/request-otp
    * Request an OTP for password recovery or WA-first set-password.

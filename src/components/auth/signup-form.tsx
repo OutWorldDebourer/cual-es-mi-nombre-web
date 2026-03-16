@@ -2,10 +2,12 @@
  * SignupForm — Multi-step phone registration with Supabase OTP
  *
  * State machine:
- *   PHONE_PASSWORD → signUp() → VERIFY_OTP → verifyOtp() → redirect /dashboard
+ *   PHONE_PASSWORD → checkStatus() → signUp() → VERIFY_OTP → verifyOtp() → redirect /dashboard
+ *                  ↘ (existing user) → existingUser banner
  *
- * Uses Supabase Auth native phone signup. OTP delivery is handled
- * transparently by the SMS Hook (A8.1.2) → WhatsApp.
+ * Pre-signup check: calls ``POST /auth/phone/check-status`` before
+ * ``supabase.auth.signUp()`` to detect WA-first users and prevent
+ * unnecessary OTP dispatch.
  *
  * @module components/auth/signup-form
  */
@@ -16,6 +18,8 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { phoneAuthApi } from "@/lib/api";
+import type { CheckPhoneStatusResponse } from "@/lib/api";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { OTPInput, useOTPTimer } from "@/components/auth/otp-input";
 import { Button } from "@/components/ui/button";
@@ -106,6 +110,8 @@ export function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [existingUser, setExistingUser] = useState(false);
+  const [existingAction, setExistingAction] = useState<CheckPhoneStatusResponse["action"] | null>(null);
+  const [existingChannel, setExistingChannel] = useState<string | null>(null);
 
   // --- OTP timer (starts when step transitions to verify_otp) ---
   const timer = useOTPTimer({
@@ -142,6 +148,19 @@ export function SignupForm() {
     setLoading(true);
 
     try {
+      // ── Pre-check: is this phone already registered? ─────────────
+      // Calls backend BEFORE supabase.auth.signUp() to prevent
+      // unnecessary OTP dispatch via SMS Hook to existing users.
+      const phoneStatus = await phoneAuthApi.checkStatus(phone);
+
+      if (phoneStatus.action !== "signup") {
+        setExistingUser(true);
+        setExistingAction(phoneStatus.action);
+        setExistingChannel(phoneStatus.channel_origin);
+        return;
+      }
+
+      // ── Phone is available — proceed with Supabase signup ────────
       const supabase = createClient();
       const { data, error: authError } = await supabase.auth.signUp({
         phone,
@@ -156,11 +175,12 @@ export function SignupForm() {
         return;
       }
 
-      // Detect existing user (WA-first or previous signup with confirmed phone).
-      // Supabase returns user with empty identities array for repeated signups
-      // of already-confirmed users — no OTP is sent in this case.
+      // Fallback: detect existing user via Supabase identities array
+      // (safety net in case check-status and auth.users are briefly out of sync)
       if (data?.user?.identities?.length === 0) {
         setExistingUser(true);
+        setExistingAction("login");
+        setExistingChannel(null);
         return;
       }
 
@@ -243,33 +263,50 @@ export function SignupForm() {
   }
 
   // =========================================================================
-  // Render — Existing user detected (WA-first)
+  // Render — Existing user detected
   // =========================================================================
 
   if (existingUser) {
     const setPasswordHref = `/set-password?phone=${encodeURIComponent(phone)}&from=signup`;
+    const isWaFirst = existingChannel === "whatsapp";
+    const needsPassword = existingAction === "set_password";
 
     return (
       <div className="space-y-4">
         <div className="rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 text-sm space-y-2">
           <p className="font-medium text-green-900 dark:text-green-100">
-            Tu asistente de WhatsApp ya está activo
+            {needsPassword
+              ? "Tu asistente de WhatsApp ya está activo"
+              : "Este número ya tiene una cuenta"}
           </p>
           <p className="text-green-800 dark:text-green-200">
-            Tu asistente de WhatsApp ya está activo con este número.
-            Para acceder desde la web, necesitas crear una contraseña.
+            {needsPassword
+              ? "Tu asistente de WhatsApp ya está activo con este número. Para acceder desde la web, necesitas crear una contraseña."
+              : isWaFirst
+                ? "Ya tienes una cuenta con este número. Inicia sesión o recupera tu contraseña."
+                : "Ya existe una cuenta registrada con este número. Inicia sesión o recupera tu contraseña."}
           </p>
         </div>
 
-        <Button asChild className="w-full">
-          <Link href={setPasswordHref}>Crear contraseña para la web</Link>
-        </Button>
+        {needsPassword && (
+          <Button asChild className="w-full">
+            <Link href={setPasswordHref}>Crear contraseña para la web</Link>
+          </Button>
+        )}
 
-        <div className="flex gap-2">
-          <Button asChild variant="outline" className="flex-1">
+        {!needsPassword && (
+          <Button asChild className="w-full">
             <Link href="/login">Iniciar sesión</Link>
           </Button>
-          <Button asChild variant="outline" className="flex-1">
+        )}
+
+        <div className="flex gap-2">
+          {needsPassword && (
+            <Button asChild variant="outline" className="flex-1">
+              <Link href="/login">Iniciar sesión</Link>
+            </Button>
+          )}
+          <Button asChild variant="outline" className={needsPassword ? "flex-1" : "w-full"}>
             <Link href="/recovery">Recuperar contraseña</Link>
           </Button>
         </div>
@@ -280,6 +317,8 @@ export function SignupForm() {
           className="w-full"
           onClick={() => {
             setExistingUser(false);
+            setExistingAction(null);
+            setExistingChannel(null);
             setError(null);
           }}
         >
@@ -347,7 +386,7 @@ export function SignupForm() {
         )}
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Enviando código..." : "Crear cuenta"}
+          {loading ? "Verificando..." : "Crear cuenta"}
         </Button>
       </form>
     );
