@@ -97,6 +97,21 @@ en un producto SaaS de pago.
 - `src/components/reminders/reminder-list.tsx` — "Cargando recordatorios..." reemplazado por RemindersListSkeleton
 - `src/components/credits/transaction-table.tsx` — "Cargando..." reemplazado por TransactionTableSkeleton
 
+#### M10.5 OG Tags, Favicon, Web Manifest ✅
+**Archivos creados:**
+- `src/app/icon.svg` — NUEVO: SVG favicon (sparkle teal gradient, 32x32)
+- `src/app/apple-icon.tsx` — NUEVO: Dynamic Apple touch icon (180x180, edge runtime)
+- `src/app/opengraph-image.tsx` — NUEVO: Dynamic OG image (1200x630, teal gradient + brand)
+- `src/app/manifest.ts` — NUEVO: Web manifest (name, theme_color, start_url, icons)
+
+**Archivos modificados:**
+- `src/app/layout.tsx` — Metadata completo: title template, OG tags, Twitter card, keywords, metadataBase
+
+#### M6.3 Error/404 Pages ✅
+**Archivos creados:**
+- `src/app/not-found.tsx` — NUEVO: Branded 404 (Sparkles icon, CTAs dashboard/inicio)
+- `src/app/error.tsx` — NUEVO: Branded error (retry reset, digest ref, CTA dashboard)
+
 ---
 
 ## Modulos de Mejora
@@ -245,9 +260,9 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - [ ] Progress indicator para multi-step
 - [ ] Password strength indicator visual
 
-#### M6.3 — Pagina de error/404
-- [ ] Crear `app/not-found.tsx` con diseno on-brand
-- [ ] Crear `app/error.tsx` con recovery action
+#### M6.3 — Pagina de error/404 ✅
+- [x] `app/not-found.tsx` — branded 404 con Sparkles icon, mensaje amigable, CTAs a dashboard/inicio
+- [x] `app/error.tsx` — branded error con retry (reset), digest ref, CTA a dashboard
 
 ---
 
@@ -295,13 +310,13 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 **Implementado:**
 - ✅ M10.1 — `lang="es"` corregido
+- ✅ M10.5 — OG tags, favicon, web manifest
 
 **Pendiente:**
 - [ ] M10.1 — Eliminar `tabIndex={-1}` del link "Olvidaste tu contrasena?"
 - [ ] M10.2 — Skip navigation link
 - [ ] M10.3 — Focus visible styles mas prominentes
 - [ ] M10.4 — `prefers-reduced-motion` en animaciones
-- [ ] M10.5 — OG tags, favicon, web manifest
 
 ---
 
@@ -374,20 +389,21 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 ### Ola 4 — Refinamiento (PENDIENTE)
 - M3.4: Breadcrumbs
 - M4.2-4.3: FormError, toast con undo
-- M10.2-10.5: Skip nav, focus, OG tags
+- M10.2-10.4: Skip nav, focus, reduced-motion
 - M12-M14: Performance, components, animations
 
 ---
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------|----------|
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|----------|
 | Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
 | Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~75 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | 100 |
 | Mobile usability | FALLA | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Auth con branding | Distintiva |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Distintiva |
 | Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo |
 | Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Premium |
+| Error pages | Genericas | Genericas | Genericas | Genericas | Branded 404+Error | Premium |
 | Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

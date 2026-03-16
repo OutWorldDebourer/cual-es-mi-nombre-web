@@ -21,9 +21,39 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Cual es mi nombre — Tu asistente virtual",
+  title: {
+    default: "Cuál es mi nombre — Tu asistente inteligente en WhatsApp",
+    template: "%s | Cuál es mi nombre",
+  },
   description:
-    "Dashboard web para configurar tu asistente virtual de WhatsApp. Gestiona calendario, notas y recordatorios.",
+    "Gestiona tu calendario, toma notas y configura recordatorios — todo desde una conversación natural en WhatsApp con IA.",
+  keywords: [
+    "asistente virtual",
+    "WhatsApp",
+    "IA",
+    "calendario",
+    "notas",
+    "recordatorios",
+    "inteligencia artificial",
+  ],
+  authors: [{ name: "Cuál es mi nombre" }],
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://cual-es-mi-nombre.vercel.app",
+  ),
+  openGraph: {
+    type: "website",
+    locale: "es_PE",
+    siteName: "Cuál es mi nombre",
+    title: "Cuál es mi nombre — Tu asistente inteligente en WhatsApp",
+    description:
+      "Gestiona tu calendario, toma notas y configura recordatorios — todo desde una conversación natural en WhatsApp con IA.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cuál es mi nombre — Tu asistente inteligente en WhatsApp",
+    description:
+      "Gestiona tu calendario, notas y recordatorios desde WhatsApp con IA.",
+  },
 };
 
 export default function RootLayout({
