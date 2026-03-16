@@ -8,9 +8,8 @@ import type { Profile, SubscriptionPlan } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogoutButton } from "@/components/dashboard/logout-button";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
+import { UserMenu } from "@/components/dashboard/user-menu";
 import {
   Home,
   StickyNote,
@@ -227,20 +226,10 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
-            <div className="hidden sm:flex items-center gap-2">
-              <Avatar className="size-7">
-                <AvatarFallback>
-                  {(user.email ?? user.phone ?? "U").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm text-muted-foreground">
-                {user.email ?? user.phone}
-              </span>
-            </div>
+            <UserMenu email={user.email ?? user.phone ?? "Usuario"} />
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <LogoutButton />
           </div>
         </header>
 

@@ -191,11 +191,11 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M3.2 — Mobile nav (hamburger + drawer lateral + backdrop blur + auto-close)
 - ✅ M3.3 — Sidebar refinada (secciones separadas, plan badge, brand mark con Sparkles)
 - ✅ M3.5 — Header mejorado (sticky + backdrop blur + theme toggle)
+- ✅ M3.5 — Avatar con dropdown menu (configuracion, planes, cerrar sesion)
 
 **Pendiente:**
 - [ ] M3.4 — Breadcrumbs para paginas anidadas (`Configuracion > Google Calendar`)
 - [ ] M3.3 — Sidebar collapsible en desktop (solo iconos)
-- [ ] M3.5 — Avatar con dropdown menu (perfil, configuracion, cerrar sesion)
 
 ---
 
@@ -478,6 +478,15 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - [x] M13.5 — shadcn Progress ✅ (reemplazar div en credit-balance)
 - [x] M13.6 — shadcn Avatar ✅ (perfil con iniciales en header)
 
+#### M3.5 — Avatar Dropdown Menu ✅
+**Archivos creados:**
+- `src/components/dashboard/user-menu.tsx` — NUEVO: UserMenu client component con Avatar trigger + DropdownMenu (email label, Configuracion, Planes, Cerrar sesion con variant destructive)
+
+**Archivos modificados:**
+- `src/components/dashboard/shell.tsx` — Header: Avatar+email+LogoutButton reemplazados por `<UserMenu />`, imports limpiados
+
+---
+
 #### M13.1 — shadcn Select ✅
 **Archivos creados:**
 - `src/components/ui/select.tsx` — NUEVO: shadcn Select completo (Select, SelectTrigger, SelectContent, SelectItem, SelectGroup, SelectValue, SelectLabel, SelectSeparator) con Radix primitives, data-slot, animaciones entrada/salida
@@ -575,7 +584,6 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 ### Backlog (baja prioridad, independientes)
 - M3.4: Breadcrumbs para paginas anidadas
 - M3.3: Sidebar collapsible en desktop (solo iconos)
-- M3.5: Avatar con dropdown menu (perfil, configuracion, cerrar sesion)
 - M1.3: Spacing tokens consistentes
 - M2.2: Scroll-triggered reveal animations (IntersectionObserver)
 - M2.4: Testimonios reales o estadisticas de uso
