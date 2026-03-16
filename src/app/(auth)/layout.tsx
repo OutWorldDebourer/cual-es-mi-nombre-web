@@ -23,6 +23,14 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-2">
+      {/* Skip to form — accessibility */}
+      <a
+        href="#auth-form"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:text-sm focus:font-medium focus:shadow-lg"
+      >
+        Ir al formulario
+      </a>
+
       {/* ═══════════════════════════════════════════════════════════
          BRANDING PANEL — desktop only
          ═══════════════════════════════════════════════════════════ */}
@@ -148,7 +156,7 @@ export default function AuthLayout({
 
         {/* Form container */}
         <div className="flex flex-1 items-center justify-center px-4 py-10">
-          <div className="w-full max-w-md">{children}</div>
+          <div id="auth-form" className="w-full max-w-md">{children}</div>
         </div>
       </div>
     </div>

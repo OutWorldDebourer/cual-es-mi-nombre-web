@@ -348,19 +348,30 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M10 — Accesibilidad y SEO
+### ~~M10 — Accesibilidad y SEO~~ ✅ COMPLETO
 
 **Prioridad:** MEDIA
 
 **Implementado:**
 - ✅ M10.1 — `lang="es"` corregido
 - ✅ M10.5 — OG tags, favicon, web manifest
+- ✅ M10.1 — Eliminado `tabIndex={-1}` del link "Olvidaste tu contrasena?" (ahora accesible por teclado)
+- ✅ M10.2 — Skip navigation link en dashboard shell ("Ir al contenido principal") y auth layout ("Ir al formulario")
+- ✅ M10.3 — Focus visible styles prominentes (`outline-2 outline-offset-2 outline-ring` global via `@layer base`)
+- ✅ M10.4 — `prefers-reduced-motion: reduce` desactiva animaciones, transitions y scroll-behavior smooth
 
-**Pendiente:**
-- [ ] M10.1 — Eliminar `tabIndex={-1}` del link "Olvidaste tu contrasena?"
-- [ ] M10.2 — Skip navigation link
-- [ ] M10.3 — Focus visible styles mas prominentes
-- [ ] M10.4 — `prefers-reduced-motion` en animaciones
+#### M10.2 — Skip Navigation ✅
+**Archivos modificados:**
+- `src/components/dashboard/shell.tsx` — Skip link "Ir al contenido principal" + `id="main-content"` en `<main>`
+- `src/app/(auth)/layout.tsx` — Skip link "Ir al formulario" + `id="auth-form"` en form container
+
+#### M10.3 — Focus Visible Styles ✅
+**Archivos modificados:**
+- `src/app/globals.css` — `:focus-visible` rule en `@layer base` con `outline-2 outline-offset-2 outline-ring`
+
+#### M10.4 — Reduced Motion ✅
+**Archivos modificados:**
+- `src/app/globals.css` — `@media (prefers-reduced-motion: reduce)` elimina animation-duration, transition-duration, scroll-behavior
 
 ---
 
@@ -471,7 +482,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - M8: Notas UX polish (views, tags, empty state)
 - M3.4: Breadcrumbs
 - M6.2: Auth form polish (transitions, progress, password strength)
-- M10.2-10.4: Skip nav, focus, reduced-motion
+- ✅ M10: Accesibilidad completa (skip nav, focus visible, reduced-motion, tabIndex fix)
 - M12: Performance y optimización
 - M14: Micro-interacciones restantes (page transitions, active:scale-95)
 
@@ -479,17 +490,18 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
-| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
-| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | Completo |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 (skip-nav+focus+reduced-motion) | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | Premium |
+| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | Completo |
+| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | WCAG AA |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

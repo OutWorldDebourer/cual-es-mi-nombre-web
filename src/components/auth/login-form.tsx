@@ -140,7 +140,6 @@ export function LoginForm() {
           <Link
             href="/recovery"
             className="text-xs text-muted-foreground hover:text-primary transition-colors"
-            tabIndex={-1}
           >
             ¿Olvidaste tu contraseña?
           </Link>
