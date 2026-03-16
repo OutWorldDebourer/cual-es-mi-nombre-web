@@ -12,9 +12,9 @@ en un producto SaaS de pago.
 | Area | Estado Actual | Impacto |
 |------|---------------|---------|
 | ~~Paleta de colores~~ | ~~100% escala de grises~~ | ✅ RESUELTO — Paleta "Warm Tech" con chroma real |
-| Landing page | Titulo + 2 botones sobre fondo blanco | No convierte visitantes |
+| ~~Landing page~~ | ~~Titulo + 2 botones sobre fondo blanco~~ | ✅ RESUELTO — Landing completa con hero, features, pricing, trust |
 | ~~Tipografia~~ | ~~Solo Geist~~ | ✅ RESUELTO — Plus Jakarta Sans como display |
-| Animaciones | Casi ninguna (solo las de Radix por defecto) | Experiencia plana y estatica |
+| ~~Animaciones~~ | ~~Casi ninguna (solo las de Radix por defecto)~~ | ✅ PARCIAL — Landing con staggered animations + hover effects |
 | ~~Mobile~~ | ~~Sidebar oculta sin hamburger menu~~ | ✅ RESUELTO — Drawer mobile con backdrop |
 | ~~Iconos~~ | ~~Emojis como iconos de navegacion~~ | ✅ RESUELTO — Lucide icons en toda la nav |
 | Loading states | Texto plano "Cargando..." | Sin feedback visual |
@@ -59,6 +59,12 @@ en un producto SaaS de pago.
 - `next-themes@0.4.6` — Dark mode provider
 - `sonner@2.0.7` — Toast notification system
 
+### Ola 2 — Conversion (parcial) — M2 Landing Page
+
+**Archivos modificados:**
+- `src/app/page.tsx` — Reescrito: 6 secciones (nav, hero, features, how-it-works, pricing, footer)
+- `src/app/globals.css` — Agregado: `scroll-behavior: smooth`, keyframes `fade-in-up` y `slide-in-right`
+
 ---
 
 ## Modulos de Mejora
@@ -90,50 +96,44 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M2 — Landing Page (Conversion)
+### ~~M2 — Landing Page (Conversion)~~ ✅ COMPLETO
 
-**Prioridad:** CRITICA — Es la primera impresion del producto.
+**Implementado:**
 
-**Estado actual:**
-```tsx
-// page.tsx — TODA la landing son 10 lineas
-<div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4">
-  <h1>Cual es mi nombre?</h1>
-  <p>Tu asistente virtual para WhatsApp...</p>
-  <Button>Iniciar Sesion</Button>
-  <Button variant="outline">Crear Cuenta</Button>
-</div>
-```
-Fondo blanco vacio. Sin hero, sin features, sin social proof, sin pricing preview.
+#### M2.1 — Hero Section ✅
+- ✅ Gradient mesh background (teal + amber radial blurs)
+- ✅ Staggered CSS animations (fade-in-up con delays incrementales)
+- ✅ Badge "Potenciado por IA" con icono Sparkles
+- ✅ WhatsApp conversation mockup realista (4 mensajes: agenda + recordatorio)
+- ✅ CTA primario con shadow colored + ArrowRight icon
+- ✅ Trust indicators: "Sin tarjeta requerida" + "Configura en 2 min"
+- ✅ Sticky nav con backdrop blur + brand + auth buttons
 
-**Mejoras:**
+#### M2.2 — Seccion de Features ✅
+- ✅ Grid 4 columnas con Lucide icons (Calendar, StickyNote, Bell, MessageCircle)
+- ✅ Cada feature: icono en circulo coloreado + titulo + descripcion
+- ✅ Hover effect: translate-y + shadow elevation
+- ✅ 4 colores distintos: primary, chart-4, success, info
 
-#### M2.1 — Hero Section con impacto visual
-- [ ] Fondo con gradient mesh o patron geometrico sutil (no flat white)
-- [ ] Animacion de entrada staggered (titulo -> subtitulo -> CTAs)
-- [ ] Badge de estado ("1,000+ usuarios en LATAM" o similar)
-- [ ] Ilustracion o mockup de conversacion WhatsApp
-- [ ] CTA primario con hover efecto y feedback visual
+#### M2.3 — Seccion de Pricing Preview ✅
+- ✅ 3 planes (Basico, Pro, Premium) con precios en S/
+- ✅ Plan Pro highlighted con ring + badge "Popular"
+- ✅ Feature list con Check icons + CTA directo a signup
+- ✅ Hover lift effect en cada plan card
 
-#### M2.2 — Seccion de Features
-- [ ] Grid de 3-4 features principales con iconos SVG (no emojis)
-- [ ] Cada feature: icono + titulo + descripcion corta
-- [ ] Animacion scroll-triggered (reveal on scroll)
-- [ ] Features: Calendario, Notas, Recordatorios, IA Conversacional
+#### M2.4 — Social Proof / Trust ✅
+- ✅ Seccion "Empieza en 3 simples pasos" con iconos en circulos primary
+- ✅ Connector dashed line entre pasos (desktop)
+- ✅ Trust badges: WhatsApp, Google Calendar, MercadoPago
 
-#### M2.3 — Seccion de Pricing Preview
-- [ ] Reutilizar `PlanCard` existente en version compacta
-- [ ] Highlight del plan "Popular" (Pro)
-- [ ] Link directo a signup desde cada plan
+#### M2.5 — Footer ✅
+- ✅ Branding con Sparkles icon + copyright dinamico
+- ✅ Layout responsive (column mobile, row desktop)
 
-#### M2.4 — Social Proof / Trust
-- [ ] Seccion "Como funciona" (3 pasos: Registrate -> Vincula WhatsApp -> Listo)
-- [ ] Testimonios o estadisticas de uso
-- [ ] Logos de tecnologias (WhatsApp, Google Calendar, MercadoPago)
-
-#### M2.5 — Footer
-- [ ] Links legales, contacto, redes
-- [ ] Branding consistente
+**Pendiente (mejora futura):**
+- [ ] M2.2 — Scroll-triggered reveal animations (IntersectionObserver)
+- [ ] M2.4 — Testimonios reales o estadisticas de uso
+- [ ] M2.5 — Links legales, contacto, redes sociales
 
 ---
 
@@ -320,8 +320,8 @@ Fondo blanco vacio. Sin hero, sin features, sin social proof, sin pricing previe
 - ✅ M10.1: `lang="es"`
 - ✅ M11: Dark mode completo
 
-### Ola 2 — Conversion (PENDIENTE)
-- M2: Landing page completa
+### Ola 2 — Conversion (EN PROGRESO)
+- ✅ M2: Landing page completa (hero, features, pricing, how-it-works, footer)
 - M6.1: Auth pages con branding
 - M9.1: Pricing page premium
 
@@ -340,12 +340,13 @@ Fondo blanco vacio. Sin hero, sin features, sin social proof, sin pricing previe
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Objetivo |
-|---------|----------|-----------|----------|
-| Lighthouse Performance | ~85 | ~85 (sin cambio) | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 (lang fix) | 100 |
-| Lighthouse SEO | ~70 | ~75 (lang fix) | 100 |
-| Mobile usability | FALLA | OK (mobile nav) | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Distintiva |
-| Dark mode | No funcional | Completo | Completo |
-| Test suite | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Objetivo |
+|---------|----------|-----------|---------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | 100 |
+| Mobile usability | FALLA | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo |
+| Landing conversion | Sin landing | Sin landing | Hero+Features+Pricing+Trust | Optimizada |
+| Test suite | 208 passing | 208 passing | 208 passing | Sin regresiones |
