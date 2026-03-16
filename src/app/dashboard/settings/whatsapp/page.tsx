@@ -21,6 +21,7 @@ import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -151,11 +152,7 @@ export default function WhatsAppPage() {
                 />
               </div>
 
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
+              <FormError message={error} />
 
               <Button type="submit" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar código"}
@@ -177,11 +174,7 @@ export default function WhatsAppPage() {
                 />
               </div>
 
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
+              <FormError message={error} />
 
               <div className="flex gap-3">
                 <Button type="submit" disabled={loading}>

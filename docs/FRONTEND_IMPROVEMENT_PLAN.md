@@ -199,15 +199,33 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### ~~M4 — Sistema de Feedback y Notificaciones~~ ✅ PARCIALMENTE COMPLETO
+### ~~M4 — Sistema de Feedback y Notificaciones~~ ✅ COMPLETO
 
 **Implementado:**
 - ✅ M4.1 — Sonner toast system instalado y configurado en root layout
+- ✅ M4.1 — Migración completa: 7 componentes migrados de inline error divs a `<FormError />` / `toast`
+- ✅ M4.2 — Componente `<FormError />` reutilizable con AlertCircle icon + fade-in-up animation
+- ✅ M4.3 — Toast con undo para delete/archive notas + optimistic updates en pin/archive/delete
 
-**Pendiente:**
-- [ ] M4.1 — Migrar componentes existentes de `useState(error)` inline a `toast.error()`
-- [ ] M4.2 — Componente `<FormError />` reutilizable con animacion
-- [ ] M4.3 — Toast de confirmacion post-accion con undo
+#### M4.2 — FormError component ✅
+**Archivos creados:**
+- `src/components/ui/form-error.tsx` — NUEVO: inline error con AlertCircle icon, role="alert", animate-[fade-in-up]
+
+#### M4.1 — Migración de inline errors ✅
+**Archivos modificados (FormError inline):**
+- `src/components/auth/login-form.tsx` — inline div → `<FormError />`
+- `src/components/auth/signup-form.tsx` — 2 inline divs → `<FormError />` + existing user banner → semantic colors
+- `src/components/auth/recovery-form.tsx` — 3 inline divs → `<FormError />`
+- `src/app/dashboard/settings/whatsapp/page.tsx` — 2 inline divs → `<FormError />`
+- `src/components/notes/note-form.tsx` — inline p → `<FormError />`
+
+**Archivos modificados (toast migration):**
+- `src/app/dashboard/settings/page.tsx` — success `useState`+`setTimeout` → `toast.success()`, error → `<FormError />`
+- `src/components/plans/plan-grid.tsx` — `useState(error)` eliminado → `toast.error()`
+
+#### M4.3 — Toast con undo ✅
+**Archivos modificados:**
+- `src/components/notes/note-list.tsx` — delete con undo toast (5s delay), archive con undo toast, pin optimistic con rollback
 
 ---
 
@@ -397,12 +415,12 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ### Ola 3 — Polish (EN PROGRESO)
 - ✅ M5: Skeletons y loading states
+- ✅ M4: Feedback y notificaciones (FormError + toast migration + undo)
 - M7.2-7.3: Onboarding stepper, actividad reciente
 - M8: Notas con views y tags
 
 ### Ola 4 — Refinamiento (PENDIENTE)
 - M3.4: Breadcrumbs
-- M4.2-4.3: FormError, toast con undo
 - M10.2-10.4: Skip nav, focus, reduced-motion
 - M12-M14: Performance, components, animations
 
@@ -410,15 +428,15 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error pages | Genericas | Genericas | Genericas | Genericas | Branded 404+Error | Branded 404+Error | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Premium |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | Sin regresiones |

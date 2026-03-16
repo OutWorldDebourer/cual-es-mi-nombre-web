@@ -9,7 +9,8 @@
 
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { toast } from "sonner";
 import type { PlanInfo } from "@/types/database";
 import { PlanCard } from "@/components/plans/plan-card";
 import { backendApi, ApiError } from "@/lib/api";
@@ -26,10 +27,7 @@ export function PlanGrid({
   currentPlan,
   currencySymbol,
 }: PlanGridProps) {
-  const [error, setError] = useState<string | null>(null);
-
   const handleSelectPlan = useCallback(async (planKey: string) => {
-    setError(null);
     try {
       const supabase = createClient();
       const api = backendApi(supabase);
@@ -39,33 +37,25 @@ export function PlanGrid({
       window.location.href = result.init_point;
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.detail);
+        toast.error(err.detail);
       } else {
-        setError("Error inesperado. Intenta de nuevo.");
+        toast.error("Error inesperado. Intenta de nuevo.");
       }
     }
   }, []);
 
   return (
-    <div className="space-y-4">
-      {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
-        {plans.map((plan, index) => (
-          <PlanCard
-            key={plan.key}
-            plan={plan}
-            currentPlan={currentPlan}
-            currencySymbol={currencySymbol}
-            index={index}
-            onSelectPlan={handleSelectPlan}
-          />
-        ))}
-      </div>
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
+      {plans.map((plan, index) => (
+        <PlanCard
+          key={plan.key}
+          plan={plan}
+          currentPlan={currentPlan}
+          currencySymbol={currencySymbol}
+          index={index}
+          onSelectPlan={handleSelectPlan}
+        />
+      ))}
     </div>
   );
 }

@@ -11,7 +11,9 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,7 +43,6 @@ export default function SettingsPage() {
   const [assistantName, setAssistantName] = useState("");
   const [timezone, setTimezone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const supabase = createClient();
@@ -72,7 +73,6 @@ export default function SettingsPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSaved(false);
 
     const {
       data: { user },
@@ -94,8 +94,7 @@ export default function SettingsPage() {
     if (updateError) {
       setError(updateError.message);
     } else {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      toast.success("Cambios guardados correctamente");
     }
 
     setLoading(false);
@@ -153,17 +152,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-
-            {saved && (
-              <div className="rounded-md bg-success/10 p-3 text-sm text-success">
-                Cambios guardados correctamente
-              </div>
-            )}
+            <FormError message={error} />
 
             <Button type="submit" disabled={loading}>
               {loading ? "Guardando..." : "Guardar cambios"}

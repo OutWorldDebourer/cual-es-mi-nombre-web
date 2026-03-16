@@ -12,7 +12,8 @@
 
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import type { Note } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { NoteCard } from "@/components/notes/note-card";
@@ -38,6 +39,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const supabase = createClient();
+  const pendingDeleteRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // ── Fetch notes from Supabase ──────────────────────────────────────────
 
@@ -96,45 +98,86 @@ export function NoteList({ initialNotes }: NoteListProps) {
     await fetchNotes();
   }
 
-  async function handleDelete(noteId: string) {
-    const { error } = await supabase
-      .from("notes")
-      .delete()
-      .eq("id", noteId);
+  function handleDelete(noteId: string) {
+    // Capture note for potential undo
+    const deletedNote = notes.find((n) => n.id === noteId);
+    if (!deletedNote) return;
 
-    if (error) {
-      console.error("Error deleting note:", error.message);
-      return;
-    }
+    // Optimistic removal from UI
     setNotes((prev) => prev.filter((n) => n.id !== noteId));
+
+    // Schedule actual DB delete after toast auto-dismiss
+    const timeoutId = setTimeout(async () => {
+      pendingDeleteRef.current.delete(noteId);
+      const { error } = await supabase.from("notes").delete().eq("id", noteId);
+      if (error) {
+        // Restore on DB failure
+        setNotes((prev) => [...prev, deletedNote]);
+        toast.error("Error al eliminar la nota");
+      }
+    }, 5000);
+
+    pendingDeleteRef.current.set(noteId, timeoutId);
+
+    toast("Nota eliminada", {
+      action: {
+        label: "Deshacer",
+        onClick: () => {
+          clearTimeout(pendingDeleteRef.current.get(noteId));
+          pendingDeleteRef.current.delete(noteId);
+          setNotes((prev) => [...prev, deletedNote]);
+        },
+      },
+    });
   }
 
   async function handleTogglePin(noteId: string, isPinned: boolean) {
+    // Optimistic update
+    setNotes((prev) =>
+      prev.map((n) => (n.id === noteId ? { ...n, is_pinned: isPinned } : n)),
+    );
+
     const { error } = await supabase
       .from("notes")
       .update({ is_pinned: isPinned })
       .eq("id", noteId);
 
     if (error) {
-      console.error("Error toggling pin:", error.message);
-      return;
+      // Revert on failure
+      setNotes((prev) =>
+        prev.map((n) => (n.id === noteId ? { ...n, is_pinned: !isPinned } : n)),
+      );
+      toast.error("Error al fijar la nota");
     }
-    setNotes((prev) =>
-      prev.map((n) => (n.id === noteId ? { ...n, is_pinned: isPinned } : n)),
-    );
   }
 
   async function handleArchive(noteId: string) {
+    const archivedNote = notes.find((n) => n.id === noteId);
+    if (!archivedNote) return;
+
+    // Optimistic removal from current view
+    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+
     const { error } = await supabase
       .from("notes")
       .update({ is_archived: true })
       .eq("id", noteId);
 
     if (error) {
-      console.error("Error archiving note:", error.message);
+      setNotes((prev) => [...prev, archivedNote]);
+      toast.error("Error al archivar la nota");
       return;
     }
-    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+
+    toast("Nota archivada", {
+      action: {
+        label: "Deshacer",
+        onClick: async () => {
+          await supabase.from("notes").update({ is_archived: false }).eq("id", noteId);
+          setNotes((prev) => [...prev, { ...archivedNote, is_archived: false }]);
+        },
+      },
+    });
   }
 
   // ── Derived state ──────────────────────────────────────────────────────

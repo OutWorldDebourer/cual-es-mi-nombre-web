@@ -20,6 +20,7 @@ import { PhoneInput } from "@/components/auth/phone-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormError } from "@/components/ui/form-error";
 import { isValidE164 } from "@/lib/phone-utils";
 
 // ---------------------------------------------------------------------------
@@ -157,11 +158,7 @@ export function LoginForm() {
         />
       </div>
 
-      {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      <FormError message={error} />
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Ingresando..." : "Ingresar"}

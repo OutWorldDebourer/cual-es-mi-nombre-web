@@ -25,6 +25,7 @@ import { OTPInput, useOTPTimer } from "@/components/auth/otp-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormError } from "@/components/ui/form-error";
 import { isValidE164 } from "@/lib/phone-utils";
 
 // ---------------------------------------------------------------------------
@@ -273,13 +274,13 @@ export function SignupForm() {
 
     return (
       <div className="space-y-4">
-        <div className="rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 text-sm space-y-2">
-          <p className="font-medium text-green-900 dark:text-green-100">
+        <div className="rounded-md bg-success/10 border border-success/20 p-4 text-sm space-y-2 animate-[fade-in-up_0.3s_ease-out_both]">
+          <p className="font-medium text-success">
             {needsPassword
               ? "Tu asistente de WhatsApp ya está activo"
               : "Este número ya tiene una cuenta"}
           </p>
-          <p className="text-green-800 dark:text-green-200">
+          <p className="text-success/80">
             {needsPassword
               ? "Tu asistente de WhatsApp ya está activo con este número. Para acceder desde la web, necesitas crear una contraseña."
               : isWaFirst
@@ -379,11 +380,7 @@ export function SignupForm() {
           />
         </div>
 
-        {error && (
-          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-            {error}
-          </div>
-        )}
+        <FormError message={error} />
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Verificando..." : "Crear cuenta"}

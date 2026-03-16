@@ -13,6 +13,7 @@
 import { useState, useEffect } from "react";
 import type { Note } from "@/types/database";
 import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -118,11 +119,7 @@ export function NoteForm({
                 className="resize-y min-h-[120px]"
               />
             </div>
-            {error && (
-              <p className="text-sm text-destructive" role="alert">
-                {error}
-              </p>
-            )}
+            <FormError message={error} />
           </div>
 
           <DialogFooter>
