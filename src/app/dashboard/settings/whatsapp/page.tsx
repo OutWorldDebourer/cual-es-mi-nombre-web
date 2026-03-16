@@ -100,7 +100,7 @@ export default function WhatsAppPage() {
 
   if (step === "success") {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 stagger-children">
         <h1 className="text-3xl font-bold">WhatsApp</h1>
         <Card>
           <CardHeader>
@@ -116,7 +116,7 @@ export default function WhatsAppPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stagger-children">
       <div>
         <h1 className="text-3xl font-bold">Vincular WhatsApp</h1>
         <p className="text-muted-foreground mt-1">

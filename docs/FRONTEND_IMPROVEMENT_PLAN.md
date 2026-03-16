@@ -515,15 +515,31 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 
 ---
 
-### M14 — Micro-interacciones y Animaciones
+### ~~M14 — Micro-interacciones y Animaciones~~ ✅ COMPLETO
 
 **Prioridad:** BAJA-MEDIA
 
-- [ ] M14.1 — Page transitions (fade-in, staggered reveal)
+- [x] M14.1 — Page transitions (fade-in, staggered reveal) ✅ CSS `.stagger-children` en 9 páginas
 - [x] M14.2 — Hover states ricos (shadow + translate en cards) ✅ (implementado en M7.1)
-- [ ] M14.3 — Feedback tactil (active:scale-95 en botones)
+- [x] M14.3 — Feedback tactil (active:scale-[0.97] en botones) ✅ Base Button CVA
 - [x] M14.4 — Numbers animation (count-up en creditos) ✅ (implementado en M7.1)
-- [ ] M14.5 — Evaluar `motion` (Framer Motion) para layout animations
+- [x] M14.5 — Evaluar `motion` (Framer Motion) ✅ Diferido — CSS-only cubre todos los casos, +33KB no justificado
+
+#### M14.1 — Page transitions (staggered reveal) ✅
+**Archivos modificados:**
+- `src/app/globals.css` — `.stagger-children` utility: children get `fade-in-up` con delays incrementales (0/60/120/180/240/300ms)
+- `src/app/dashboard/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/notes/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/reminders/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/credits/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/plans/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/settings/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/settings/google/page.tsx` — `stagger-children` en root div
+- `src/app/dashboard/settings/whatsapp/page.tsx` — `stagger-children` en ambos returns
+
+#### M14.3 — Feedback táctil ✅
+**Archivos modificados:**
+- `src/components/ui/button.tsx` — `active:scale-[0.97]` en base CVA class (aplica a todos los variants, respeta `disabled:pointer-events-none`)
 
 ---
 
@@ -548,35 +564,43 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ M7: Dashboard Home completo (stepper + actividad reciente + count-up + hover)
 - ✅ M8: Notas UX polish (grid/list, search, tags, empty state)
 
-### Ola 4 — Refinamiento (EN PROGRESO)
+### Ola 4 — Refinamiento ✅ COMPLETA
 - ✅ M13: Componentes UI completos (Select, Tooltip, Sheet, Skeleton, Progress, Avatar)
 - ✅ M8: Notas UX polish (grid/list toggle, search debounce, tags interactivos, empty state)
-- M3.4: Breadcrumbs
 - ✅ M6.2: Auth form polish (step transitions, progress indicator, password strength)
 - ✅ M10: Accesibilidad completa (skip nav, focus visible, reduced-motion, tabIndex fix)
 - ✅ M12: Performance y optimización (client audit + bundle analysis + auth pages Static SSR)
-- M3.4: Breadcrumbs
-- M14: Micro-interacciones restantes (page transitions, active:scale-95)
+- ✅ M14: Micro-interacciones completas (stagger page transitions, active:scale-[0.97], Framer Motion evaluado/diferido)
+
+### Backlog (baja prioridad, independientes)
+- M3.4: Breadcrumbs para paginas anidadas
+- M3.3: Sidebar collapsible en desktop (solo iconos)
+- M3.5: Avatar con dropdown menu (perfil, configuracion, cerrar sesion)
+- M1.3: Spacing tokens consistentes
+- M2.2: Scroll-triggered reveal animations (IntersectionObserver)
+- M2.4: Testimonios reales o estadisticas de uso
+- M2.5: Links legales, contacto, redes sociales
 
 ---
 
 ## Metricas de Exito
 
-| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Post-M8 | Post-M12 | Post-M6.2 | Objetivo |
-|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|---------|----------|-----------|----------|
-| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~88 (Static SSR) | ~88 | 95+ |
-| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 | ~97 (aria-pressed+labels) | ~97 | ~97 | 100 |
-| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
-| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
-| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | +Tag colors | +Tag colors | +Auth polish | Distintiva |
-| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
-| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
-| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | +OTP/password FormError | Premium |
-| Auth forms | Basico | Basico | Basico | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | +Steps+PwdStrength+Transitions | Premium |
-| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | +Skip nav | +Skip nav | +Skip nav | Premium |
-| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
-| Notes UX | Basico | Basico | Basico | Basico | +Skeleton loading | +Skeleton loading | +Toast undo | +Toast undo | +Toast undo | +Toast undo | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Premium |
-| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +BundleAnalyzer | +PasswordStrength+StepIndicator | Completo |
-| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | +aria-pressed+group | +aria-pressed+group | +aria-pressed+group | WCAG AA |
-| Client bundle | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | 459KB gzip | 459KB gzip | <400KB |
-| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 211 passing | 211 passing | 211 passing | Sin regresiones |
+| Metrica | Pre-Ola1 | Post-Ola1 | Post-M2 | Post-M6.1 | Post-M5+M10.5+M6.3 | Post-M9.1 | Post-M4 | Post-M7 | Post-M13 | Post-M10 | Post-M8 | Post-M12 | Post-M6.2 | Post-M14 | Objetivo |
+|---------|----------|-----------|---------|-----------|---------------------|-----------|---------|---------|----------|----------|---------|----------|-----------|----------|----------|
+| Lighthouse Performance | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~85 | ~88 (Static SSR) | ~88 | ~88 | 95+ |
+| Lighthouse Accessibility | ~80 | ~90 | ~90 | ~90 | ~90 | ~90 | ~92 (role=alert) | ~92 | ~93 (tooltips) | ~97 | ~97 (aria-pressed+labels) | ~97 | ~97 | ~97 | 100 |
+| Lighthouse SEO | ~70 | ~75 | ~75 | ~75 | ~95 (OG+manifest) | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | ~95 | 100 |
+| Mobile usability | FALLA | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | 100 |
+| Brand identity | Ninguna | Paleta + tipografia | Landing completa | Auth con branding | Favicon+OG+404+Error | Pricing premium | Pricing premium | Pricing premium | Avatar+Tooltips | Avatar+Tooltips | +Tag colors | +Tag colors | +Auth polish | +Page transitions | Distintiva |
+| Dark mode | No funcional | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo | Completo |
+| Loading states | Texto plano | Texto plano | Texto plano | Texto plano | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Skeletons + Spinner | Premium |
+| Error feedback | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | Inline divs | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | FormError + Toast + Undo | +OTP/password FormError | +OTP/password FormError | Premium |
+| Auth forms | Basico | Basico | Basico | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | Split layout+branding | +Steps+PwdStrength+Transitions | +Steps+PwdStrength+Transitions | Premium |
+| Dashboard | Cards estaticas | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Cards + iconos | Stepper+Activity+CountUp+Hover | +Avatar header | +Skip nav | +Skip nav | +Skip nav | +Skip nav | +Stagger transitions | Premium |
+| Pricing page | Badge simple | Badge simple | Badge simple | Badge simple | Badge simple | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Ribbon+Crown+stagger+badge | Premium |
+| Notes UX | Basico | Basico | Basico | Basico | +Skeleton loading | +Skeleton loading | +Toast undo | +Toast undo | +Toast undo | +Toast undo | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Grid/List+Search+Tags+EmptyState | Premium |
+| UI components | shadcn base | shadcn base | shadcn base | shadcn base | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Skeleton+Spinner | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +Tooltip+Sheet+Avatar+Progress+Select | +BundleAnalyzer | +PasswordStrength+StepIndicator | +active:scale buttons | Completo |
+| Accessibility | Basica | lang="es" | lang="es" | lang="es" | OG+manifest | OG+manifest | +FormError role=alert | +FormError role=alert | +Tooltips | Skip nav+Focus visible+Reduced motion | +aria-pressed+group | +aria-pressed+group | +aria-pressed+group | +aria-pressed+group | WCAG AA |
+| Micro-interactions | Ninguna | Ninguna | Landing animations | Landing animations | Landing animations | +Stagger pricing | +Stagger pricing | +Hover+CountUp | +Hover+CountUp | +Hover+CountUp | +Hover+CountUp | +Hover+CountUp | +Step transitions | Stagger pages+active:scale | Premium |
+| Client bundle | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | 459KB gzip | 459KB gzip | 459KB gzip | <400KB |
+| Test suite | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 208 passing | 211 passing | 211 passing | 211 passing | 211 passing | Sin regresiones |

@@ -39,7 +39,7 @@ export default async function RemindersPage() {
     .order("trigger_at", { ascending: true });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stagger-children">
       <div>
         <h1 className="text-3xl font-bold">Recordatorios</h1>
         <p className="text-muted-foreground mt-1">

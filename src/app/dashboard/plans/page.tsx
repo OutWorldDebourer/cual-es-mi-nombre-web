@@ -103,7 +103,7 @@ export default async function PlansPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stagger-children">
       <div>
         <h1 className="text-3xl font-bold">Planes</h1>
         <p className="text-muted-foreground mt-1">

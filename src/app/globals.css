@@ -261,6 +261,18 @@
    ANIMATIONS
    ═══════════════════════════════════════════════════════════════ */
 
+/* Page enter — staggered children reveal (CSS-only, SSR-safe) */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+.stagger-children > :nth-child(1) { animation-delay: 0ms; }
+.stagger-children > :nth-child(2) { animation-delay: 60ms; }
+.stagger-children > :nth-child(3) { animation-delay: 120ms; }
+.stagger-children > :nth-child(4) { animation-delay: 180ms; }
+.stagger-children > :nth-child(5) { animation-delay: 240ms; }
+.stagger-children > :nth-child(6) { animation-delay: 300ms; }
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
