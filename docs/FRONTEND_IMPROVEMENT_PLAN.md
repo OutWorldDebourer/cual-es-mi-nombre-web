@@ -173,14 +173,25 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - ✅ Connector dashed line entre pasos (desktop)
 - ✅ Trust badges: WhatsApp, Google Calendar, MercadoPago
 
-#### M2.5 — Footer ✅
-- ✅ Branding con Sparkles icon + copyright dinamico
-- ✅ Layout responsive (column mobile, row desktop)
+#### M2.5 — Footer completo ✅
+- ✅ Grid 3 columnas: brand + tagline, Producto (4 links), Legal (2 links)
+- ✅ Divider + bottom bar: copyright dinámico + iconos redes sociales (Instagram, X)
+- ✅ Links legales funcionales: /terms, /privacy (páginas stub creadas)
+- ✅ Links externos con target="_blank" + rel="noopener noreferrer" + aria-label
+- ✅ Responsive: stacked en mobile, grid en tablet+
+- ✅ ScrollReveal mantenido
+
+**Archivos creados:**
+- `src/app/(legal)/layout.tsx` — NUEVO: layout compartido para páginas legales (nav simple + container max-w-3xl)
+- `src/app/(legal)/terms/page.tsx` — NUEVO: Términos de Servicio (9 secciones, contenido placeholder coherente)
+- `src/app/(legal)/privacy/page.tsx` — NUEVO: Política de Privacidad (8 secciones, contenido placeholder coherente)
+
+**Archivos modificados:**
+- `src/app/page.tsx` — Footer reescrito: grid 3 columnas + divider + copyright + social icons (Instagram, Twitter imports agregados)
 
 **Pendiente (mejora futura):**
 - [x] M2.2 — Scroll-triggered reveal animations (IntersectionObserver)
 - [ ] M2.4 — Testimonios reales o estadisticas de uso
-- [ ] M2.5 — Links legales, contacto, redes sociales
 
 #### M2.2 — Scroll-triggered reveal animations ✅
 **Archivos creados:**
@@ -607,7 +618,7 @@ Cada modulo es independiente y puede implementarse en aislamiento.
 - M1.3: Spacing tokens consistentes
 - ~~M2.2: Scroll-triggered reveal animations (IntersectionObserver)~~ ✅
 - M2.4: Testimonios reales o estadisticas de uso
-- M2.5: Links legales, contacto, redes sociales
+- ~~M2.5: Links legales, contacto, redes sociales~~ ✅
 
 ---
 

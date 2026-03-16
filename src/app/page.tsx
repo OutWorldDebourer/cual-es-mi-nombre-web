@@ -28,6 +28,8 @@ import {
   MessageCircle,
   UserPlus,
   CheckCircle2,
+  Instagram,
+  Twitter,
 } from "lucide-react";
 
 /* ── Static data ─────────────────────────────────────────────── */
@@ -471,18 +473,117 @@ export default async function HomePage() {
       </section>
 
       {/* ── Footer — M2.5 ── */}
-      <footer className="border-t py-12">
+      <footer className="border-t py-12 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <ScrollReveal>
-            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-5 text-primary" />
-                <span className="font-semibold">Cual es mi nombre</span>
+            <div className="grid gap-10 sm:grid-cols-[2fr_1fr_1fr]">
+              {/* Brand */}
+              <div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="size-5 text-primary" />
+                  <span className="font-bold">Cual es mi nombre</span>
+                </div>
+                <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+                  Tu asistente inteligente en WhatsApp. Calendario, notas,
+                  recordatorios y más con lenguaje natural.
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                &copy; {new Date().getFullYear()} Cual es mi nombre. Todos los
-                derechos reservados.
-              </p>
+
+              {/* Producto */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Producto
+                </h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link
+                      href="#"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Funciones
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="#planes"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Precios
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/login"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Iniciar Sesión
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/signup"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Crear Cuenta
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Legal
+                </h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link
+                      href="/terms"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Términos de Servicio
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/privacy"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Política de Privacidad
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="mt-10 border-t pt-6">
+              <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                <p className="text-sm text-muted-foreground">
+                  &copy; {new Date().getFullYear()} Cual es mi nombre. Todos
+                  los derechos reservados.
+                </p>
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://instagram.com/cualesminombre"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Síguenos en Instagram"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Instagram className="size-5" />
+                  </a>
+                  <a
+                    href="https://x.com/cualesminombre"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Síguenos en X"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Twitter className="size-5" />
+                  </a>
+                </div>
+              </div>
             </div>
           </ScrollReveal>
         </div>
