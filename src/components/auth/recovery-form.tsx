@@ -112,6 +112,9 @@ function mapRequestOtpError(status: number, detail: string): string {
   if (status === 502) {
     return "No se pudo enviar el código por WhatsApp. Intenta de nuevo.";
   }
+  if (status === 503) {
+    return detail || "Para recibir el código, primero envía un mensaje al asistente por WhatsApp y luego vuelve a intentarlo.";
+  }
   return "Error inesperado. Intenta de nuevo.";
 }
 
