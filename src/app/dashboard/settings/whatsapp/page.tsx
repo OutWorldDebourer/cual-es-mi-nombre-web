@@ -20,6 +20,16 @@
 import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
@@ -54,13 +64,19 @@ export default function WhatsAppPage() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const supabase = createClient();
   const api = useMemo(() => backendApi(supabase), [supabase]);
 
-  async function handleSendCode(e: React.FormEvent) {
+  function handlePhoneSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setShowConfirm(true);
+  }
+
+  async function handleSendCode() {
+    setShowConfirm(false);
     setLoading(true);
 
     try {
@@ -137,7 +153,7 @@ export default function WhatsAppPage() {
         </CardHeader>
         <CardContent>
           {step === "phone" ? (
-            <form onSubmit={handleSendCode} className="space-y-4 max-w-md">
+            <form onSubmit={handlePhoneSubmit} className="space-y-4 max-w-md">
               <div className="space-y-2">
                 <Label htmlFor="phone">Número de WhatsApp</Label>
                 <Input
@@ -196,6 +212,25 @@ export default function WhatsAppPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cambio de número de inicio de sesión</AlertDialogTitle>
+            <AlertDialogDescription>
+              Al vincular un nuevo número de WhatsApp, este también se convertirá
+              en tu número de inicio de sesión en la web. Si ya tenías un número
+              vinculado, el anterior dejará de funcionar para iniciar sesión.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSendCode}>
+              Continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
