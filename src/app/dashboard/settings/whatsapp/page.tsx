@@ -20,6 +20,7 @@
 import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
+import { isValidE164 } from "@/lib/phone-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PhoneInput } from "@/components/auth/phone-input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
@@ -44,20 +46,6 @@ import {
 
 type Step = "phone" | "code" | "success";
 
-/**
- * Normalize a phone input to E.164 format.
- * Strips spaces, dashes, and parentheses. Ensures leading '+'.
- *
- * Examples:
- *   "+51 942 961 598" → "+51942961598"
- *   "51942961598"     → "+51942961598"
- *   "+51-942-961-598" → "+51942961598"
- */
-function normalizePhone(raw: string): string {
-  const cleaned = raw.replace(/[\s\-().]/g, "");
-  return cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
-}
-
 export default function WhatsAppPage() {
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
@@ -69,9 +57,17 @@ export default function WhatsAppPage() {
   const supabase = createClient();
   const api = useMemo(() => backendApi(supabase), [supabase]);
 
+  function handlePhoneChange(e164: string) {
+    setPhone(e164);
+  }
+
   function handlePhoneSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!isValidE164(phone)) {
+      setError("Ingresa un número de teléfono válido.");
+      return;
+    }
     setShowConfirm(true);
   }
 
@@ -80,9 +76,7 @@ export default function WhatsAppPage() {
     setLoading(true);
 
     try {
-      const normalizedPhone = normalizePhone(phone);
-      await api.whatsapp.sendCode(normalizedPhone);
-      setPhone(normalizedPhone);
+      await api.whatsapp.sendCode(phone);
       setStep("code");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -147,7 +141,7 @@ export default function WhatsAppPage() {
           </CardTitle>
           <CardDescription>
             {step === "phone"
-              ? "Ingresa tu número de WhatsApp con código de país (ej: +51987654321)"
+              ? "Selecciona tu país e ingresa tu número de WhatsApp"
               : `Te enviamos un código de 6 dígitos al ${phone}`}
           </CardDescription>
         </CardHeader>
@@ -155,16 +149,11 @@ export default function WhatsAppPage() {
           {step === "phone" ? (
             <form onSubmit={handlePhoneSubmit} className="space-y-4 max-w-md">
               <div className="space-y-2">
-                <Label htmlFor="phone">Número de WhatsApp</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+51987654321"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  pattern="[+]?[0-9\s\-]{8,20}"
-                  title="Ingresa un número válido con código de país (ej: +51987654321)"
+                <Label htmlFor="wa-phone">Número de WhatsApp</Label>
+                <PhoneInput
+                  id="wa-phone"
+                  onChange={handlePhoneChange}
+                  aria-invalid={!!error}
                 />
               </div>
 
