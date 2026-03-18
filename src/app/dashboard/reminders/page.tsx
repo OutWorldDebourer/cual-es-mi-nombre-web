@@ -43,7 +43,7 @@ export default async function RemindersPage() {
       <div>
         <h1 className="text-3xl font-bold">Recordatorios</h1>
         <p className="text-muted-foreground mt-1">
-          Gestiona tus recordatorios. Créalos por WhatsApp.
+          Gestiona tus recordatorios desde aquí o por WhatsApp.
         </p>
       </div>
       <ReminderList

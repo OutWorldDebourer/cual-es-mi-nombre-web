@@ -92,6 +92,11 @@ export interface Reminder {
   channel: "whatsapp" | "web";
   sent_at: string | null;
   failed_reason: string | null;
+  // Recurring fields
+  is_recurring: boolean;
+  recurrence_rule: string | null;
+  recurrence_parent_id: string | null;
+  occurrence_number: number;
   created_at: string;
 }
 
