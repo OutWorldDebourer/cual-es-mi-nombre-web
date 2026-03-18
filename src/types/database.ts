@@ -41,6 +41,7 @@ export interface Profile {
   credits_total: number;
   google_token_vault_id: string | null; // non-null = Google connected
   google_calendar_id: string;
+  message_wait_seconds: number;
   channel_origin: "whatsapp" | "web" | null;
   is_active: boolean;
   wa_verification_code: string | null;

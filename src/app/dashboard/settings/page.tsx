@@ -50,6 +50,7 @@ const TIMEZONES = [
 export default function SettingsPage() {
   const [assistantName, setAssistantName] = useState("");
   const [timezone, setTimezone] = useState("");
+  const [messageWaitSeconds, setMessageWaitSeconds] = useState(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,13 +65,14 @@ export default function SettingsPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("assistant_name, timezone")
+        .select("assistant_name, timezone, message_wait_seconds")
         .eq("id", user.id)
         .single();
 
       if (profile) {
         setAssistantName(profile.assistant_name ?? "Asistente");
         setTimezone(profile.timezone ?? "America/Lima");
+        setMessageWaitSeconds(profile.message_wait_seconds ?? 3);
       }
     }
 
@@ -96,6 +98,7 @@ export default function SettingsPage() {
       .update({
         assistant_name: assistantName.trim() || "Asistente",
         timezone,
+        message_wait_seconds: messageWaitSeconds,
       })
       .eq("id", user.id);
 
@@ -159,6 +162,31 @@ export default function SettingsPage() {
               </Select>
               <p className="text-xs text-muted-foreground">
                 Se usa para programar recordatorios y eventos del calendario.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="messageWait">Tiempo de espera por mensaje</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="messageWait"
+                  type="range"
+                  min={0}
+                  max={10}
+                  step={1}
+                  value={messageWaitSeconds}
+                  onChange={(e) =>
+                    setMessageWaitSeconds(Number(e.target.value))
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm font-medium w-12 text-right">
+                  {messageWaitSeconds}s
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Cuántos segundos esperar antes de procesar tu mensaje, para
+                concatenar mensajes consecutivos. 0 = respuesta inmediata.
               </p>
             </div>
 
