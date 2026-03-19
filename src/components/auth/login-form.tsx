@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/ui/form-error";
 import { isValidE164 } from "@/lib/phone-utils";
+import { phoneAuthApi } from "@/lib/api";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -75,9 +76,15 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // --- Pre-check state (WA-first / no account) ---
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
+
   // --- Phone change handler ---
   const handlePhoneChange = useCallback((e164: string) => {
     setPhone(e164);
+    setNeedsPassword(false);
+    setNoAccount(false);
   }, []);
 
   // --- Submit handler ---
@@ -99,6 +106,22 @@ export function LoginForm() {
     setLoading(true);
 
     try {
+      // ── Pre-check: detect WA-first users without password ───────
+      try {
+        const status = await phoneAuthApi.checkStatus(phone);
+        if (status.action === "set_password") {
+          setNeedsPassword(true);
+          return;
+        }
+        if (status.action === "signup") {
+          setNoAccount(true);
+          return;
+        }
+      } catch {
+        // Network error on check — fall through to signInWithPassword
+      }
+
+      // ── Standard login flow ─────────────────────────────────────
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithPassword({
         phone,
@@ -118,6 +141,58 @@ export function LoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // --- Reset to form ---
+  function handleReset() {
+    setNeedsPassword(false);
+    setNoAccount(false);
+    setError(null);
+  }
+
+  // --- Banner: WA-first user needs password ---
+  if (needsPassword) {
+    const setPasswordHref = `/set-password?phone=${encodeURIComponent(phone)}&from=login`;
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md bg-success/10 border border-success/20 p-4 text-sm space-y-2 animate-[fade-in-up_0.3s_ease-out_both]">
+          <p className="font-medium text-success">
+            Tu cuenta fue creada desde WhatsApp
+          </p>
+          <p className="text-success/80">
+            Ya estás registrado con este número gracias a tu asistente de
+            WhatsApp. Para acceder desde la web, necesitas crear una contraseña.
+          </p>
+        </div>
+        <Button asChild className="w-full">
+          <Link href={setPasswordHref}>Crear contraseña para la web</Link>
+        </Button>
+        <Button type="button" variant="ghost" className="w-full" onClick={handleReset}>
+          Usar otro número
+        </Button>
+      </div>
+    );
+  }
+
+  // --- Banner: no account found ---
+  if (noAccount) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md bg-muted border p-4 text-sm space-y-2 animate-[fade-in-up_0.3s_ease-out_both]">
+          <p className="font-medium">No existe una cuenta con este número</p>
+          <p className="text-muted-foreground">
+            No encontramos una cuenta asociada a este número. Regístrate para
+            empezar a usar el asistente.
+          </p>
+        </div>
+        <Button asChild className="w-full">
+          <Link href="/signup">Registrarse</Link>
+        </Button>
+        <Button type="button" variant="ghost" className="w-full" onClick={handleReset}>
+          Usar otro número
+        </Button>
+      </div>
+    );
   }
 
   // --- Render ---
