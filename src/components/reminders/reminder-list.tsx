@@ -120,6 +120,8 @@ export function ReminderList({
       .update({
         content: data.content,
         trigger_at: data.trigger_at,
+        is_recurring: data.is_recurring,
+        recurrence_rule: data.recurrence_rule,
       })
       .eq("id", editingReminder.id)
       .eq("status", "pending");
