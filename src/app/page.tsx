@@ -222,10 +222,14 @@ export default async function HomePage() {
                   size="lg"
                   className="gap-2 shadow-lg shadow-primary/25"
                 >
-                  <Link href="/signup">
+                  <a
+                    href="https://wa.me/51901258245?text=Hola%2C%20quiero%20comenzar%20%F0%9F%91%8B"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Comenzar gratis
                     <ArrowRight className="size-4" />
-                  </Link>
+                  </a>
                 </Button>
                 <Button asChild size="lg" variant="outline">
                   <Link href="#planes">Ver planes</Link>
