@@ -332,10 +332,10 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
               >
                 {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
-              <UserMenu email={user.email ?? user.phone ?? "Usuario"} />
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <ThemeToggle />
+              <UserMenu email={user.email ?? user.phone ?? "Usuario"} />
             </div>
           </div>
           <DashboardBreadcrumb pathname={pathname} routeLabels={routeLabels} />
