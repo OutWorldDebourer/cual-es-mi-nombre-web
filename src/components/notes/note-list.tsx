@@ -18,6 +18,7 @@ import type { Note } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { NoteCard } from "@/components/notes/note-card";
 import { NoteForm } from "@/components/notes/note-form";
+import { NoteViewDialog } from "@/components/notes/note-view-dialog";
 import { NotesGridSkeleton } from "@/components/skeletons/note-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -360,6 +362,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
               key={note.id}
               note={note}
               layout={viewMode}
+              onView={setViewingNote}
               onEdit={(n) => {
                 setEditingNote(n);
                 setFormOpen(true);
@@ -372,6 +375,18 @@ export function NoteList({ initialNotes }: NoteListProps) {
           ))}
         </div>
       )}
+
+      {/* View dialog (read-only) */}
+      <NoteViewDialog
+        note={viewingNote}
+        open={!!viewingNote}
+        onOpenChange={(open) => { if (!open) setViewingNote(null); }}
+        onEdit={(n) => {
+          setViewingNote(null);
+          setEditingNote(n);
+          setFormOpen(true);
+        }}
+      />
 
       {/* Create/Edit dialog */}
       <NoteForm

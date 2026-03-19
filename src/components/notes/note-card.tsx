@@ -40,26 +40,12 @@ import {
 
 type NoteLayout = "grid" | "list";
 
-const TAG_COLORS = [
-  "bg-primary/15 text-primary hover:bg-primary/25",
-  "bg-chart-4/15 text-chart-4 hover:bg-chart-4/25",
-  "bg-success/15 text-success hover:bg-success/25",
-  "bg-info/15 text-info hover:bg-info/25",
-  "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25",
-  "bg-destructive/15 text-destructive hover:bg-destructive/25",
-] as const;
-
-function tagColor(tag: string): string {
-  let hash = 0;
-  for (let i = 0; i < tag.length; i++) {
-    hash = ((hash << 5) - hash + tag.charCodeAt(i)) | 0;
-  }
-  return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
-}
+import { tagColor } from "@/components/notes/note-tag-colors";
 
 interface NoteCardProps {
   note: Note;
   layout?: NoteLayout;
+  onView: (note: Note) => void;
   onEdit: (note: Note) => void;
   onDelete: (noteId: string) => void;
   onTogglePin: (noteId: string, isPinned: boolean) => void;
@@ -70,6 +56,7 @@ interface NoteCardProps {
 export function NoteCard({
   note,
   layout = "grid",
+  onView,
   onEdit,
   onDelete,
   onTogglePin,
@@ -85,6 +72,7 @@ export function NoteCard({
       : note.content;
 
   const actionsMenu = (
+    <div onClick={(e) => e.stopPropagation()}>
     <DropdownMenu>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -121,15 +109,17 @@ export function NoteCard({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </div>
   );
 
   if (layout === "list") {
     return (
       <>
         <Card
-          className={`transition-shadow hover:shadow-md ${
+          className={`transition-shadow hover:shadow-md cursor-pointer ${
             note.is_pinned ? "border-primary/40 bg-primary/5" : ""
           }`}
+          onClick={() => onView(note)}
         >
           <div className="flex items-center gap-4 px-4 py-3">
             {/* Title + date */}
@@ -158,7 +148,7 @@ export function NoteCard({
                     key={tag}
                     variant="secondary"
                     className={`text-xs cursor-pointer transition-colors ${tagColor(tag)}`}
-                    onClick={() => onTagClick?.(tag)}
+                    onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
                   >
                     {tag}
                   </Badge>
@@ -203,9 +193,10 @@ export function NoteCard({
   return (
     <>
       <Card
-        className={`transition-shadow hover:shadow-md ${
+        className={`transition-shadow hover:shadow-md cursor-pointer ${
           note.is_pinned ? "border-primary/40 bg-primary/5" : ""
         }`}
+        onClick={() => onView(note)}
       >
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
@@ -236,7 +227,7 @@ export function NoteCard({
                   key={tag}
                   variant="secondary"
                   className={`text-xs cursor-pointer transition-colors ${tagColor(tag)}`}
-                  onClick={() => onTagClick?.(tag)}
+                  onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
                 >
                   {tag}
                 </Badge>
