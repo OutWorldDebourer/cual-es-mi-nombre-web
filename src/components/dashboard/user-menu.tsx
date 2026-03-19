@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Gem, LogOut } from "lucide-react";
+import { Settings, Gem, LogOut, User } from "lucide-react";
 
 interface UserMenuProps {
   email: string;
@@ -31,12 +31,12 @@ export function UserMenu({ email }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           aria-label="Menu de usuario"
         >
-          <Avatar className="size-7">
-            <AvatarFallback>
-              {email.charAt(0).toUpperCase()}
+          <Avatar className="size-8 border border-border bg-muted transition-colors group-hover:border-primary/40 group-hover:bg-primary/10">
+            <AvatarFallback className="bg-transparent text-xs font-medium text-foreground">
+              {email ? email.charAt(0).toUpperCase() : <User className="size-4 text-muted-foreground" />}
             </AvatarFallback>
           </Avatar>
           <span className="hidden text-sm text-muted-foreground sm:inline">
