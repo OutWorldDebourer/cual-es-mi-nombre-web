@@ -17,6 +17,7 @@ import type { Reminder, ReminderStatus } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { ReminderCard } from "@/components/reminders/reminder-card";
 import { ReminderForm } from "@/components/reminders/reminder-form";
+import { ReminderViewDialog } from "@/components/reminders/reminder-view-dialog";
 import type { ReminderFormData } from "@/components/reminders/reminder-form";
 import { RemindersListSkeleton } from "@/components/skeletons/reminder-card-skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -55,6 +56,7 @@ export function ReminderList({
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  const [viewingReminder, setViewingReminder] = useState<Reminder | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -316,6 +318,7 @@ export function ReminderList({
               key={reminder.id}
               reminder={reminder}
               timezone={timezone}
+              onView={setViewingReminder}
               onCancel={handleCancel}
               onEdit={(r) => {
                 setEditingReminder(r);
@@ -327,6 +330,19 @@ export function ReminderList({
           ))}
         </div>
       )}
+
+      {/* View dialog (read-only) */}
+      <ReminderViewDialog
+        reminder={viewingReminder}
+        open={!!viewingReminder}
+        onOpenChange={(open) => { if (!open) setViewingReminder(null); }}
+        onEdit={(r) => {
+          setViewingReminder(null);
+          setEditingReminder(r);
+          setFormOpen(true);
+        }}
+        timezone={timezone}
+      />
 
       {/* Create/Edit dialog */}
       <ReminderForm

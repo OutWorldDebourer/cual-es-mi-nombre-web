@@ -43,6 +43,7 @@ import {
 interface ReminderCardProps {
   reminder: Reminder;
   timezone?: string;
+  onView: (reminder: Reminder) => void;
   onCancel: (reminderId: string) => void;
   onEdit: (reminder: Reminder) => void;
   onDelete: (reminderId: string) => void;
@@ -63,6 +64,7 @@ const STATUS_CONFIG: Record<
 export function ReminderCard({
   reminder,
   timezone,
+  onView,
   onCancel,
   onEdit,
   onDelete,
@@ -93,13 +95,14 @@ export function ReminderCard({
   return (
     <>
       <Card
-        className={`transition-shadow ${
+        className={`transition-shadow hover:shadow-md cursor-pointer ${
           overdue
             ? "border-destructive/40 bg-destructive/5"
             : reminder.status === "sent"
               ? "border-success/30 bg-success/5"
               : ""
         }`}
+        onClick={() => onView(reminder)}
       >
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
@@ -126,6 +129,7 @@ export function ReminderCard({
               <Badge variant={config.variant}>{config.label}</Badge>
               {/* Actions menu */}
               {(canEdit || canCancel || canDelete) && (
+                <div onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -170,6 +174,7 @@ export function ReminderCard({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
+                </div>
               )}
             </div>
           </div>
