@@ -9,8 +9,8 @@
  * @module app/dashboard/layout
  */
 
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getAuthUser, getProfile } from "@/lib/supabase/auth";
 import { DashboardShell } from "@/components/dashboard/shell";
 
 export default async function DashboardLayout({
@@ -18,22 +18,16 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getAuthUser();
 
   // Double-check: middleware should catch this, but defense in depth
   if (!user) {
     redirect("/login");
   }
 
-  // Fetch profile for display (credits, plan, assistant name)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await getProfile(user.id);
 
   return (
     <DashboardShell

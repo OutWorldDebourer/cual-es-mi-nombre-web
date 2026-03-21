@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   MessageCircle,
   Sparkles,
+  User,
   Calendar,
   Gem,
   Check,
@@ -19,6 +20,7 @@ interface OnboardingStep {
 
 interface OnboardingStepperProps {
   hasPhone: boolean;
+  hasDisplayName: boolean;
   hasCustomName: boolean;
   hasGoogle: boolean;
   hasPaidPlan: boolean;
@@ -26,6 +28,7 @@ interface OnboardingStepperProps {
 
 export function OnboardingStepper({
   hasPhone,
+  hasDisplayName,
   hasCustomName,
   hasGoogle,
   hasPaidPlan,
@@ -38,6 +41,14 @@ export function OnboardingStepper({
       href: "/dashboard/settings/whatsapp",
       icon: MessageCircle,
       completed: hasPhone,
+    },
+    {
+      key: "display-name",
+      title: "Dinos tu nombre",
+      description: "Para que tu asistente te llame por tu nombre",
+      href: "/dashboard/settings",
+      icon: User,
+      completed: hasDisplayName,
     },
     {
       key: "name",

@@ -23,24 +23,21 @@ import {
   RecentActivity,
   type ActivityItem,
 } from "@/components/dashboard/recent-activity";
+import { getAuthUser, getProfile } from "@/lib/supabase/auth";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await getProfile(user.id);
 
-  // Fetch recent activity in parallel
+  // Fetch recent activity in parallel (needs its own client for non-cached queries)
+  const supabase = await createClient();
   const [recentNotes, recentReminders, recentCredits] = await Promise.all([
     supabase
       .from("notes")
@@ -100,19 +97,25 @@ export default async function DashboardPage() {
   activityItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   const recentActivity = activityItems.slice(0, 6);
 
+  const displayName = profile?.display_name as string | null;
   const assistantName = profile?.assistant_name ?? "Asistente";
   const plan = profile?.plan ?? "free";
   const credits = profile?.credits_remaining ?? 0;
   const hasPhone = !!profile?.phone_number;
   const hasGoogle = !!profile?.google_token_vault_id;
   const hasCustomName = assistantName !== "Asistente";
+  // "Usuario" is the default set by the handle_new_user trigger (009_triggers.sql)
+  // when WhatsApp doesn't provide a contact name — treat it as "not set"
+  const hasDisplayName = !!displayName && displayName !== "Usuario";
   const onboarding = profile?.onboarding_status ?? "new";
 
   return (
     <div className="space-y-6 stagger-children">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          Hola, soy {assistantName}
+          {hasDisplayName
+            ? `Hola ${displayName}, soy ${assistantName}`
+            : `Hola, soy ${assistantName}`}
         </h1>
         <p className="text-muted-foreground mt-1">
           Aqui tienes el resumen de tu asistente virtual.
@@ -233,6 +236,7 @@ export default async function DashboardPage() {
       {onboarding !== "completed" && (
         <OnboardingStepper
           hasPhone={hasPhone}
+          hasDisplayName={hasDisplayName}
           hasCustomName={hasCustomName}
           hasGoogle={hasGoogle}
           hasPaidPlan={plan !== "free"}

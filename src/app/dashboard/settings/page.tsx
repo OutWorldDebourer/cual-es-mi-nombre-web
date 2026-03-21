@@ -1,7 +1,8 @@
 /**
  * Settings Page — "Cuál es mi nombre" Web
  *
- * Allows users to change their assistant name and timezone.
+ * Allows users to change their display name, assistant name, timezone,
+ * and message wait seconds.
  * Writes directly to Supabase (RLS protects — user can only update own profile).
  *
  * @module app/dashboard/settings/page
@@ -48,6 +49,7 @@ const TIMEZONES = [
 ];
 
 export default function SettingsPage() {
+  const [displayName, setDisplayName] = useState("");
   const [assistantName, setAssistantName] = useState("");
   const [timezone, setTimezone] = useState("");
   const [messageWaitSeconds, setMessageWaitSeconds] = useState(3);
@@ -65,11 +67,13 @@ export default function SettingsPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("assistant_name, timezone, message_wait_seconds")
+        .select("display_name, assistant_name, timezone, message_wait_seconds")
         .eq("id", user.id)
         .single();
 
       if (profile) {
+        const raw = profile.display_name ?? "";
+        setDisplayName(raw === "Usuario" ? "" : raw);
         setAssistantName(profile.assistant_name ?? "Asistente");
         setTimezone(profile.timezone ?? "America/Lima");
         setMessageWaitSeconds(profile.message_wait_seconds ?? 3);
@@ -93,9 +97,17 @@ export default function SettingsPage() {
       return;
     }
 
+    const trimmedDisplayName = displayName.trim();
+    if (trimmedDisplayName.length > 50) {
+      setError("El nombre no puede tener más de 50 caracteres.");
+      setLoading(false);
+      return;
+    }
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
+        display_name: trimmedDisplayName || null,
         assistant_name: assistantName.trim() || "Asistente",
         timezone,
         message_wait_seconds: messageWaitSeconds,
@@ -103,7 +115,7 @@ export default function SettingsPage() {
       .eq("id", user.id);
 
     if (updateError) {
-      setError(updateError.message);
+      setError("No se pudieron guardar los cambios. Intenta de nuevo.");
     } else {
       toast.success("Cambios guardados correctamente");
     }
@@ -116,20 +128,46 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-3xl font-bold">Configuración</h1>
         <p className="text-muted-foreground mt-1">
-          Personaliza tu asistente virtual.
+          Personaliza tu perfil y tu asistente virtual.
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Perfil del asistente</CardTitle>
-          <CardDescription>
-            Cambia el nombre y la zona horaria de tu asistente. El nombre se usa
-            en todas las conversaciones de WhatsApp.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSave} className="space-y-4 max-w-md">
+      <form onSubmit={handleSave} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Tu perfil</CardTitle>
+            <CardDescription>
+              Cómo tu asistente se referirá a ti en las conversaciones.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="max-w-md">
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Tu nombre</Label>
+              <Input
+                id="displayName"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                onBlur={(e) => setDisplayName(e.target.value.trim())}
+                placeholder="Ej: María, Carlos, Ana..."
+                maxLength={50}
+                autoComplete="given-name"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tu asistente te llamará por este nombre.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Perfil del asistente</CardTitle>
+            <CardDescription>
+              Cambia el nombre y la zona horaria de tu asistente. El nombre se
+              usa en todas las conversaciones de WhatsApp.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 max-w-md">
             <div className="space-y-2">
               <Label htmlFor="assistantName">Nombre del asistente</Label>
               <Input
@@ -166,7 +204,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="messageWait">Tiempo de espera por mensaje</Label>
+              <Label htmlFor="messageWait">
+                Tiempo de espera por mensaje
+              </Label>
               <div className="flex items-center gap-3">
                 <Input
                   id="messageWait"
@@ -189,15 +229,16 @@ export default function SettingsPage() {
                 concatenar mensajes consecutivos. 0 = respuesta inmediata.
               </p>
             </div>
+          </CardContent>
+        </Card>
 
-            <FormError message={error} />
-
-            <Button type="submit" disabled={loading}>
-              {loading ? "Guardando..." : "Guardar cambios"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <div className="max-w-md">
+          <FormError message={error} />
+          <Button type="submit" disabled={loading}>
+            {loading ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
