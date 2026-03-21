@@ -14,6 +14,7 @@ import { UserMenu } from "@/components/dashboard/user-menu";
 import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb-nav";
 import {
   Home,
+  MessageSquare,
   StickyNote,
   Bell,
   CreditCard,
@@ -45,6 +46,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Inicio", icon: Home, group: "main" },
+  { href: "/dashboard/chat", label: "Chat", icon: MessageSquare, group: "main" },
   { href: "/dashboard/notes", label: "Notas", icon: StickyNote, group: "main" },
   { href: "/dashboard/reminders", label: "Recordatorios", icon: Bell, group: "main" },
   { href: "/dashboard/credits", label: "Creditos", icon: CreditCard, group: "main" },

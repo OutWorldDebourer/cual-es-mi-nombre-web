@@ -23,6 +23,10 @@ import type {
   CheckoutPreferenceResponse,
   PlansListResponse,
 } from "@/types/database";
+import type {
+  ChatSendResponse,
+  ChatHistoryResponse,
+} from "@/types/chat";
 import { buildGoogleConnectContractUrl } from "@/lib/google-auth";
 
 // ── Configuration ──────────────────────────────────────────────────────────
@@ -289,6 +293,39 @@ export const phoneAuthApi = {
   },
 };
 
+// ── Chat API ────────────────────────────────────────────────────────────────
+
+function chatApi(supabase: SupabaseClient) {
+  return {
+    /**
+     * POST /api/chat/send
+     * Send a message through the multi-agent pipeline.
+     */
+    async send(message: string): Promise<ChatSendResponse> {
+      return authFetch<ChatSendResponse>(supabase, "/api/chat/send", {
+        method: "POST",
+        body: JSON.stringify({ message }),
+      });
+    },
+
+    /**
+     * GET /api/chat/history
+     * Fetch paginated web chat history.
+     */
+    async history(params?: {
+      limit?: number;
+      before?: string;
+    }): Promise<ChatHistoryResponse> {
+      const searchParams = new URLSearchParams();
+      if (params?.limit != null) searchParams.set("limit", String(params.limit));
+      if (params?.before) searchParams.set("before", params.before);
+      const qs = searchParams.toString();
+      const path = `/api/chat/history${qs ? `?${qs}` : ""}`;
+      return authFetch<ChatHistoryResponse>(supabase, path);
+    },
+  };
+}
+
 // ── Factory ────────────────────────────────────────────────────────────────
 
 /**
@@ -306,5 +343,6 @@ export function backendApi(supabase: SupabaseClient) {
     whatsapp: whatsappApi(supabase),
     google: googleApi(supabase),
     payments: paymentsApi(supabase),
+    chat: chatApi(supabase),
   };
 }
