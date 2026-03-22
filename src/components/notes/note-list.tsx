@@ -56,6 +56,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastFetchRef = useRef(0);
 
   const supabase = createClient();
   const pendingDeleteRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
@@ -72,8 +73,9 @@ export function NoteList({ initialNotes }: NoteListProps) {
 
   // ── Fetch notes from Supabase ──────────────────────────────────────────
 
-  const fetchNotes = useCallback(async () => {
-    setIsLoading(true);
+  const fetchNotes = useCallback(async (silent = false) => {
+    lastFetchRef.current = Date.now();
+    if (!silent) setIsLoading(true);
     const { data, error } = await supabase
       .from("notes")
       .select("*")
@@ -81,10 +83,17 @@ export function NoteList({ initialNotes }: NoteListProps) {
       .order("is_pinned", { ascending: false })
       .order("updated_at", { ascending: false });
 
-    if (!error && data) {
-      setNotes(data as Note[]);
+    if (error) {
+      if (!silent) toast.error("Error al cargar notas");
+    } else if (data) {
+      const pending = pendingDeleteRef.current;
+      setNotes(
+        pending.size > 0
+          ? (data as Note[]).filter((n) => !pending.has(n.id))
+          : (data as Note[]),
+      );
     }
-    setIsLoading(false);
+    if (!silent) setIsLoading(false);
   }, [supabase, tab]);
 
   // Refetch when tab changes
@@ -92,8 +101,13 @@ export function NoteList({ initialNotes }: NoteListProps) {
     void fetchNotes();
   }, [fetchNotes]);
 
-  // Auto-refresh when notes change from WhatsApp or other sources
-  useRealtimeTable("notes", fetchNotes);
+  // Silent refetch on Realtime events (no skeleton, dedup with manual fetches)
+  const realtimeFetch = useCallback(() => {
+    if (Date.now() - lastFetchRef.current < 500) return;
+    void fetchNotes(true);
+  }, [fetchNotes]);
+
+  useRealtimeTable("notes", realtimeFetch);
 
   // ── CRUD handlers ──────────────────────────────────────────────────────
 

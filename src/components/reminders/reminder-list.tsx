@@ -61,14 +61,16 @@ export function ReminderList({
   const [isLoading, setIsLoading] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastFetchRef = useRef(0);
   const pendingDeleteRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const supabase = createClient();
 
   // ── Fetch reminders from Supabase ──────────────────────────────────────
 
-  const fetchReminders = useCallback(async () => {
-    setIsLoading(true);
+  const fetchReminders = useCallback(async (silent = false) => {
+    lastFetchRef.current = Date.now();
+    if (!silent) setIsLoading(true);
     const statuses = TAB_STATUSES[tab];
     let query = supabase
       .from("reminders")
@@ -82,18 +84,30 @@ export function ReminderList({
 
     const { data, error } = await query;
 
-    if (!error && data) {
-      setReminders(data as Reminder[]);
+    if (error) {
+      if (!silent) toast.error("Error al cargar recordatorios");
+    } else if (data) {
+      const pending = pendingDeleteRef.current;
+      setReminders(
+        pending.size > 0
+          ? (data as Reminder[]).filter((r) => !pending.has(r.id))
+          : (data as Reminder[]),
+      );
     }
-    setIsLoading(false);
+    if (!silent) setIsLoading(false);
   }, [supabase, tab]);
 
   useEffect(() => {
     void fetchReminders();
   }, [fetchReminders]);
 
-  // Auto-refresh when reminders change from WhatsApp or other sources
-  useRealtimeTable("reminders", fetchReminders);
+  // Silent refetch on Realtime events (no skeleton, dedup with manual fetches)
+  const realtimeFetch = useCallback(() => {
+    if (Date.now() - lastFetchRef.current < 500) return;
+    void fetchReminders(true);
+  }, [fetchReminders]);
+
+  useRealtimeTable("reminders", realtimeFetch);
 
   // ── CRUD handlers ─────────────────────────────────────────────────────
 

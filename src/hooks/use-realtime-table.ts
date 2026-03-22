@@ -28,8 +28,14 @@ export function useRealtimeTable(table: string, onEvent: () => void, debounceMs 
         },
       )
       .subscribe((status, err) => {
-        if (status === "CHANNEL_ERROR") {
-          console.error(`[useRealtimeTable] ${table}:`, err);
+        if (status === "SUBSCRIBED") {
+          console.debug(`[Realtime] ${table}: connected`);
+        } else if (status === "CHANNEL_ERROR") {
+          console.error(`[Realtime] ${table}: error`, err);
+        } else if (status === "TIMED_OUT") {
+          console.warn(`[Realtime] ${table}: timed out`);
+        } else if (status === "CLOSED") {
+          console.debug(`[Realtime] ${table}: closed`);
         }
       });
 
