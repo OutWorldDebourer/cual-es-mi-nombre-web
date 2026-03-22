@@ -17,6 +17,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import type { Note, NoteStatus } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
+import { useRealtimeTable } from "@/hooks/use-realtime-table";
 import { NoteCard } from "@/components/notes/note-card";
 import { NoteForm } from "@/components/notes/note-form";
 import { NoteViewDialog } from "@/components/notes/note-view-dialog";
@@ -90,6 +91,9 @@ export function NoteList({ initialNotes }: NoteListProps) {
   useEffect(() => {
     void fetchNotes();
   }, [fetchNotes]);
+
+  // Auto-refresh when notes change from WhatsApp or other sources
+  useRealtimeTable("notes", fetchNotes);
 
   // ── CRUD handlers ──────────────────────────────────────────────────────
 

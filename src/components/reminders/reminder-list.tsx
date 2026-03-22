@@ -15,6 +15,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import type { Reminder, ReminderStatus } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
+import { useRealtimeTable } from "@/hooks/use-realtime-table";
 import { ReminderCard } from "@/components/reminders/reminder-card";
 import { ReminderForm } from "@/components/reminders/reminder-form";
 import { ReminderViewDialog } from "@/components/reminders/reminder-view-dialog";
@@ -90,6 +91,9 @@ export function ReminderList({
   useEffect(() => {
     void fetchReminders();
   }, [fetchReminders]);
+
+  // Auto-refresh when reminders change from WhatsApp or other sources
+  useRealtimeTable("reminders", fetchReminders);
 
   // ── CRUD handlers ─────────────────────────────────────────────────────
 
