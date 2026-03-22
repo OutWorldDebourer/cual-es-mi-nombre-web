@@ -12,6 +12,7 @@
 
 import type { Note } from "@/types/database";
 import { formatRelativeTime } from "@/lib/dates";
+import { NOTE_STATUS_CONFIG } from "@/components/notes/note-status-config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +48,15 @@ export function NoteViewDialog({
             {note.is_pinned && (
               <span aria-label="Fijada">📌</span>
             )}
-            {note.title || "Sin título"}
+            {note.title || "Sin titulo"}
+            {note.status !== "active" && (
+              <Badge
+                variant="outline"
+                className={`text-[10px] px-1.5 py-0 shrink-0 ${NOTE_STATUS_CONFIG[note.status].badgeClass}`}
+              >
+                {NOTE_STATUS_CONFIG[note.status].label}
+              </Badge>
+            )}
           </DialogTitle>
           <DialogDescription>
             {formatRelativeTime(note.updated_at)}

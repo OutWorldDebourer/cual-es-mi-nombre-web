@@ -20,6 +20,7 @@ function makeNote(overrides: Partial<Note> = {}): Note {
     title: "Existing Note",
     content: "Existing content",
     tags: [],
+    status: "active",
     is_pinned: false,
     is_archived: false,
     created_at: "2026-03-01T12:00:00Z",
@@ -98,6 +99,7 @@ describe("NoteForm", () => {
     expect(onSubmit).toHaveBeenCalledWith({
       title: "Mi titulo",
       content: "Mi contenido",
+      status: "active",
     });
   });
 });

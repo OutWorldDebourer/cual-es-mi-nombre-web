@@ -15,6 +15,7 @@ export type SubscriptionStatus =
   | "trial"
   | "active"
   | "past_due"
+  | "pending"
   | "cancelled"
   | "expired";
 export type OnboardingStatus =
@@ -57,10 +58,15 @@ export interface Subscription {
   plan: SubscriptionPlan;
   status: SubscriptionStatus;
   mp_preapproval_id: string | null;
-  started_at: string;
-  expires_at: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
   created_at: string;
+  updated_at: string;
 }
+
+export type NoteStatus = "active" | "en_curso" | "completed";
 
 export interface Note {
   id: string;
@@ -68,6 +74,7 @@ export interface Note {
   title: string | null;
   content: string;
   tags: string[];
+  status: NoteStatus;
   is_pinned: boolean;
   is_archived: boolean;
   created_at: string;
@@ -146,4 +153,20 @@ export interface PlansListResponse {
 export interface CheckoutPreferenceResponse {
   init_point: string;
   preference_id: string;
+}
+
+// ── Subscription management ───────────────────────────────────────────────
+
+export interface CancelSubscriptionResponse {
+  status: string;
+  grace_ends_at: string;
+  message: string;
+}
+
+export interface SubscriptionStatusResponse {
+  status: string;
+  plan: string;
+  cancelled_at: string | null;
+  grace_ends_at: string | null;
+  current_period_end: string | null;
 }

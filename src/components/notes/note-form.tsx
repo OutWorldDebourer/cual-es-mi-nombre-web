@@ -11,12 +11,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Note } from "@/types/database";
+import type { Note, NoteStatus } from "@/types/database";
+import { NOTE_STATUSES, NOTE_STATUS_CONFIG } from "@/components/notes/note-status-config";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +39,7 @@ interface NoteFormProps {
   onOpenChange: (open: boolean) => void;
   /** If provided, the form operates in edit mode */
   note?: Note | null;
-  onSubmit: (data: { title: string; content: string }) => Promise<void>;
+  onSubmit: (data: { title: string; content: string; status?: NoteStatus }) => Promise<void>;
 }
 
 export function NoteForm({
@@ -42,6 +50,7 @@ export function NoteForm({
 }: NoteFormProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [status, setStatus] = useState<NoteStatus>("active");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,9 +61,11 @@ export function NoteForm({
     if (note) {
       setTitle(note.title ?? "");
       setContent(note.content);
+      setStatus(note.status);
     } else {
       setTitle("");
       setContent("");
+      setStatus("active");
     }
     setError(null);
   }, [note, open]);
@@ -71,7 +82,7 @@ export function NoteForm({
     setError(null);
 
     try {
-      await onSubmit({ title: title.trim(), content: content.trim() });
+      await onSubmit({ title: title.trim(), content: content.trim(), status });
       onOpenChange(false);
     } catch (err: unknown) {
       setError(
@@ -118,6 +129,21 @@ export function NoteForm({
                 rows={6}
                 className="resize-y min-h-[120px]"
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="note-status">Estado</Label>
+              <Select value={status} onValueChange={(v) => setStatus(v as NoteStatus)}>
+                <SelectTrigger id="note-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NOTE_STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {NOTE_STATUS_CONFIG[s].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <FormError message={error} />
           </div>
