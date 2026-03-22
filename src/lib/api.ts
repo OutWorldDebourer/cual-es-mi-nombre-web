@@ -20,8 +20,10 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
+  CancelSubscriptionResponse,
   CheckoutPreferenceResponse,
   PlansListResponse,
+  SubscriptionStatusResponse,
 } from "@/types/database";
 import type {
   ChatSendResponse,
@@ -293,6 +295,38 @@ export const phoneAuthApi = {
   },
 };
 
+// ── Subscription Management API ──────────────────────────────────────────────
+
+function subscriptionApi(supabase: SupabaseClient) {
+  return {
+    /**
+     * POST /api/subscription/cancel
+     * Cancel the user's active subscription. Starts a 3-day grace period.
+     */
+    async cancel(reason?: string): Promise<CancelSubscriptionResponse> {
+      return authFetch<CancelSubscriptionResponse>(
+        supabase,
+        "/api/subscription/cancel",
+        {
+          method: "POST",
+          body: JSON.stringify({ reason: reason ?? null }),
+        },
+      );
+    },
+
+    /**
+     * GET /api/subscription/status
+     * Fetch the current subscription status for the authenticated user.
+     */
+    async getStatus(): Promise<SubscriptionStatusResponse> {
+      return authFetch<SubscriptionStatusResponse>(
+        supabase,
+        "/api/subscription/status",
+      );
+    },
+  };
+}
+
 // ── Chat API ────────────────────────────────────────────────────────────────
 
 function chatApi(supabase: SupabaseClient) {
@@ -343,6 +377,7 @@ export function backendApi(supabase: SupabaseClient) {
     whatsapp: whatsappApi(supabase),
     google: googleApi(supabase),
     payments: paymentsApi(supabase),
+    subscription: subscriptionApi(supabase),
     chat: chatApi(supabase),
   };
 }

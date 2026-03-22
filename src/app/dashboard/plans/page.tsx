@@ -14,7 +14,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPlans } from "@/lib/api";
 import { PlanGrid } from "@/components/plans/plan-grid";
-import type { SubscriptionPlan } from "@/types/database";
+import type { SubscriptionPlan, SubscriptionStatus } from "@/types/database";
 
 export default async function PlansPage() {
   const supabase = await createClient();
@@ -34,6 +34,19 @@ export default async function PlansPage() {
     .single();
 
   const currentPlan: SubscriptionPlan = (profile?.plan as SubscriptionPlan) ?? "free";
+
+  // Fetch subscription status for cancel button / grace banner
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("status, cancelled_at, current_period_end")
+    .eq("profile_id", user.id)
+    .in("status", ["active", "cancelled", "past_due"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const subscriptionStatus = (subscription?.status as SubscriptionStatus) ?? null;
+  const cancelledAt = (subscription?.cancelled_at as string) ?? null;
 
   // Fetch plan catalog from backend API
   let plans;
@@ -115,6 +128,8 @@ export default async function PlansPage() {
         plans={plans}
         currentPlan={currentPlan}
         currencySymbol={currencySymbol}
+        subscriptionStatus={subscriptionStatus}
+        cancelledAt={cancelledAt}
       />
     </div>
   );
