@@ -146,6 +146,11 @@
   --sidebar-accent-foreground: oklch(0.22 0.04 195);
   --sidebar-border: oklch(0.91 0.015 195);
   --sidebar-ring: oklch(0.52 0.14 195);
+
+  /* Animation vars */
+  --pulse-glow-color: oklch(0.52 0.14 195 / 0.2);
+  --pulse-glow-color-strong: oklch(0.52 0.14 195 / 0.4);
+  --glow-color: oklch(0.52 0.14 195 / 0.08);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -212,6 +217,11 @@
   --sidebar-accent-foreground: oklch(0.92 0.03 195);
   --sidebar-border: oklch(0.3 0.015 260);
   --sidebar-ring: oklch(0.68 0.14 195);
+
+  /* Animation vars — dark */
+  --pulse-glow-color: oklch(0.68 0.14 195 / 0.2);
+  --pulse-glow-color-strong: oklch(0.68 0.14 195 / 0.4);
+  --glow-color: oklch(0.68 0.14 195 / 0.1);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -272,6 +282,45 @@
 .stagger-children > :nth-child(4) { animation-delay: 180ms; }
 .stagger-children > :nth-child(5) { animation-delay: 240ms; }
 .stagger-children > :nth-child(6) { animation-delay: 300ms; }
+
+/* Floating gradient orbs — ambient background motion */
+@keyframes float-orb-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, 15px) scale(0.97); }
+  75% { transform: translate(-25px, -10px) scale(1.03); }
+}
+
+@keyframes float-orb-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-20px, 25px) scale(0.96); }
+  50% { transform: translate(25px, -15px) scale(1.04); }
+  75% { transform: translate(10px, 20px) scale(0.98); }
+}
+
+/* CTA button pulse glow — uses CSS var for theme awareness */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 10px 25px -5px var(--pulse-glow-color, oklch(0.52 0.14 195 / 0.2)); }
+  50% { box-shadow: 0 10px 35px -3px var(--pulse-glow-color-strong, oklch(0.52 0.14 195 / 0.4)); }
+}
+
+/* Sparkle nav icon subtle pulse */
+@keyframes sparkle-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* Shimmer border for highlighted pricing card */
+@keyframes shimmer-border {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Typing dots bounce */
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
 
 @keyframes fade-in-up {
   from {

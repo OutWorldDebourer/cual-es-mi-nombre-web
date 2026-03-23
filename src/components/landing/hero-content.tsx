@@ -1,0 +1,91 @@
+"use client";
+
+import { motion } from "motion/react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, ArrowRight, Check } from "lucide-react";
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.12 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 100, damping: 14 },
+  },
+};
+
+export function HeroContent() {
+  return (
+    <motion.div
+      className="space-y-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants}>
+        <Badge variant="secondary">
+          <Sparkles className="size-3" />
+          Potenciado por IA
+        </Badge>
+      </motion.div>
+
+      <motion.h1
+        className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl"
+        variants={itemVariants}
+      >
+        Tu asistente{" "}
+        <span className="text-primary">inteligente</span> en WhatsApp
+      </motion.h1>
+
+      <motion.p
+        className="max-w-lg text-lg leading-relaxed text-muted-foreground"
+        variants={itemVariants}
+      >
+        Gestiona tu calendario, toma notas, configura recordatorios y mas —
+        todo desde una conversacion natural en WhatsApp.
+      </motion.p>
+
+      <motion.div className="flex flex-wrap gap-4" variants={itemVariants}>
+        <Button
+          asChild
+          size="lg"
+          className="group gap-2 animate-[pulse-glow_2s_ease-in-out_infinite]"
+        >
+          <a
+            href="https://wa.me/51901258245?text=Hola%2C%20quiero%20comenzar%20%F0%9F%91%8B"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Comenzar gratis
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+          </a>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link href="#planes">Ver planes</Link>
+        </Button>
+      </motion.div>
+
+      <motion.div
+        className="flex items-center gap-6 text-sm text-muted-foreground"
+        variants={itemVariants}
+      >
+        <span className="flex items-center gap-1.5">
+          <Check className="size-4 text-success" />
+          Sin tarjeta requerida
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Check className="size-4 text-success" />
+          Configura en 2 min
+        </span>
+      </motion.div>
+    </motion.div>
+  );
+}

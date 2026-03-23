@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { MotionProvider } from "@/components/motion-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -68,9 +69,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
+          <MotionProvider>
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </MotionProvider>
           <Toaster
             position="bottom-right"
             richColors
