@@ -67,6 +67,7 @@ export interface Subscription {
 }
 
 export type NoteStatus = "active" | "en_curso" | "completed";
+export type NotePriority = "urgent" | "high" | "normal" | "low";
 
 export interface Note {
   id: string;
@@ -75,6 +76,8 @@ export interface Note {
   content: string;
   tags: string[];
   status: NoteStatus;
+  priority: NotePriority;
+  position: string;
   is_pinned: boolean;
   is_archived: boolean;
   created_at: string;

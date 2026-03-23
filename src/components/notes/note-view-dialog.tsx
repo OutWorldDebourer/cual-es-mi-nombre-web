@@ -13,6 +13,7 @@
 import type { Note } from "@/types/database";
 import { formatRelativeTime } from "@/lib/dates";
 import { NOTE_STATUS_CONFIG } from "@/components/notes/note-status-config";
+import { NOTE_PRIORITY_CONFIG } from "@/components/notes/note-priority-config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +41,9 @@ export function NoteViewDialog({
 }: NoteViewDialogProps) {
   if (!note) return null;
 
+  const priority = note.priority ?? "normal";
+  const priorityConfig = priority !== "normal" ? NOTE_PRIORITY_CONFIG[priority] : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[80vh] flex flex-col">
@@ -55,6 +59,14 @@ export function NoteViewDialog({
                 className={`text-[10px] px-1.5 py-0 shrink-0 ${NOTE_STATUS_CONFIG[note.status].badgeClass}`}
               >
                 {NOTE_STATUS_CONFIG[note.status].label}
+              </Badge>
+            )}
+            {priorityConfig && (
+              <Badge
+                variant="outline"
+                className={`text-[10px] px-1.5 py-0 shrink-0 ${priorityConfig.badgeClass}`}
+              >
+                {priorityConfig.icon} {priorityConfig.label}
               </Badge>
             )}
           </DialogTitle>

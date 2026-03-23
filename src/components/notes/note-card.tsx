@@ -10,9 +10,10 @@
 "use client";
 
 import { useState } from "react";
-import type { Note, NoteStatus } from "@/types/database";
+import type { Note, NoteStatus, NotePriority } from "@/types/database";
 import { formatRelativeTime } from "@/lib/dates";
 import { NOTE_STATUS_CONFIG } from "@/components/notes/note-status-config";
+import { NOTE_PRIORITY_CONFIG } from "@/components/notes/note-priority-config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -38,6 +42,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { GripVertical } from "lucide-react";
+import type { DraggableSyntheticListeners } from "@dnd-kit/core";
 
 type NoteLayout = "grid" | "list";
 
@@ -53,7 +59,9 @@ interface NoteCardProps {
   onTogglePin: (noteId: string, isPinned: boolean) => void;
   onArchive: (noteId: string) => void;
   onStatusChange?: (noteId: string, status: NoteStatus) => void;
+  onPriorityChange?: (noteId: string, priority: NotePriority) => void;
   onTagClick?: (tag: string) => void;
+  dragHandleListeners?: DraggableSyntheticListeners;
 }
 
 export function NoteCard({
@@ -66,9 +74,26 @@ export function NoteCard({
   onTogglePin,
   onArchive,
   onStatusChange,
+  onPriorityChange,
   onTagClick,
+  dragHandleListeners,
 }: NoteCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const priority = note.priority ?? "normal";
+  const priorityConfig = priority !== "normal" ? NOTE_PRIORITY_CONFIG[priority] : null;
+
+  const priorityDot = priorityConfig ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className={`inline-block h-2 w-2 rounded-full shrink-0 ${priorityConfig.dotClass}`}
+          aria-label={`Prioridad: ${priorityConfig.label}`}
+        />
+      </TooltipTrigger>
+      <TooltipContent>{priorityConfig.label}</TooltipContent>
+    </Tooltip>
+  ) : null;
 
   const maxPreview = layout === "list" ? 120 : 200;
   const contentPreview =
@@ -125,6 +150,44 @@ export function NoteCard({
             )}
           </>
         )}
+        {onPriorityChange && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                {priorityConfig ? (
+                  <span className={`inline-block h-2 w-2 rounded-full mr-1 ${priorityConfig.dotClass}`} />
+                ) : null}
+                Prioridad
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {priority !== "urgent" && (
+                  <DropdownMenuItem onClick={() => onPriorityChange(note.id, "urgent")}>
+                    <span className={`inline-block h-2 w-2 rounded-full ${NOTE_PRIORITY_CONFIG.urgent.dotClass}`} />
+                    Urgente
+                  </DropdownMenuItem>
+                )}
+                {priority !== "high" && (
+                  <DropdownMenuItem onClick={() => onPriorityChange(note.id, "high")}>
+                    <span className={`inline-block h-2 w-2 rounded-full ${NOTE_PRIORITY_CONFIG.high.dotClass}`} />
+                    Alta
+                  </DropdownMenuItem>
+                )}
+                {priority !== "normal" && (
+                  <DropdownMenuItem onClick={() => onPriorityChange(note.id, "normal")}>
+                    Normal
+                  </DropdownMenuItem>
+                )}
+                {priority !== "low" && (
+                  <DropdownMenuItem onClick={() => onPriorityChange(note.id, "low")}>
+                    <span className={`inline-block h-2 w-2 rounded-full ${NOTE_PRIORITY_CONFIG.low.dotClass}`} />
+                    Baja
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => setShowDeleteDialog(true)}
@@ -137,16 +200,29 @@ export function NoteCard({
     </div>
   );
 
+  const dragHandle = dragHandleListeners ? (
+    <button
+      {...dragHandleListeners}
+      className="touch-none transition-opacity duration-150 opacity-0 group-hover:opacity-50 hover:!opacity-100 max-md:opacity-30 cursor-grab active:cursor-grabbing shrink-0"
+      aria-label="Arrastrar para reordenar"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <GripVertical className="h-4 w-4 text-muted-foreground" />
+    </button>
+  ) : null;
+
   if (layout === "list") {
     return (
       <>
         <Card
-          className={`transition-shadow hover:shadow-md cursor-pointer ${
+          className={`group transition-shadow hover:shadow-md cursor-pointer ${
             note.is_pinned ? "border-primary/40 bg-primary/5" : ""
           } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
           onClick={() => onView(note)}
         >
           <div className="flex items-center gap-4 px-4 py-3">
+            {/* Drag handle */}
+            {dragHandle}
             {/* Index */}
             {index != null && (
               <span className="text-xs font-mono text-muted-foreground/60 shrink-0">
@@ -156,6 +232,7 @@ export function NoteCard({
             {/* Title + date + status */}
             <div className="min-w-0 w-48 shrink-0">
               <div className="flex items-center gap-1.5">
+                {priorityDot}
                 <p className="text-sm font-medium truncate">
                   {note.is_pinned && (
                     <span className="mr-1" aria-label="Fijada">
@@ -236,15 +313,18 @@ export function NoteCard({
   return (
     <>
       <Card
-        className={`transition-shadow hover:shadow-md cursor-pointer ${
+        className={`group transition-shadow hover:shadow-md cursor-pointer ${
           note.is_pinned ? "border-primary/40 bg-primary/5" : ""
         } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
         onClick={() => onView(note)}
       >
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
+            {/* Drag handle */}
+            {dragHandle}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
+                {priorityDot}
                 {index != null && (
                   <span className="text-xs font-mono text-muted-foreground/60">
                     #{index}

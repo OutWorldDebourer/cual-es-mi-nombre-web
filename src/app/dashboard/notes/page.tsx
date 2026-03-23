@@ -24,12 +24,13 @@ export default async function NotesPage() {
     redirect("/login");
   }
 
-  // Fetch active notes (non-archived), pinned first, newest first
+  // Fetch active notes (non-archived): pinned first → position → newest
   const { data: notes } = await supabase
     .from("notes")
     .select("*")
     .eq("is_archived", false)
     .order("is_pinned", { ascending: false })
+    .order("position", { ascending: true })
     .order("updated_at", { ascending: false });
 
   return (

@@ -15,15 +15,26 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
-import type { Note, NoteStatus } from "@/types/database";
+import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import type { Note, NoteStatus, NotePriority } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
+import { generateKeyBetween } from "@/lib/fractional-index";
 import { useRealtimeTable } from "@/hooks/use-realtime-table";
+import { useNoteDrag } from "@/hooks/use-note-drag";
 import { NoteCard } from "@/components/notes/note-card";
+import { NoteSortableCard } from "@/components/notes/note-sortable-card";
+import { NoteDragOverlay } from "@/components/notes/note-drag-overlay";
 import { NoteForm } from "@/components/notes/note-form";
 import { NoteViewDialog } from "@/components/notes/note-view-dialog";
 import { NoteGroupSection } from "@/components/notes/note-group-section";
 import { NotesGridSkeleton } from "@/components/skeletons/note-card-skeleton";
 import { NOTE_STATUS_CONFIG, NOTE_STATUSES } from "@/components/notes/note-status-config";
+import { NotePriorityFilter } from "@/components/notes/note-priority-filter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,6 +50,7 @@ interface NoteListProps {
 type NoteTab = "active" | "archived";
 type ViewMode = "grid" | "list";
 type StatusFilter = "all" | NoteStatus;
+type PriorityFilter = "all" | NotePriority;
 type GroupMode = "none" | "tag";
 
 export function NoteList({ initialNotes }: NoteListProps) {
@@ -49,6 +61,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const [groupMode, setGroupMode] = useState<GroupMode>("none");
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
@@ -61,10 +74,26 @@ export function NoteList({ initialNotes }: NoteListProps) {
   const supabase = createClient();
   const pendingDeleteRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  // ── Drag & drop ────────────────────────────────────────────────────────
+
+  const {
+    activeNote,
+    isDraggingRef,
+    sensors,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+  } = useNoteDrag({ notes, setNotes });
+
+  const dragDisabled = !!search;
+
   // ── Reset filters on tab/tag changes ───────────────────────────────────
 
   useEffect(() => {
-    if (tab === "archived") setStatusFilter("all");
+    if (tab === "archived") {
+      setStatusFilter("all");
+      setPriorityFilter("all");
+    }
   }, [tab]);
 
   useEffect(() => {
@@ -81,6 +110,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
       .select("*")
       .eq("is_archived", tab === "archived")
       .order("is_pinned", { ascending: false })
+      .order("position", { ascending: true })
       .order("updated_at", { ascending: false });
 
     if (error) {
@@ -102,33 +132,45 @@ export function NoteList({ initialNotes }: NoteListProps) {
   }, [fetchNotes]);
 
   // Silent refetch on Realtime events (no skeleton, dedup with manual fetches)
+  // Skip during drag to prevent stale positions from reverting optimistic updates.
   const realtimeFetch = useCallback(() => {
+    if (isDraggingRef.current) return;
     if (Date.now() - lastFetchRef.current < 500) return;
     void fetchNotes(true);
-  }, [fetchNotes]);
+  }, [fetchNotes, isDraggingRef]);
 
   useRealtimeTable("notes", realtimeFetch);
 
   // ── CRUD handlers ──────────────────────────────────────────────────────
 
-  async function handleCreate(data: { title: string; content: string; status?: NoteStatus }) {
+  async function handleCreate(data: { title: string; content: string; status?: NoteStatus; priority?: NotePriority }) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Sesion expirada");
+
+    // New note at the top: position before the lowest existing position
+    const minPosition = notes.reduce<string | null>((min, n) => {
+      if (!n.position) return min;
+      if (min === null || n.position < min) return n.position;
+      return min;
+    }, null);
+    const position = generateKeyBetween(null, minPosition);
 
     const { error } = await supabase.from("notes").insert({
       profile_id: user.id,
       title: data.title || null,
       content: data.content,
       status: data.status ?? "active",
+      priority: data.priority ?? "normal",
+      position,
     });
 
     if (error) throw new Error(error.message);
     await fetchNotes();
   }
 
-  async function handleUpdate(data: { title: string; content: string; status?: NoteStatus }) {
+  async function handleUpdate(data: { title: string; content: string; status?: NoteStatus; priority?: NotePriority }) {
     if (!editingNote) return;
 
     const { error } = await supabase
@@ -137,6 +179,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
         title: data.title || null,
         content: data.content,
         status: data.status ?? editingNote.status,
+        priority: data.priority ?? editingNote.priority,
         updated_at: new Date().toISOString(),
       })
       .eq("id", editingNote.id);
@@ -251,6 +294,28 @@ export function NoteList({ initialNotes }: NoteListProps) {
     }
   }
 
+  async function handlePriorityChange(noteId: string, priority: NotePriority) {
+    const oldNote = notes.find((n) => n.id === noteId);
+    if (!oldNote) return;
+
+    // Optimistic update
+    setNotes((prev) =>
+      prev.map((n) => (n.id === noteId ? { ...n, priority } : n)),
+    );
+
+    const { error } = await supabase
+      .from("notes")
+      .update({ priority, updated_at: new Date().toISOString() })
+      .eq("id", noteId);
+
+    if (error) {
+      setNotes((prev) =>
+        prev.map((n) => (n.id === noteId ? { ...n, priority: oldNote.priority } : n)),
+      );
+      toast.error("Error al cambiar la prioridad");
+    }
+  }
+
   // ── Debounced search ─────────────────────────────────────────────────
 
   function handleSearchChange(value: string) {
@@ -270,6 +335,8 @@ export function NoteList({ initialNotes }: NoteListProps) {
   const filteredNotes = useMemo(() => notes.filter((note) => {
     // Status filter
     if (statusFilter !== "all" && note.status !== statusFilter) return false;
+    // Priority filter
+    if (priorityFilter !== "all" && note.priority !== priorityFilter) return false;
     // Tag filter
     if (selectedTag && !note.tags.some((t) => t === selectedTag)) return false;
     // Text search
@@ -280,7 +347,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
       note.content.toLowerCase().includes(q) ||
       note.tags.some((t) => t.toLowerCase().includes(q))
     );
-  }), [notes, statusFilter, selectedTag, search]);
+  }), [notes, statusFilter, priorityFilter, selectedTag, search]);
 
   // ── Grouped notes (by tag) ─────────────────────────────────────────────
 
@@ -309,6 +376,12 @@ export function NoteList({ initialNotes }: NoteListProps) {
     return sorted;
   }, [filteredNotes, groupMode]);
 
+  // ── Pinned / unpinned split ──────────────────────────────────────────
+
+  const pinnedNotes = useMemo(() => filteredNotes.filter((n) => n.is_pinned), [filteredNotes]);
+  const unpinnedNotes = useMemo(() => filteredNotes.filter((n) => !n.is_pinned), [filteredNotes]);
+  const hasPinnedAndUnpinned = pinnedNotes.length > 0 && unpinnedNotes.length > 0;
+
   // ── Render helpers ───────────────────────────────────────────────────
 
   const gridClass =
@@ -332,6 +405,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
         onTogglePin={handleTogglePin}
         onArchive={handleArchive}
         onStatusChange={handleStatusChange}
+        onPriorityChange={handlePriorityChange}
         onTagClick={setSelectedTag}
       />
     ));
@@ -455,6 +529,11 @@ export function NoteList({ initialNotes }: NoteListProps) {
         </div>
       )}
 
+      {/* Priority filter pills (only on active tab, like status filter) */}
+      {tab === "active" && (
+        <NotePriorityFilter value={priorityFilter} onChange={setPriorityFilter} />
+      )}
+
       {/* Active tag filter */}
       {selectedTag && (
         <div className="flex items-center gap-2">
@@ -483,20 +562,22 @@ export function NoteList({ initialNotes }: NoteListProps) {
           <h3 className="text-lg font-semibold">
             {tab === "archived"
               ? "No hay notas archivadas"
-              : search || selectedTag || statusFilter !== "all"
+              : search || selectedTag || statusFilter !== "all" || priorityFilter !== "all"
                 ? "No se encontraron notas"
                 : "No tienes notas aun"}
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            {tab === "active" && !search && !selectedTag && statusFilter === "all"
+            {tab === "active" && !search && !selectedTag && statusFilter === "all" && priorityFilter === "all"
               ? 'Envia un mensaje por WhatsApp como "Guarda una nota: comprar leche" o crea una aqui.'
               : statusFilter !== "all"
                 ? `No hay notas con estado "${NOTE_STATUS_CONFIG[statusFilter as NoteStatus].label}".`
-                : selectedTag
-                  ? "No hay notas con esta etiqueta."
-                  : "Intenta con otro termino de busqueda."}
+                : priorityFilter !== "all"
+                  ? "No hay notas con esta prioridad."
+                  : selectedTag
+                    ? "No hay notas con esta etiqueta."
+                    : "Intenta con otro termino de busqueda."}
           </p>
-          {tab === "active" && !search && !selectedTag && statusFilter === "all" && (
+          {tab === "active" && !search && !selectedTag && statusFilter === "all" && priorityFilter === "all" && (
             <Button
               onClick={() => {
                 setEditingNote(null);
@@ -510,11 +591,89 @@ export function NoteList({ initialNotes }: NoteListProps) {
         </div>
       )}
 
-      {/* Notes — flat view */}
+      {/* Notes — flat view with drag & drop */}
       {!isLoading && filteredNotes.length > 0 && groupedNotes === null && (
-        <div className={gridClass}>
-          {renderNoteCards(filteredNotes)}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <SortableContext
+            items={filteredNotes.map((n) => n.id)}
+            strategy={viewMode === "grid" ? rectSortingStrategy : verticalListSortingStrategy}
+          >
+            <div className="space-y-3" role="list" aria-label="Lista de notas ordenable">
+              {/* Pinned section */}
+              {hasPinnedAndUnpinned && (
+                <div className="text-xs text-muted-foreground font-medium flex items-center gap-2">
+                  <span>Fijadas ({pinnedNotes.length})</span>
+                  <div className="flex-1 border-t border-border/50" />
+                </div>
+              )}
+              {pinnedNotes.length > 0 && (
+                <div className={gridClass}>
+                  {pinnedNotes.map((note, idx) => (
+                    <NoteSortableCard
+                      key={note.id}
+                      note={note}
+                      index={idx + 1}
+                      layout={viewMode}
+                      disabled={dragDisabled}
+                      onView={setViewingNote}
+                      onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+                      onDelete={handleDelete}
+                      onTogglePin={handleTogglePin}
+                      onArchive={handleArchive}
+                      onStatusChange={handleStatusChange}
+                      onPriorityChange={handlePriorityChange}
+                      onTagClick={setSelectedTag}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Separator between pinned and unpinned */}
+              {hasPinnedAndUnpinned && (
+                <div className="border-t border-dashed border-border/60" />
+              )}
+
+              {/* Unpinned section */}
+              {hasPinnedAndUnpinned && (
+                <div className="text-xs text-muted-foreground font-medium flex items-center gap-2">
+                  <span>Otras ({unpinnedNotes.length})</span>
+                  <div className="flex-1 border-t border-border/50" />
+                </div>
+              )}
+              {unpinnedNotes.length > 0 && (
+                <div className={gridClass}>
+                  {unpinnedNotes.map((note, idx) => (
+                    <NoteSortableCard
+                      key={note.id}
+                      note={note}
+                      index={pinnedNotes.length + idx + 1}
+                      layout={viewMode}
+                      disabled={dragDisabled}
+                      onView={setViewingNote}
+                      onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+                      onDelete={handleDelete}
+                      onTogglePin={handleTogglePin}
+                      onArchive={handleArchive}
+                      onStatusChange={handleStatusChange}
+                      onPriorityChange={handlePriorityChange}
+                      onTagClick={setSelectedTag}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </SortableContext>
+
+          <DragOverlay>
+            {activeNote && <NoteDragOverlay note={activeNote} layout={viewMode} />}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* Notes — grouped by tag */}

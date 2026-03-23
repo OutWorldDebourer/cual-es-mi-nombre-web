@@ -30,6 +30,8 @@ function makeNote(overrides: Partial<Note> = {}): Note {
     content: "This is a test note content",
     tags: [],
     status: "active",
+    priority: "normal",
+    position: "a0",
     is_pinned: false,
     is_archived: false,
     created_at: "2026-03-01T12:00:00Z",
@@ -39,6 +41,7 @@ function makeNote(overrides: Partial<Note> = {}): Note {
 }
 
 const defaultProps = {
+  onView: vi.fn(),
   onEdit: vi.fn(),
   onDelete: vi.fn(),
   onTogglePin: vi.fn(),
