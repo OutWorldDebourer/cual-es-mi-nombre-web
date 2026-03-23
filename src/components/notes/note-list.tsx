@@ -15,7 +15,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
-import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
+import { DndContext, closestCenter, closestCorners, DragOverlay, type Announcements } from "@dnd-kit/core";
 import {
   SortableContext,
   rectSortingStrategy,
@@ -25,8 +25,7 @@ import type { Note, NoteStatus, NotePriority } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { generateKeyBetween } from "@/lib/fractional-index";
 import { useRealtimeTable } from "@/hooks/use-realtime-table";
-import { useNoteDrag } from "@/hooks/use-note-drag";
-import { NoteCard } from "@/components/notes/note-card";
+import { useNoteDrag, parseCompositeId } from "@/hooks/use-note-drag";
 import { NoteSortableCard } from "@/components/notes/note-sortable-card";
 import { NoteDragOverlay } from "@/components/notes/note-drag-overlay";
 import { NoteForm } from "@/components/notes/note-form";
@@ -40,7 +39,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { FolderOpen, LayoutGrid, List, Search, StickyNote, Tag, X } from "lucide-react";
+import { Archive, Columns3, FolderOpen, LayoutGrid, List, Search, StickyNote, Tag, X } from "lucide-react";
+import { NoteBoardView } from "@/components/notes/note-board-view";
 
 interface NoteListProps {
   /** Initial notes from server-side fetch (SSR hydration) */
@@ -48,25 +48,51 @@ interface NoteListProps {
 }
 
 type NoteTab = "active" | "archived";
-type ViewMode = "grid" | "list";
+type ViewMode = "grid" | "list" | "board";
 type StatusFilter = "all" | NoteStatus;
 type PriorityFilter = "all" | NotePriority;
 type GroupMode = "none" | "tag";
+
+const dndScreenReaderInstructions = {
+  draggable: "Para mover una nota, presiona espacio o enter. Usa las flechas para moverla. Presiona espacio o enter de nuevo para soltarla, o escape para cancelar.",
+};
+
+function readStorage<T extends string>(key: string, fallback: T, validValues: readonly T[]): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as string;
+    return (validValues as readonly string[]).includes(parsed) ? (parsed as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export function NoteList({ initialNotes }: NoteListProps) {
   const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<NoteTab>("active");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => readStorage("notes-viewMode", "grid", ["grid", "list", "board"] as const));
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
-  const [groupMode, setGroupMode] = useState<GroupMode>("none");
+  const [groupMode, setGroupModeState] = useState<GroupMode>(() => readStorage("notes-groupMode", "none", ["none", "tag"] as const));
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeState(mode);
+    try { localStorage.setItem("notes-viewMode", JSON.stringify(mode)); } catch { /* noop */ }
+  }, []);
+
+  const setGroupMode = useCallback((mode: GroupMode) => {
+    setGroupModeState(mode);
+    try { localStorage.setItem("notes-groupMode", JSON.stringify(mode)); } catch { /* noop */ }
+  }, []);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastFetchRef = useRef(0);
@@ -83,9 +109,45 @@ export function NoteList({ initialNotes }: NoteListProps) {
     handleDragStart,
     handleDragEnd,
     handleDragCancel,
-  } = useNoteDrag({ notes, setNotes });
+  } = useNoteDrag({
+    notes,
+    setNotes,
+    boardMode: viewMode === "board",
+    groupMode: groupMode === "tag",
+  });
 
   const dragDisabled = !!search;
+
+  // Build announcements with access to notes for human-readable titles
+  const dndAnnouncements = useMemo((): Announcements => {
+    function resolveLabel(id: string | number): string {
+      const raw = String(id);
+      // Board column droppable IDs: "column-active", "column-en_curso", etc.
+      if (raw.startsWith("column-")) {
+        const status = raw.slice(7) as NoteStatus;
+        return `columna ${NOTE_STATUS_CONFIG[status]?.label ?? status}`;
+      }
+      const noteId = parseCompositeId(raw)?.noteId ?? raw;
+      const note = notes.find((n) => n.id === noteId);
+      return note?.title || "Sin titulo";
+    }
+    return {
+      onDragStart({ active }) {
+        return `Nota seleccionada: ${resolveLabel(active.id)}. Usa las flechas para moverla.`;
+      },
+      onDragOver({ active, over }) {
+        if (over) return `Nota ${resolveLabel(active.id)} sobre ${resolveLabel(over.id)}.`;
+        return `Nota ${resolveLabel(active.id)} fuera de una zona valida.`;
+      },
+      onDragEnd({ active, over }) {
+        if (over) return `Nota ${resolveLabel(active.id)} colocada junto a ${resolveLabel(over.id)}.`;
+        return `Nota ${resolveLabel(active.id)} regresada a su posicion original.`;
+      },
+      onDragCancel({ active }) {
+        return `Movimiento cancelado. Nota ${resolveLabel(active.id)} regresada a su posicion original.`;
+      },
+    };
+  }, [notes]);
 
   // ── Reset filters on tab/tag changes ───────────────────────────────────
 
@@ -98,7 +160,15 @@ export function NoteList({ initialNotes }: NoteListProps) {
 
   useEffect(() => {
     if (selectedTag) setGroupMode("none");
-  }, [selectedTag]);
+  }, [selectedTag, setGroupMode]);
+
+  // Board and group-by-tag are mutually exclusive; board shows all statuses
+  useEffect(() => {
+    if (viewMode === "board") {
+      setGroupMode("none");
+      setStatusFilter("all");
+    }
+  }, [viewMode, setGroupMode]);
 
   // ── Fetch notes from Supabase ──────────────────────────────────────────
 
@@ -384,32 +454,13 @@ export function NoteList({ initialNotes }: NoteListProps) {
 
   // ── Render helpers ───────────────────────────────────────────────────
 
+  // Card layout for non-board views (board uses compact via NoteBoardColumn)
+  const cardLayout = viewMode === "board" ? "grid" as const : viewMode;
+
   const gridClass =
     viewMode === "grid"
       ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       : "flex flex-col gap-3";
-
-  function renderNoteCards(notesToRender: Note[], startIndex = 0, keyPrefix = "") {
-    return notesToRender.map((note, idx) => (
-      <NoteCard
-        key={keyPrefix ? `${keyPrefix}-${note.id}` : note.id}
-        note={note}
-        index={startIndex + idx + 1}
-        layout={viewMode}
-        onView={setViewingNote}
-        onEdit={(n) => {
-          setEditingNote(n);
-          setFormOpen(true);
-        }}
-        onDelete={handleDelete}
-        onTogglePin={handleTogglePin}
-        onArchive={handleArchive}
-        onStatusChange={handleStatusChange}
-        onPriorityChange={handlePriorityChange}
-        onTagClick={setSelectedTag}
-      />
-    ));
-  }
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -423,8 +474,16 @@ export function NoteList({ initialNotes }: NoteListProps) {
             onValueChange={(v) => setTab(v as NoteTab)}
           >
             <TabsList>
-              <TabsTrigger value="active">Activas</TabsTrigger>
-              <TabsTrigger value="archived">Archivadas</TabsTrigger>
+              <TabsTrigger value="active" className="text-xs sm:text-sm">
+                <StickyNote className="h-3.5 w-3.5 sm:hidden" />
+                <span className="hidden sm:inline">Activas</span>
+                <span className="sm:hidden">Act.</span>
+              </TabsTrigger>
+              <TabsTrigger value="archived" className="text-xs sm:text-sm">
+                <Archive className="h-3.5 w-3.5 sm:hidden" />
+                <span className="hidden sm:inline">Archivadas</span>
+                <span className="sm:hidden">Arch.</span>
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           <div className="flex border rounded-md" role="group" aria-label="Vista de notas">
@@ -463,11 +522,26 @@ export function NoteList({ initialNotes }: NoteListProps) {
                 <Button
                   variant="ghost"
                   size="icon-xs"
+                  onClick={() => setViewMode("board")}
+                  className={`rounded-none border-r ${viewMode === "board" ? "bg-muted" : ""}`}
+                  aria-label="Vista tablero"
+                  aria-pressed={viewMode === "board"}
+                >
+                  <Columns3 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Tablero</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => setGroupMode(groupMode === "none" ? "tag" : "none")}
                   className={`rounded-l-none ${groupMode === "tag" ? "bg-muted" : ""}`}
                   aria-label="Agrupar por etiqueta"
                   aria-pressed={groupMode === "tag"}
-                  disabled={!!selectedTag}
+                  disabled={!!selectedTag || viewMode === "board"}
                 >
                   <FolderOpen className="h-4 w-4" />
                 </Button>
@@ -482,10 +556,10 @@ export function NoteList({ initialNotes }: NoteListProps) {
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar notas..."
+              placeholder="Buscar..."
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-8 pr-8"
+              className="pl-8 pr-8 text-sm"
               aria-label="Buscar notas"
             />
             {searchInput && (
@@ -498,14 +572,19 @@ export function NoteList({ initialNotes }: NoteListProps) {
               </button>
             )}
           </div>
-          <Button onClick={() => { setEditingNote(null); setFormOpen(true); }}>
-            + Nueva
+          <Button
+            onClick={() => { setEditingNote(null); setFormOpen(true); }}
+            className="shrink-0"
+            aria-label="Crear nueva nota"
+          >
+            <span className="sm:hidden">+</span>
+            <span className="hidden sm:inline">+ Nueva</span>
           </Button>
         </div>
       </div>
 
-      {/* Status filter pills (only on active tab) */}
-      {tab === "active" && (
+      {/* Status filter pills (only on active tab, hidden in board mode) */}
+      {tab === "active" && viewMode !== "board" && (
         <div className="flex items-center gap-1.5 flex-wrap">
           <Badge
             variant={statusFilter === "all" ? "default" : "outline"}
@@ -591,14 +670,43 @@ export function NoteList({ initialNotes }: NoteListProps) {
         </div>
       )}
 
+      {/* Notes — board view */}
+      {!isLoading && filteredNotes.length > 0 && viewMode === "board" && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+          accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
+        >
+          <NoteBoardView
+            notes={filteredNotes}
+            dragDisabled={dragDisabled}
+            onView={setViewingNote}
+            onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+            onDelete={handleDelete}
+            onTogglePin={handleTogglePin}
+            onArchive={handleArchive}
+            onStatusChange={handleStatusChange}
+            onPriorityChange={handlePriorityChange}
+            onTagClick={setSelectedTag}
+          />
+          <DragOverlay>
+            {activeNote && <NoteDragOverlay note={activeNote} layout="compact" />}
+          </DragOverlay>
+        </DndContext>
+      )}
+
       {/* Notes — flat view with drag & drop */}
-      {!isLoading && filteredNotes.length > 0 && groupedNotes === null && (
+      {!isLoading && filteredNotes.length > 0 && viewMode !== "board" && groupedNotes === null && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
         >
           <SortableContext
             items={filteredNotes.map((n) => n.id)}
@@ -619,7 +727,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
                       key={note.id}
                       note={note}
                       index={idx + 1}
-                      layout={viewMode}
+                      layout={cardLayout}
                       disabled={dragDisabled}
                       onView={setViewingNote}
                       onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
@@ -653,7 +761,7 @@ export function NoteList({ initialNotes }: NoteListProps) {
                       key={note.id}
                       note={note}
                       index={pinnedNotes.length + idx + 1}
-                      layout={viewMode}
+                      layout={cardLayout}
                       disabled={dragDisabled}
                       onView={setViewingNote}
                       onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
@@ -671,22 +779,56 @@ export function NoteList({ initialNotes }: NoteListProps) {
           </SortableContext>
 
           <DragOverlay>
-            {activeNote && <NoteDragOverlay note={activeNote} layout={viewMode} />}
+            {activeNote && <NoteDragOverlay note={activeNote} layout={cardLayout} />}
           </DragOverlay>
         </DndContext>
       )}
 
-      {/* Notes — grouped by tag */}
-      {!isLoading && filteredNotes.length > 0 && groupedNotes !== null && (
-        <div className="space-y-6">
-          {groupedNotes.map(([tag, groupNotes]) => (
-            <NoteGroupSection key={tag} tag={tag} count={groupNotes.length}>
-              <div className={gridClass}>
-                {renderNoteCards(groupNotes, 0, tag)}
-              </div>
-            </NoteGroupSection>
-          ))}
-        </div>
+      {/* Notes — grouped by tag with drag & drop */}
+      {!isLoading && filteredNotes.length > 0 && viewMode !== "board" && groupedNotes !== null && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+          accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
+        >
+          <div className="space-y-6">
+            {groupedNotes.map(([tag, groupNotes]) => (
+              <NoteGroupSection key={tag} tag={tag} count={groupNotes.length}>
+                <SortableContext
+                  items={groupNotes.map((n) => `${tag}::${n.id}`)}
+                  strategy={viewMode === "grid" ? rectSortingStrategy : verticalListSortingStrategy}
+                >
+                  <div className={gridClass}>
+                    {groupNotes.map((note, idx) => (
+                      <NoteSortableCard
+                        key={`${tag}-${note.id}`}
+                        note={note}
+                        sortableId={`${tag}::${note.id}`}
+                        index={idx + 1}
+                        layout={cardLayout}
+                        disabled={dragDisabled}
+                        onView={setViewingNote}
+                        onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+                        onDelete={handleDelete}
+                        onTogglePin={handleTogglePin}
+                        onArchive={handleArchive}
+                        onStatusChange={handleStatusChange}
+                        onPriorityChange={handlePriorityChange}
+                        onTagClick={setSelectedTag}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </NoteGroupSection>
+            ))}
+          </div>
+          <DragOverlay>
+            {activeNote && <NoteDragOverlay note={activeNote} layout={cardLayout} />}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* View dialog (read-only) */}

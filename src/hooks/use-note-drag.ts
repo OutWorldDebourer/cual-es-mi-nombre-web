@@ -29,9 +29,24 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { generateKeyBetween } from "@/lib/fractional-index";
 import { compareNotes } from "@/hooks/use-note-sort";
-import type { Note } from "@/types/database";
+import type { Note, NoteStatus } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+
+const COLUMN_PREFIX = "column-";
+const COMPOSITE_SEP = "::";
+
+/** Parse a composite ID "tag::noteId" into parts. Returns null for plain IDs. */
+export function parseCompositeId(id: string): { tag: string; noteId: string } | null {
+  const idx = id.indexOf(COMPOSITE_SEP);
+  if (idx === -1) return null;
+  return { tag: id.slice(0, idx), noteId: id.slice(idx + COMPOSITE_SEP.length) };
+}
+
+/** Extract the real note ID from a potentially composite ID. */
+function toNoteId(id: string): string {
+  return parseCompositeId(id)?.noteId ?? id;
+}
 
 // ── Pure computation — extracted for testability and Phase 5/6 reuse ────
 
@@ -73,11 +88,76 @@ export function computeDragMove(
   const newIsPinned = crossedPinBoundary ? overNote.is_pinned : draggedNote.is_pinned;
 
   const filtered = notes.filter((n) => n.id !== activeId);
-  const leftPos = filtered[newIndex - 1]?.position || null;
-  const rightPos = filtered[newIndex]?.position || null;
+  const leftPos = filtered[newIndex - 1]?.position ?? null;
+  const rightPos = filtered[newIndex]?.position ?? null;
   const newPosition = generateKeyBetween(leftPos, rightPos);
 
   return { newPosition, newIsPinned, crossedPinBoundary };
+}
+
+// ── Board (multi-container) computation ──────────────────────────────────
+
+export interface BoardDragMoveResult {
+  newPosition: string;
+  newStatus: NoteStatus;
+  statusChanged: boolean;
+}
+
+/**
+ * Compute the new position and status after a board drag operation.
+ *
+ * Handles 3 scenarios:
+ * 1. Drop on empty column (overId = "column-{status}") → append at end
+ * 2. Drop on item in different column → insert near that item, change status
+ * 3. Reorder within same column → position relative to neighbors
+ *
+ * Returns null if the drag should be ignored.
+ */
+export function computeBoardDragMove(
+  notes: Note[],
+  activeId: string,
+  overId: string,
+): BoardDragMoveResult | null {
+  const activeNote = notes.find((n) => n.id === activeId);
+  if (!activeNote) return null;
+
+  // Case 1: Dropped on a column droppable (empty zone)
+  if (typeof overId === "string" && overId.startsWith(COLUMN_PREFIX)) {
+    const targetStatus = overId.slice(COLUMN_PREFIX.length) as NoteStatus;
+    const columnNotes = notes
+      .filter((n) => n.status === targetStatus && n.id !== activeId)
+      .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0));
+
+    const lastPos = columnNotes.at(-1)?.position ?? null;
+    const newPosition = generateKeyBetween(lastPos, null);
+    return {
+      newPosition,
+      newStatus: targetStatus,
+      statusChanged: activeNote.status !== targetStatus,
+    };
+  }
+
+  // Over target is a note
+  const overNote = notes.find((n) => n.id === overId);
+  if (!overNote) return null;
+  if (activeId === overId) return null;
+
+  const targetStatus = overNote.status;
+  const statusChanged = activeNote.status !== targetStatus;
+
+  // Get column notes (excluding the active item), sorted by position
+  const columnNotes = notes
+    .filter((n) => n.status === targetStatus && n.id !== activeId)
+    .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0));
+
+  const overIndex = columnNotes.findIndex((n) => n.id === overId);
+  if (overIndex === -1) return null;
+
+  const leftPos = columnNotes[overIndex - 1]?.position ?? null;
+  const rightPos = columnNotes[overIndex]?.position ?? null;
+  const newPosition = generateKeyBetween(leftPos, rightPos);
+
+  return { newPosition, newStatus: targetStatus, statusChanged };
 }
 
 // ── Hook ───────────────────────────────────────────────────────────────
@@ -85,9 +165,11 @@ export function computeDragMove(
 interface UseNoteDragOptions {
   notes: Note[];
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
+  boardMode?: boolean;
+  groupMode?: boolean;
 }
 
-export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
+export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = false }: UseNoteDragOptions) {
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const isDraggingRef = useRef(false);
 
@@ -96,7 +178,7 @@ export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
       activationConstraint: { distance: 5 },
     }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 250, tolerance: 5 },
+      activationConstraint: { delay: 200, tolerance: 8 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -105,7 +187,8 @@ export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
-      const note = notes.find((n) => n.id === event.active.id);
+      const noteId = toNoteId(event.active.id as string);
+      const note = notes.find((n) => n.id === noteId);
       if (note) {
         setActiveNote(note);
         isDraggingRef.current = true;
@@ -124,9 +207,85 @@ export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
         return;
       }
 
+      const rawActiveId = active.id as string;
+      const rawOverId = over.id as string;
+
+      // ── Group mode: parse composite IDs, block cross-group ──
+      const activeNoteId = toNoteId(rawActiveId);
+      const overNoteId = toNoteId(rawOverId);
+
+      if (groupMode) {
+        const activeParsed = parseCompositeId(rawActiveId);
+        const overParsed = parseCompositeId(rawOverId);
+        if (activeParsed && overParsed && activeParsed.tag !== overParsed.tag) {
+          // Cross-group drag blocked (DA-4)
+          isDraggingRef.current = false;
+          return;
+        }
+      }
+
+      const overId = overNoteId;
+      const activeId = activeNoteId;
+      const isBoardDrop = boardMode && (
+        rawOverId.startsWith(COLUMN_PREFIX) ||
+        notes.find((n) => n.id === overId)?.status !== notes.find((n) => n.id === activeId)?.status
+      );
+
+      // ── Board (multi-container) drag ─────────────────────────
+      if (isBoardDrop) {
+        let boardResult: BoardDragMoveResult | null;
+        try {
+          boardResult = computeBoardDragMove(notes, activeId, overId);
+        } catch {
+          isDraggingRef.current = false;
+          toast.error("Error al calcular posicion");
+          return;
+        }
+
+        if (!boardResult) {
+          isDraggingRef.current = false;
+          return;
+        }
+
+        const { newPosition, newStatus, statusChanged } = boardResult;
+        const snapshot = notes;
+
+        setNotes((prev) => {
+          const updated = prev.map((n) =>
+            n.id === activeId
+              ? { ...n, position: newPosition, status: newStatus }
+              : n,
+          );
+          return updated.sort(compareNotes);
+        });
+
+        try {
+          const supabase = createClient();
+          const updatePayload: { position: string; status?: NoteStatus } = { position: newPosition };
+          if (statusChanged) updatePayload.status = newStatus;
+
+          const { error } = await supabase
+            .from("notes")
+            .update(updatePayload)
+            .eq("id", activeId);
+
+          if (error) {
+            setNotes(snapshot);
+            toast.error("Error al guardar orden");
+          }
+        } catch {
+          setNotes(snapshot);
+          toast.error("Error al guardar orden");
+        } finally {
+          isDraggingRef.current = false;
+        }
+        return;
+      }
+
+      // ── Flat (single-container) drag ─────────────────────────
       let result: DragMoveResult | null;
       try {
-        result = computeDragMove(notes, active.id as string, over.id as string);
+        result = computeDragMove(notes, activeId, overId);
       } catch {
         isDraggingRef.current = false;
         toast.error("Error al calcular posicion");
@@ -139,22 +298,17 @@ export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
       }
 
       const { newPosition, newIsPinned, crossedPinBoundary } = result;
-
-      // Snapshot for revert on failure
       const snapshot = notes;
 
-      // Optimistic update + re-sort
       setNotes((prev) => {
         const updated = prev.map((n) =>
-          n.id === active.id
+          n.id === activeId
             ? { ...n, position: newPosition, is_pinned: newIsPinned }
             : n,
         );
         return updated.sort(compareNotes);
       });
 
-      // Persist to Supabase — try/finally guarantees isDraggingRef is released
-      // even if the network call throws (browser offline, etc.)
       try {
         const supabase = createClient();
         const updatePayload: { position: string; is_pinned?: boolean } = { position: newPosition };
@@ -163,7 +317,7 @@ export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
         const { error } = await supabase
           .from("notes")
           .update(updatePayload)
-          .eq("id", active.id as string);
+          .eq("id", activeId);
 
         if (error) {
           setNotes(snapshot);
@@ -173,11 +327,10 @@ export function useNoteDrag({ notes, setNotes }: UseNoteDragOptions) {
         setNotes(snapshot);
         toast.error("Error al guardar orden");
       } finally {
-        // Release Realtime AFTER the DB write completes
         isDraggingRef.current = false;
       }
     },
-    [notes, setNotes],
+    [notes, setNotes, boardMode, groupMode],
   );
 
   const handleDragCancel = useCallback(() => {

@@ -45,7 +45,7 @@ import {
 import { GripVertical } from "lucide-react";
 import type { DraggableSyntheticListeners } from "@dnd-kit/core";
 
-type NoteLayout = "grid" | "list";
+type NoteLayout = "grid" | "list" | "compact";
 
 import { tagColor } from "@/components/notes/note-tag-colors";
 
@@ -95,7 +95,7 @@ export function NoteCard({
     </Tooltip>
   ) : null;
 
-  const maxPreview = layout === "list" ? 120 : 200;
+  const maxPreview = layout === "compact" ? 100 : layout === "list" ? 120 : 200;
   const contentPreview =
     note.content.length > maxPreview
       ? note.content.slice(0, maxPreview) + "…"
@@ -203,13 +203,94 @@ export function NoteCard({
   const dragHandle = dragHandleListeners ? (
     <button
       {...dragHandleListeners}
-      className="touch-none transition-opacity duration-150 opacity-0 group-hover:opacity-50 hover:!opacity-100 max-md:opacity-30 cursor-grab active:cursor-grabbing shrink-0"
+      className="touch-none transition-all duration-150 opacity-0 group-hover:opacity-50 hover:!opacity-100 max-md:opacity-30 cursor-grab active:cursor-grabbing active:scale-110 shrink-0 rounded p-0.5 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
       aria-label="Arrastrar para reordenar"
       onClick={(e) => e.stopPropagation()}
     >
       <GripVertical className="h-4 w-4 text-muted-foreground" />
     </button>
   ) : null;
+
+  if (layout === "compact") {
+    return (
+      <>
+        <Card
+          className={`group transition-shadow hover:shadow-md cursor-pointer ${
+            note.is_pinned ? "border-primary/40 bg-primary/5" : ""
+          } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
+          onClick={() => onView(note)}
+        >
+          <CardHeader className="px-3 py-2 pb-1">
+            <div className="flex items-start justify-between gap-1">
+              {dragHandle}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1">
+                  {priorityDot}
+                  <CardTitle className="text-sm truncate">
+                    {note.is_pinned && (
+                      <span className="mr-1" aria-label="Fijada">
+                        📌
+                      </span>
+                    )}
+                    {note.title || "Sin título"}
+                  </CardTitle>
+                </div>
+              </div>
+              {actionsMenu}
+            </div>
+          </CardHeader>
+          <CardContent className="px-3 pb-2 pt-0">
+            <p className={`text-xs text-muted-foreground line-clamp-2 ${
+              note.status === "completed" ? "line-through opacity-60" : ""
+            }`}>
+              {contentPreview}
+            </p>
+            {note.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {note.tags.slice(0, 2).map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className={`text-[10px] px-1.5 py-0 cursor-pointer transition-colors ${tagColor(tag)}`}
+                    onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+                {note.tags.length > 2 && (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                    +{note.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar esta nota?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción no se puede deshacer. La nota &quot;
+                {note.title || "Sin título"}&quot; será eliminada
+                permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => onDelete(note.id)}
+                className="bg-destructive text-white hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
+    );
+  }
 
   if (layout === "list") {
     return (

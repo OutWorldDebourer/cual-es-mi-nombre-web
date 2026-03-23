@@ -14,12 +14,12 @@ import type { Note } from "@/types/database";
 
 interface NoteDragOverlayProps {
   note: Note;
-  layout: "grid" | "list";
+  layout: "grid" | "list" | "compact";
 }
 
 export function NoteDragOverlay({ note, layout }: NoteDragOverlayProps) {
   return (
-    <div className="shadow-lg rotate-2 scale-[1.03] opacity-[0.92] border-2 border-primary rounded-lg cursor-grabbing pointer-events-none">
+    <div className="drag-overlay-enter opacity-[0.92] border-2 border-primary rounded-lg cursor-grabbing pointer-events-none">
       <NoteCard
         note={note}
         layout={layout}

@@ -17,8 +17,10 @@ import type { Note, NoteStatus, NotePriority } from "@/types/database";
 
 interface NoteSortableCardProps {
   note: Note;
+  /** Override dnd-kit sortable ID (default: note.id). Use for composite IDs like "tag::noteId". */
+  sortableId?: string;
   index?: number;
-  layout: "grid" | "list";
+  layout: "grid" | "list" | "compact";
   disabled?: boolean;
   onView: (note: Note) => void;
   onEdit: (note: Note) => void;
@@ -32,6 +34,7 @@ interface NoteSortableCardProps {
 
 export function NoteSortableCard({
   note,
+  sortableId,
   index,
   layout,
   disabled = false,
@@ -51,7 +54,7 @@ export function NoteSortableCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: note.id, disabled });
+  } = useSortable({ id: sortableId ?? note.id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -61,7 +64,7 @@ export function NoteSortableCard({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
+    <div ref={setNodeRef} style={style} {...attributes} aria-roledescription="elemento ordenable">
       <NoteCard
         note={note}
         index={index}
