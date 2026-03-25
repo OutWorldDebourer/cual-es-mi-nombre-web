@@ -629,6 +629,9 @@ export function NoteList({ initialNotes }: NoteListProps) {
         </div>
       )}
 
+      {/* Tab content with fade transition */}
+      <div key={tab} className="animate-in fade-in duration-150">
+
       {/* Loading */}
       {isLoading && <NotesGridSkeleton count={6} />}
 
@@ -830,6 +833,8 @@ export function NoteList({ initialNotes }: NoteListProps) {
           </DragOverlay>
         </DndContext>
       )}
+
+      </div>{/* end tab fade wrapper */}
 
       {/* View dialog (read-only) */}
       <NoteViewDialog

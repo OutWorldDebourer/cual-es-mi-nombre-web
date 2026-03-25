@@ -289,6 +289,9 @@ export function ReminderList({
         </div>
       </div>
 
+      {/* Tab content with fade transition */}
+      <div key={tab} className="animate-in fade-in duration-150">
+
       {/* Loading */}
       {isLoading && <RemindersListSkeleton count={4} />}
 
@@ -348,6 +351,8 @@ export function ReminderList({
           ))}
         </div>
       )}
+
+      </div>{/* end tab fade wrapper */}
 
       {/* View dialog (read-only) */}
       <ReminderViewDialog
