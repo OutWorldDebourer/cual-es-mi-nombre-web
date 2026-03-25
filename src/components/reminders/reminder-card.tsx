@@ -104,32 +104,16 @@ export function ReminderCard({
         }`}
         onClick={() => onView(reminder)}
       >
-        <CardHeader className="overflow-hidden pb-2">
-          <div className="flex items-start justify-between gap-2 min-w-0">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-base whitespace-nowrap truncate">
-                {overdue && <span className="mr-1">⚠️</span>}
-                {reminder.status === "sent" && <span className="mr-1">✅</span>}
-                {formatDateTime(reminder.trigger_at, timezone)}
-              </CardTitle>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0 max-w-[50%] min-w-0">
-              {/* Recurring badge */}
-              {reminder.is_recurring && rruleDescription && (
-                <Badge variant="outline" className="text-xs whitespace-nowrap truncate max-w-[120px]">
-                  🔁 {rruleDescription}
-                  {reminder.occurrence_number > 0 && (
-                    <span className="ml-1 opacity-70">
-                      #{reminder.occurrence_number}
-                    </span>
-                  )}
-                </Badge>
-              )}
-              {/* Status badge */}
-              <Badge variant={config.variant} className="whitespace-nowrap shrink-0">{config.label}</Badge>
-              {/* Actions menu */}
-              {(canEdit || canCancel || canDelete) && (
-                <div onClick={(e) => e.stopPropagation()}>
+        <CardHeader className="pb-2">
+          {/* Row 1: Date/time + menu */}
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base whitespace-nowrap shrink-0">
+              {overdue && <span className="mr-1">⚠️</span>}
+              {reminder.status === "sent" && <span className="mr-1">✅</span>}
+              {formatDateTime(reminder.trigger_at, timezone)}
+            </CardTitle>
+            {(canEdit || canCancel || canDelete) && (
+              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -174,9 +158,22 @@ export function ReminderCard({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
+          {/* Row 2: Badges */}
+          <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
+            {reminder.is_recurring && rruleDescription && (
+              <Badge variant="outline" className="text-xs truncate min-w-0">
+                🔁 {rruleDescription}
+                {reminder.occurrence_number > 0 && (
+                  <span className="ml-1 opacity-70">
+                    #{reminder.occurrence_number}
+                  </span>
+                )}
+              </Badge>
+            )}
+            <Badge variant={config.variant} className="whitespace-nowrap shrink-0">{config.label}</Badge>
           </div>
         </CardHeader>
         <CardContent>
