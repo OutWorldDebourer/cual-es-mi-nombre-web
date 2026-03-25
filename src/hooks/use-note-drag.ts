@@ -172,6 +172,9 @@ interface UseNoteDragOptions {
 export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = false }: UseNoteDragOptions) {
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const isDraggingRef = useRef(false);
+  const dragCountRef = useRef(0);
+  const notesRef = useRef(notes);
+  notesRef.current = notes;
   const [recentlyMovedIds, setRecentlyMovedIds] = useState<Set<string>>(new Set());
   const highlightTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -207,13 +210,14 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
       const noteId = toNoteId(event.active.id as string);
-      const note = notes.find((n) => n.id === noteId);
+      const note = notesRef.current.find((n) => n.id === noteId);
       if (note) {
         setActiveNote(note);
+        dragCountRef.current++;
         isDraggingRef.current = true;
       }
     },
-    [notes],
+    [],
   );
 
   const handleDragEnd = useCallback(
@@ -221,8 +225,13 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       const { active, over } = event;
       setActiveNote(null);
 
+      const releaseDrag = () => {
+        dragCountRef.current = Math.max(0, dragCountRef.current - 1);
+        isDraggingRef.current = dragCountRef.current > 0;
+      };
+
       if (!over || active.id === over.id) {
-        isDraggingRef.current = false;
+        releaseDrag();
         return;
       }
 
@@ -237,37 +246,37 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         const activeParsed = parseCompositeId(rawActiveId);
         const overParsed = parseCompositeId(rawOverId);
         if (activeParsed && overParsed && activeParsed.tag !== overParsed.tag) {
-          // Cross-group drag blocked (DA-4)
-          isDraggingRef.current = false;
+          releaseDrag();
           return;
         }
       }
 
       const overId = overNoteId;
       const activeId = activeNoteId;
+      const currentNotes = notesRef.current;
       const isBoardDrop = boardMode && (
         rawOverId.startsWith(COLUMN_PREFIX) ||
-        notes.find((n) => n.id === overId)?.status !== notes.find((n) => n.id === activeId)?.status
+        currentNotes.find((n) => n.id === overId)?.status !== currentNotes.find((n) => n.id === activeId)?.status
       );
 
       // ── Board (multi-container) drag ─────────────────────────
       if (isBoardDrop) {
         let boardResult: BoardDragMoveResult | null;
         try {
-          boardResult = computeBoardDragMove(notes, activeId, overId);
+          boardResult = computeBoardDragMove(currentNotes, activeId, overId);
         } catch {
-          isDraggingRef.current = false;
-          toast.error("Error al calcular posicion");
+          releaseDrag();
+          toast.error("Error al calcular posición");
           return;
         }
 
         if (!boardResult) {
-          isDraggingRef.current = false;
+          releaseDrag();
           return;
         }
 
         const { newPosition, newStatus, statusChanged } = boardResult;
-        const snapshot = notes;
+        const snapshot = currentNotes;
 
         setNotes((prev) => {
           const updated = prev.map((n) =>
@@ -297,7 +306,7 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
           setNotes(snapshot);
           toast.error("Error al guardar orden");
         } finally {
-          isDraggingRef.current = false;
+          releaseDrag();
         }
         return;
       }
@@ -305,20 +314,20 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       // ── Flat (single-container) drag ─────────────────────────
       let result: DragMoveResult | null;
       try {
-        result = computeDragMove(notes, activeId, overId);
+        result = computeDragMove(currentNotes, activeId, overId);
       } catch {
-        isDraggingRef.current = false;
-        toast.error("Error al calcular posicion");
+        releaseDrag();
+        toast.error("Error al calcular posición");
         return;
       }
 
       if (!result) {
-        isDraggingRef.current = false;
+        releaseDrag();
         return;
       }
 
       const { newPosition, newIsPinned, crossedPinBoundary } = result;
-      const snapshot = notes;
+      const snapshot = currentNotes;
 
       setNotes((prev) => {
         const updated = prev.map((n) =>
@@ -348,15 +357,16 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         setNotes(snapshot);
         toast.error("Error al guardar orden");
       } finally {
-        isDraggingRef.current = false;
+        releaseDrag();
       }
     },
-    [notes, setNotes, boardMode, groupMode, markRecentlyMoved],
+    [setNotes, boardMode, groupMode, markRecentlyMoved],
   );
 
   const handleDragCancel = useCallback(() => {
     setActiveNote(null);
-    isDraggingRef.current = false;
+    dragCountRef.current = Math.max(0, dragCountRef.current - 1);
+    isDraggingRef.current = dragCountRef.current > 0;
   }, []);
 
   return {

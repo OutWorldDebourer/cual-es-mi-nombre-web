@@ -59,7 +59,7 @@ export function NoteSortableCard({
   } = useSortable({ id: sortableId ?? note.id, disabled });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : undefined,
     zIndex: isDragging ? 1 : undefined,
