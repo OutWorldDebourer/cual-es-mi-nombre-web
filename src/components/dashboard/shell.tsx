@@ -18,7 +18,6 @@ import { ChatFab } from "@/components/chat/chat-fab";
 import { ChatOverlay } from "@/components/chat/chat-overlay";
 import {
   Home,
-  MessageSquare,
   StickyNote,
   Bell,
   CreditCard,
@@ -50,7 +49,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Inicio", icon: Home, group: "main" },
-  { href: "/dashboard/chat", label: "Chat", icon: MessageSquare, group: "main" },
   { href: "/dashboard/notes", label: "Notas", icon: StickyNote, group: "main" },
   { href: "/dashboard/reminders", label: "Recordatorios", icon: Bell, group: "main" },
   { href: "/dashboard/credits", label: "Creditos", icon: CreditCard, group: "main" },
@@ -349,7 +347,7 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
         </header>
 
         {/* Page content */}
-        <main id="main-content" className="flex-1 p-4 pb-20 md:p-6 md:pb-6">
+        <main id="main-content" className="flex-1 p-4 pb-28 md:p-6 md:pb-6">
           <ApiStatusBanner />
           {children}
         </main>

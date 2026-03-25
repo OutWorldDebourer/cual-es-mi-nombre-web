@@ -4,9 +4,13 @@ import { useEffect, useState } from "react";
 
 type ApiHealthStatus = "checking" | "healthy" | "unreachable" | "unconfigured";
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 3000;
+
 /**
  * Lightweight health-check hook that pings the backend on mount.
- * Returns the API status so the dashboard can show a warning banner if needed.
+ * Retries up to MAX_RETRIES times before reporting unreachable,
+ * preventing false positives from transient network issues.
  */
 export function useApiHealth(): ApiHealthStatus {
   const [status, setStatus] = useState<ApiHealthStatus>("checking");
@@ -19,22 +23,44 @@ export function useApiHealth(): ApiHealthStatus {
       return;
     }
 
-    const controller = new AbortController();
+    let cancelled = false;
 
-    fetch(`${apiUrl}/health`, {
-      method: "GET",
-      signal: controller.signal,
-    })
-      .then((res) => {
-        setStatus(res.ok ? "healthy" : "unreachable");
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          setStatus("unreachable");
+    async function check() {
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (cancelled) return;
+
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+
+          const res = await fetch(`${apiUrl}/health`, {
+            method: "GET",
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+
+          if (!cancelled) {
+            setStatus(res.ok ? "healthy" : "unreachable");
+            return;
+          }
+          return;
+        } catch {
+          // Last attempt failed — report unreachable
+          if (attempt === MAX_RETRIES) {
+            if (!cancelled) setStatus("unreachable");
+            return;
+          }
+          // Wait before retry
+          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         }
-      });
+      }
+    }
 
-    return () => controller.abort();
+    check();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return status;
