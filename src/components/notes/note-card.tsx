@@ -311,7 +311,7 @@ export function NoteCard({
               </span>
             )}
             {/* Title + date + status */}
-            <div className="min-w-0 w-48 shrink-0">
+            <div className="min-w-0 w-32 sm:w-48 shrink-0">
               <div className="flex items-center gap-1.5 min-w-0">
                 {priorityDot}
                 <p className="text-sm font-medium truncate min-w-0">
