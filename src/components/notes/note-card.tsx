@@ -102,7 +102,7 @@ export function NoteCard({
       : note.content;
 
   const actionsMenu = (
-    <div onClick={(e) => e.stopPropagation()}>
+    <div onClick={(e) => e.stopPropagation()} className="shrink-0">
     <DropdownMenu>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -394,24 +394,24 @@ export function NoteCard({
   return (
     <>
       <Card
-        className={`group transition-shadow hover:shadow-md cursor-pointer ${
+        className={`group overflow-hidden transition-shadow hover:shadow-md cursor-pointer ${
           note.is_pinned ? "border-primary/40 bg-primary/5" : ""
         } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
         onClick={() => onView(note)}
       >
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
+        <CardHeader className="pb-2 overflow-hidden">
+          <div className="flex items-start justify-between gap-2 min-w-0">
             {/* Drag handle */}
             {dragHandle}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center gap-1.5 min-w-0">
                 {priorityDot}
                 {index != null && (
-                  <span className="text-xs font-mono text-muted-foreground/60">
+                  <span className="text-xs font-mono text-muted-foreground/60 shrink-0">
                     #{index}
                   </span>
                 )}
-                <CardTitle className="text-base truncate min-w-0">
+                <CardTitle className="text-base truncate min-w-0 shrink">
                   {note.is_pinned && (
                     <span className="mr-1" aria-label="Fijada">
                       📌
@@ -422,7 +422,7 @@ export function NoteCard({
                 {note.status !== "active" && (
                   <Badge
                     variant="outline"
-                    className={`text-[10px] px-1.5 py-0 shrink-0 ${NOTE_STATUS_CONFIG[note.status].badgeClass}`}
+                    className={`text-[10px] px-1.5 py-0 shrink-0 whitespace-nowrap ${NOTE_STATUS_CONFIG[note.status].badgeClass}`}
                   >
                     {NOTE_STATUS_CONFIG[note.status].label}
                   </Badge>
