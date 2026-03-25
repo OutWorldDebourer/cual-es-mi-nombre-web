@@ -107,7 +107,7 @@ export function ReminderCard({
         <CardHeader className="pb-2">
           {/* Row 1: Date/time + menu */}
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-base whitespace-nowrap shrink-0">
+            <CardTitle className="text-base truncate min-w-0">
               {overdue && <span className="mr-1">⚠️</span>}
               {reminder.status === "sent" && <span className="mr-1">✅</span>}
               {formatDateTime(reminder.trigger_at, timezone)}
