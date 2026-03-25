@@ -235,8 +235,8 @@ function SidebarContent({
         </div>
       ) : (
         <div className="border-t border-sidebar-border p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium truncate">{assistantName}</p>
+          <div className="flex items-center justify-between min-w-0">
+            <p className="text-sm font-medium truncate min-w-0">{assistantName}</p>
             <Badge className={cn("text-[10px] font-semibold uppercase", PLAN_STYLES[plan])}>
               {plan}
             </Badge>
