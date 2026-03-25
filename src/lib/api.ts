@@ -82,6 +82,13 @@ async function authFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  if (!API_URL) {
+    throw new ApiError(
+      503,
+      "Backend no configurado. Contacta al administrador.",
+    );
+  }
+
   const token = await getAccessToken(supabase);
 
   const res = await fetch(`${API_URL}${path}`, {

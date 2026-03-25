@@ -21,6 +21,8 @@ import { ChatHeader } from "./chat-header";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatInput } from "./chat-input";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -60,6 +62,8 @@ export function ChatOverlay({ isOpen, onClose, assistantName }: ChatOverlayProps
   useEffect(() => {
     if (!isOpen || hasLoaded) return;
     let cancelled = false;
+    let retries = 0;
+    const MAX_RETRIES = 3;
 
     async function loadHistory() {
       try {
@@ -70,6 +74,17 @@ export function ChatOverlay({ isOpen, onClose, assistantName }: ChatOverlayProps
         setHasLoaded(true);
       } catch (err) {
         if (cancelled) return;
+
+        // Retry on network/server errors (not auth)
+        const isNetworkError = !(err instanceof ApiError);
+        const isServerError = err instanceof ApiError && err.status >= 500;
+        if ((isNetworkError || isServerError) && retries < MAX_RETRIES) {
+          retries++;
+          const delay = 1000 * Math.pow(2, retries - 1); // 1s, 2s, 4s
+          setTimeout(() => { if (!cancelled) loadHistory(); }, delay);
+          return;
+        }
+
         let detail: string;
         if (err instanceof ApiError) {
           detail = err.detail;
@@ -162,7 +177,18 @@ export function ChatOverlay({ isOpen, onClose, assistantName }: ChatOverlayProps
 
   const chatContent = (
     <div className="flex h-full flex-col">
-      <ChatHeader assistantName={assistantName} isSending={isSending} />
+      <div className="relative">
+        <ChatHeader assistantName={assistantName} isSending={isSending} />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
+          aria-label="Cerrar chat"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
       {isInitialLoad && !hasLoaded ? (
         <div className="flex flex-1 items-center justify-center" role="status" aria-label="Cargando mensajes">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />

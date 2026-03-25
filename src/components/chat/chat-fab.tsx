@@ -26,7 +26,7 @@ export function ChatFab({ isOpen, onClick }: ChatFabProps) {
       onClick={onClick}
       size="icon"
       className={cn(
-        "fixed bottom-24 right-4 z-50 h-14 w-14 rounded-full shadow-lg",
+        "fixed bottom-28 right-4 z-50 h-14 w-14 rounded-full shadow-lg",
         "md:bottom-6 md:right-6",
         "bg-primary text-primary-foreground hover:bg-primary/90",
         "transition-transform hover:scale-105 active:scale-95",
