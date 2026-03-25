@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb-nav";
+import { BottomNav } from "@/components/dashboard/bottom-nav";
 import {
   Home,
   MessageSquare,
@@ -344,8 +345,11 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
         </header>
 
         {/* Page content */}
-        <main id="main-content" className="flex-1 p-4 md:p-6">{children}</main>
+        <main id="main-content" className="flex-1 p-4 pb-20 md:p-6 md:pb-6">{children}</main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <BottomNav />
     </div>
   );
 }
