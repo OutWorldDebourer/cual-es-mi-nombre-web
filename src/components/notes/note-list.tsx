@@ -15,7 +15,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
-import { DndContext, closestCenter, closestCorners, DragOverlay, type Announcements } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragOverlay, type Announcements } from "@dnd-kit/core";
 import {
   SortableContext,
   rectSortingStrategy,
@@ -25,7 +25,7 @@ import type { Note, NoteStatus, NotePriority } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { generateKeyBetween } from "@/lib/fractional-index";
 import { useRealtimeTable } from "@/hooks/use-realtime-table";
-import { useNoteDrag, parseCompositeId } from "@/hooks/use-note-drag";
+import { useNoteDrag, parseCompositeId, kanbanCollisionDetection } from "@/hooks/use-note-drag";
 import { NoteSortableCard } from "@/components/notes/note-sortable-card";
 import { NoteDragOverlay } from "@/components/notes/note-drag-overlay";
 import { NoteForm } from "@/components/notes/note-form";
@@ -688,7 +688,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
       {!isLoading && filteredNotes.length > 0 && viewMode === "board" && (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={kanbanCollisionDetection}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}

@@ -20,11 +20,14 @@ import { useRef, useState, useCallback } from "react";
 import {
   type DragStartEvent,
   type DragEndEvent,
+  type CollisionDetection,
   MouseSensor,
   TouchSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
+  pointerWithin,
+  closestCenter,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { generateKeyBetween } from "@/lib/fractional-index";
@@ -35,6 +38,48 @@ import { toast } from "sonner";
 
 const COLUMN_PREFIX = "column-";
 const COMPOSITE_SEP = "::";
+
+/**
+ * Custom collision detection for Kanban board mode.
+ *
+ * Uses pointerWithin to detect which column the pointer is inside,
+ * then returns the closest item within that column (or the column itself
+ * if empty). Falls back to closestCenter when pointer is outside all columns.
+ *
+ * Fixes: closestCorners never detects target columns because sortable items
+ * in the source column are always geometrically "closer" to the pointer.
+ */
+export const kanbanCollisionDetection: CollisionDetection = (args) => {
+  // Exclude the active item's own droppable — useSortable registers both a
+  // draggable and a droppable, so pointerWithin/closestCenter would return it
+  // as the best match (distance ≈ 0), causing a silent no-op in handleDragEnd.
+  const filteredArgs = {
+    ...args,
+    droppableContainers: args.droppableContainers.filter(
+      (c) => c.id !== args.active.id,
+    ),
+  };
+
+  const pointerCollisions = pointerWithin(filteredArgs);
+
+  if (pointerCollisions.length > 0) {
+    const columns = pointerCollisions.filter((c) =>
+      String(c.id).startsWith(COLUMN_PREFIX),
+    );
+    const items = pointerCollisions.filter(
+      (c) => !String(c.id).startsWith(COLUMN_PREFIX),
+    );
+
+    // Closest item inside the column the pointer is over
+    if (items.length > 0) return [items[0]];
+
+    // Empty column → return the column droppable
+    if (columns.length > 0) return [columns[0]];
+  }
+
+  // Pointer between columns → fallback
+  return closestCenter(filteredArgs);
+};
 
 /** Parse a composite ID "tag::noteId" into parts. Returns null for plain IDs. */
 export function parseCompositeId(id: string): { tag: string; noteId: string } | null {
