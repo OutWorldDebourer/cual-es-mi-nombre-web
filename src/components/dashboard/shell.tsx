@@ -13,6 +13,8 @@ import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb-nav";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
+import { ChatFab } from "@/components/chat/chat-fab";
+import { ChatOverlay } from "@/components/chat/chat-overlay";
 import {
   Home,
   MessageSquare,
@@ -257,6 +259,7 @@ function SidebarContent({
 export function DashboardShell({ user, profile, children }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("sidebar-collapsed") === "true";
@@ -350,6 +353,14 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
 
       {/* Mobile bottom navigation */}
       <BottomNav />
+
+      {/* Chat FAB + Overlay */}
+      <ChatFab isOpen={chatOpen} onClick={() => setChatOpen(true)} />
+      <ChatOverlay
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+        assistantName={assistantName}
+      />
     </div>
   );
 }

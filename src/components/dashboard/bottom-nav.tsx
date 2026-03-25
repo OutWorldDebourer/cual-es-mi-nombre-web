@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, MessageSquare, StickyNote, Bell, Settings } from "lucide-react";
+import { Home, StickyNote, Bell, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface BottomNavItem {
@@ -14,7 +14,6 @@ interface BottomNavItem {
 
 const bottomNavItems: BottomNavItem[] = [
   { href: "/dashboard", label: "Inicio", icon: Home },
-  { href: "/dashboard/chat", label: "Chat", icon: MessageSquare },
   { href: "/dashboard/notes", label: "Notas", icon: StickyNote },
   { href: "/dashboard/reminders", label: "Recordatorios", icon: Bell },
   { href: "/dashboard/settings", label: "Config", icon: Settings },
