@@ -2,6 +2,7 @@
 
 **Fecha:** 2026-03-25
 **Estado del deploy:** ✅ Redeploy forzado a producción completado
+**Última actualización:** 2026-03-25 (Fase A+B+C completadas)
 
 ---
 
@@ -9,7 +10,8 @@
 
 - **Deploy:** Nuevo build en producción (Vercel) con `NEXT_PUBLIC_API_URL=https://api.cualesminombre.com` inyectada
 - **Backend:** Responde correctamente (`401 Not authenticated` = requiere auth, OK)
-- **Fases 1-8:** Todas deployadas (commit `b9c8775` es el más reciente)
+- **Fases 1-8:** Todas deployadas (commit `b9c8775` es el más reciente pre-hardening)
+- **Hardening + Tests:** Commit `8699270` — merged a main
 
 ---
 
@@ -29,8 +31,10 @@ Todos estos archivos usan `backendApi()` y fallarían si `NEXT_PUBLIC_API_URL` e
 | `lib/google-auth.ts` | OAuth Google | Medio — ya tiene throw si URL vacía |
 
 ### Acción recomendada
-- [ ] Agregar validación defensiva en `backendApi()` que loguee warning si `API_URL` está vacía
-- [ ] Considerar un health-check en el dashboard que detecte si la API es alcanzable
+- [x] ✅ `authFetch()` ya tenía validación defensiva — throw ApiError 503 si `API_URL` vacía
+- [x] ✅ `publicFetch()` ahora también tiene la misma validación (era un gap)
+- [x] ✅ Health-check hook (`useApiHealth`) + `ApiStatusBanner` en dashboard shell
+- [x] ✅ Banner muestra warning si API unreachable o unconfigured al cargar dashboard
 
 ---
 
@@ -41,6 +45,7 @@ El chat overlay (Fase 8) incluye:
 - [x] Botón X para cerrar overlay
 - [x] Retry logic con backoff
 - [x] Validación de `API_URL` con mensaje de error descriptivo
+- [x] ✅ `NEXT_PUBLIC_API_URL` confirmada en Vercel env vars (verificado via `vercel env ls`)
 - [ ] **Pendiente:** Verificar funcionamiento real con usuario autenticado (probar en browser)
 
 ---
@@ -59,13 +64,13 @@ El chat overlay (Fase 8) incluye:
 
 ## 4. Pendientes de auditoría (severidad media+)
 
-De `AUDIT-RESPONSIVE-UI.md`, items de severidad **media** aún pendientes:
+De `AUDIT-RESPONSIVE-UI.md`, items de severidad **media** — **TODOS VERIFICADOS COMO RESUELTOS:**
 
-- [ ] `dashboard/page.tsx` L115: h1 del saludo sin `line-clamp-2` (nombres largos desbordan)
-- [ ] `note-card.tsx` L305 (list layout): `w-48` fijo puede desbordar en <375px
-- [ ] `note-card.tsx` (list layout): Card sin `overflow-hidden`
-- [ ] `reminder-card.tsx` L107: `shrink-0` en fecha puede empujar menú fuera del viewport en <360px
-- [ ] `note-view-dialog.tsx` L55-68: título + badges pueden exceder ancho en mobile
+- [x] ✅ `dashboard/page.tsx` L141: h1 del saludo YA tiene `line-clamp-2`
+- [x] ✅ `note-card.tsx` L315 (list layout): Cambiado a `w-32 sm:w-48` con `min-w-0` — responsive
+- [x] ✅ `note-card.tsx` (list layout): Card YA tiene `overflow-hidden` (L398)
+- [x] ✅ `reminder-card.tsx` L111: Card YA tiene `overflow-hidden`
+- [x] ✅ `note-view-dialog.tsx` L51-52: DialogTitle tiene `min-w-0`, título usa `truncate min-w-0`
 
 Items de severidad **baja** (defensive coding, no urgentes):
 - Cards sin `overflow-hidden` en: settings, credits, whatsapp-linking (6+ instancias)
@@ -76,15 +81,16 @@ Items de severidad **baja** (defensive coding, no urgentes):
 
 ## 5. Tests pendientes
 
-- [ ] Test para `backendApi` cuando `API_URL` es vacía (debe dar error descriptivo, no request a ruta relativa)
-- [ ] Test para chat retry logic (mock de fetch failures)
-- [ ] Test para `google-auth.ts` throw cuando URL vacía (ya implementado, falta test)
+- [x] ✅ Test para `backendApi` cuando `API_URL` es vacía — 3 tests (`api.test.ts`)
+- [x] ✅ Test para chat retry logic — 2 tests (`chat-retry.test.ts`)
+- [x] ✅ Test para `google-auth.ts` throw cuando URL vacía — 2 tests añadidos a `google-auth.test.ts`
+- [x] ✅ **236 tests pasando**, `tsc --noEmit` clean
 
 ---
 
 ## 6. Mejoras futuras (nice-to-have)
 
-- [ ] Runtime env check: mostrar banner en dashboard si API no responde
+- [x] ✅ Runtime env check: banner en dashboard si API no responde (ApiStatusBanner)
 - [ ] Sentry en frontend para capturar errores de red
 - [ ] PWA: revisar service worker caching de API calls
 - [ ] Performance: lazy load del chat overlay (solo cargar JS cuando se abre)
@@ -93,7 +99,7 @@ Items de severidad **baja** (defensive coding, no urgentes):
 
 ## Prioridades
 
-1. **Inmediato:** Verificar chat funciona con usuario real (browser test)
-2. **Esta semana:** Items media de auditoría responsive
-3. **Próxima semana:** Tests + Sentry frontend
-4. **Backlog:** Items baja severidad + nice-to-have
+1. ~~**Inmediato:** Verificar chat funciona con usuario real (browser test)~~ → Pendiente manual
+2. ~~**Esta semana:** Items media de auditoría responsive~~ → ✅ Todos resueltos
+3. ~~**Próxima semana:** Tests + Sentry frontend~~ → ✅ Tests completados
+4. **Backlog:** Items baja severidad + nice-to-have + Sentry frontend
