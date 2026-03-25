@@ -25,6 +25,7 @@ interface NoteBoardColumnProps {
   status: NoteStatus;
   notes: Note[];
   dragDisabled?: boolean;
+  recentlyMovedIds?: Set<string>;
   onView: (note: Note) => void;
   onEdit: (note: Note) => void;
   onDelete: (noteId: string) => void;
@@ -45,6 +46,7 @@ export function NoteBoardColumn({
   status,
   notes,
   dragDisabled = false,
+  recentlyMovedIds,
   onView,
   onEdit,
   onDelete,
@@ -104,6 +106,7 @@ export function NoteBoardColumn({
               note={note}
               layout="compact"
               disabled={dragDisabled}
+              recentlyMovedIds={recentlyMovedIds}
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}

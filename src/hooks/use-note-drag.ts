@@ -172,6 +172,25 @@ interface UseNoteDragOptions {
 export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = false }: UseNoteDragOptions) {
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const isDraggingRef = useRef(false);
+  const [recentlyMovedIds, setRecentlyMovedIds] = useState<Set<string>>(new Set());
+  const highlightTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const markRecentlyMoved = useCallback((noteId: string) => {
+    // Clear existing timer for this note if any
+    const existing = highlightTimers.current.get(noteId);
+    if (existing) clearTimeout(existing);
+
+    setRecentlyMovedIds((prev) => new Set(prev).add(noteId));
+    const timer = setTimeout(() => {
+      setRecentlyMovedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(noteId);
+        return next;
+      });
+      highlightTimers.current.delete(noteId);
+    }, 700);
+    highlightTimers.current.set(noteId, timer);
+  }, []);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -258,6 +277,7 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
           );
           return updated.sort(compareNotes);
         });
+        markRecentlyMoved(activeId);
 
         try {
           const supabase = createClient();
@@ -308,6 +328,7 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         );
         return updated.sort(compareNotes);
       });
+      markRecentlyMoved(activeId);
 
       try {
         const supabase = createClient();
@@ -330,7 +351,7 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         isDraggingRef.current = false;
       }
     },
-    [notes, setNotes, boardMode, groupMode],
+    [notes, setNotes, boardMode, groupMode, markRecentlyMoved],
   );
 
   const handleDragCancel = useCallback(() => {
@@ -341,6 +362,7 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
   return {
     activeNote,
     isDraggingRef,
+    recentlyMovedIds,
     sensors,
     handleDragStart,
     handleDragEnd,

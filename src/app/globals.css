@@ -369,3 +369,8 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes highlight {
+  0% { background-color: hsl(var(--primary) / 0.15); }
+  100% { background-color: transparent; }
+}

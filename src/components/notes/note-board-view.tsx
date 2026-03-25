@@ -20,6 +20,7 @@ import { NoteBoardColumn } from "@/components/notes/note-board-column";
 interface NoteBoardViewProps {
   notes: Note[];
   dragDisabled?: boolean;
+  recentlyMovedIds?: Set<string>;
   onView: (note: Note) => void;
   onEdit: (note: Note) => void;
   onDelete: (noteId: string) => void;
@@ -33,6 +34,7 @@ interface NoteBoardViewProps {
 export function NoteBoardView({
   notes,
   dragDisabled = false,
+  recentlyMovedIds,
   onView,
   onEdit,
   onDelete,
@@ -62,6 +64,7 @@ export function NoteBoardView({
           status={status}
           notes={columnNotes[status]}
           dragDisabled={dragDisabled}
+          recentlyMovedIds={recentlyMovedIds}
           onView={onView}
           onEdit={onEdit}
           onDelete={onDelete}

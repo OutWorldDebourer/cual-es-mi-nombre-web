@@ -22,6 +22,7 @@ interface NoteSortableCardProps {
   index?: number;
   layout: "grid" | "list" | "compact";
   disabled?: boolean;
+  recentlyMovedIds?: Set<string>;
   onView: (note: Note) => void;
   onEdit: (note: Note) => void;
   onDelete: (noteId: string) => void;
@@ -38,6 +39,7 @@ export function NoteSortableCard({
   index,
   layout,
   disabled = false,
+  recentlyMovedIds,
   onView,
   onEdit,
   onDelete,
@@ -64,7 +66,13 @@ export function NoteSortableCard({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} aria-roledescription="elemento ordenable">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      aria-roledescription="elemento ordenable"
+      className={recentlyMovedIds?.has(note.id) ? "animate-[highlight_0.7s_ease-out] rounded-xl" : undefined}
+    >
       <NoteCard
         note={note}
         index={index}

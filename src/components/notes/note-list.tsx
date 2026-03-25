@@ -107,6 +107,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
   const {
     activeNote,
     isDraggingRef,
+    recentlyMovedIds,
     sensors,
     handleDragStart,
     handleDragEnd,
@@ -696,6 +697,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           <NoteBoardView
             notes={filteredNotes}
             dragDisabled={dragDisabled}
+            recentlyMovedIds={recentlyMovedIds}
             onView={setViewingNote}
             onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
             onDelete={handleDelete}
@@ -742,6 +744,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                       index={idx + 1}
                       layout={cardLayout}
                       disabled={dragDisabled}
+                      recentlyMovedIds={recentlyMovedIds}
                       onView={setViewingNote}
                       onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
                       onDelete={handleDelete}
@@ -776,6 +779,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                       index={pinnedNotes.length + idx + 1}
                       layout={cardLayout}
                       disabled={dragDisabled}
+                      recentlyMovedIds={recentlyMovedIds}
                       onView={setViewingNote}
                       onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
                       onDelete={handleDelete}
@@ -823,6 +827,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                         index={idx + 1}
                         layout={cardLayout}
                         disabled={dragDisabled}
+                      recentlyMovedIds={recentlyMovedIds}
                         onView={setViewingNote}
                         onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
                         onDelete={handleDelete}
