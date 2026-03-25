@@ -48,11 +48,11 @@ export function NoteViewDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 min-w-0">
             {note.is_pinned && (
               <span aria-label="Fijada">📌</span>
             )}
-            {note.title || "Sin titulo"}
+            <span className="truncate min-w-0">{note.title || "Sin titulo"}</span>
             {note.status !== "active" && (
               <Badge
                 variant="outline"
