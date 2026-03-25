@@ -1,11 +1,11 @@
 # Plan de Acción — Fase 8: Fixes críticos + Chat flotante
 
 **Fecha:** 2026-03-25
-**Estado:** Pendiente
+**Estado:** ✅ Completado
 
 ---
 
-## Tarea 8.1 — Fix definitivo del badge "Pendiente" en reminder-card
+## ✅ Tarea 8.1 — Fix definitivo del badge "Pendiente" en reminder-card
 
 - **Prioridad:** P0
 - **Complejidad:** M (30-90 min)
@@ -24,7 +24,7 @@
 
 ---
 
-## Tarea 8.2 — Chat flotante (FAB + drawer/overlay)
+## ✅ Tarea 8.2 — Chat flotante (FAB + drawer/overlay)
 
 - **Prioridad:** P1
 - **Complejidad:** L (> 90 min)
@@ -60,7 +60,7 @@
 
 ---
 
-## Tarea 8.3 — Investigar por qué el chat no carga en mobile
+## ✅ Tarea 8.3 — Investigar por qué el chat no carga en mobile
 
 - **Prioridad:** P0 (bloquea 8.2)
 - **Complejidad:** M
@@ -87,3 +87,32 @@
 
 **Orden de ejecución:** 8.3 → 8.1 → 8.2
 **Esfuerzo total estimado:** ~4-5h
+
+---
+
+## Resultado de Ejecución
+
+**Fecha:** 2026-03-25
+**Vitest:** ✅ 229 tests passed, 0 failed
+
+### Tarea 8.3 — Diagnóstico chat mobile
+- **Hallazgo:** El error "Error al cargar historial" es un error de red/API (fetch falla silenciosamente), NO un problema de SSR/layout/hydration
+- **Causa probable:** `TypeError` en fetch (CORS, mixed content, o API timeout) — el catch solo mostraba mensaje genérico sin retry
+- **Fix:** Retry hasta 2 veces con backoff exponencial en errores de red/servidor + mensajes descriptivos por tipo de error
+- **Archivo:** `src/components/chat/chat-view.tsx`
+- **Commit:** `45a441f`
+
+### Tarea 8.1 — Badge "Pendiente"
+- **Fix:** Separé `#N` del badge de recurrencia en su propio `<span shrink-0>`. En mobile (<640px) el badge de recurrencia muestra solo "🔄", en desktop muestra texto completo
+- **Archivo:** `src/components/reminders/reminder-card.tsx`
+- **Also fixed:** `onView` prop faltante en test, `NODE_ENV` en vitest.config.ts (resolvió 150 fallos pre-existentes de React.act)
+- **Commit:** `358925b`
+
+### Tarea 8.2 — Chat flotante
+- **Archivos creados:** `chat-fab.tsx`, `chat-overlay.tsx`
+- **Archivos modificados:** `shell.tsx` (FAB+Overlay), `bottom-nav.tsx` (removió tab Chat), `chat/page.tsx` (redirect)
+- **Mobile:** Drawer bottom (85vh) via vaul, swipe to close
+- **Desktop:** Sheet right (400px) via radix/Sheet
+- **Lazy load:** Mensajes se cargan al abrir por primera vez, no pre-cargados
+- **Bottom nav:** 4 tabs (Inicio, Notas, Recordatorios, Config)
+- **Commit:** `212f080`
