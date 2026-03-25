@@ -67,7 +67,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         )}
 
         {/* Message content */}
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{message.content}</p>
 
         {/* Error indicator */}
         {message.error && (

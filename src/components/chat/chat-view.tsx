@@ -136,7 +136,7 @@ export function ChatView({ assistantName }: ChatViewProps) {
   // ── Initial loading state ─────────────────────────────────────────────
   if (isInitialLoad) {
     return (
-      <div className="flex h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm">
+      <div className="flex h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm">
         <ChatHeader assistantName={assistantName} isSending={false} />
         <div className="flex flex-1 items-center justify-center" role="status" aria-label="Cargando mensajes">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
@@ -146,7 +146,7 @@ export function ChatView({ assistantName }: ChatViewProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm">
+    <div className="flex h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm">
       <ChatHeader assistantName={assistantName} isSending={isSending} />
       <ChatMessageList
         messages={messages}

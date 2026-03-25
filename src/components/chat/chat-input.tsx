@@ -51,7 +51,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-end gap-2 border-t px-4 py-3"
+      className="flex items-end gap-2 border-t px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
       <textarea
         ref={textareaRef}
