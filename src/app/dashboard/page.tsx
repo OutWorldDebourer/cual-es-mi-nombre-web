@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Coins,
   Gem,
@@ -16,6 +17,7 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
+  Plus,
 } from "lucide-react";
 import { CountUp } from "@/components/dashboard/count-up";
 import { OnboardingStepper } from "@/components/dashboard/onboarding-stepper";
@@ -144,6 +146,18 @@ export default async function DashboardPage() {
         <p className="text-muted-foreground mt-1">
           Aqui tienes el resumen de tu asistente virtual.
         </p>
+        <div className="flex gap-2 mt-3 flex-wrap">
+          <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+            <Link href="/dashboard/notes?action=new">
+              <Plus className="h-4 w-4 mr-1" /> Nueva nota
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+            <Link href="/dashboard/reminders?action=new">
+              <Plus className="h-4 w-4 mr-1" /> Nuevo recordatorio
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0">

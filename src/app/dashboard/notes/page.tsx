@@ -14,7 +14,13 @@ import { redirect } from "next/navigation";
 import { NoteList } from "@/components/notes/note-list";
 import type { Note } from "@/types/database";
 
-export default async function NotesPage() {
+export default async function NotesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ action?: string }>;
+}) {
+  const params = await searchParams;
+  const autoCreate = params.action === "new";
   const supabase = await createClient();
   const {
     data: { user },
@@ -41,7 +47,7 @@ export default async function NotesPage() {
           Gestiona tus notas. También puedes crear notas por WhatsApp.
         </p>
       </div>
-      <NoteList initialNotes={(notes as Note[]) ?? []} />
+      <NoteList initialNotes={(notes as Note[]) ?? []} autoCreate={autoCreate} />
     </div>
   );
 }

@@ -45,6 +45,8 @@ import { NoteBoardView } from "@/components/notes/note-board-view";
 interface NoteListProps {
   /** Initial notes from server-side fetch (SSR hydration) */
   initialNotes: Note[];
+  /** Auto-open the create form (from ?action=new) */
+  autoCreate?: boolean;
 }
 
 type NoteTab = "active" | "archived";
@@ -69,7 +71,7 @@ function readStorage<T extends string>(key: string, fallback: T, validValues: re
   }
 }
 
-export function NoteList({ initialNotes }: NoteListProps) {
+export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
   const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -150,6 +152,14 @@ export function NoteList({ initialNotes }: NoteListProps) {
   }, [notes]);
 
   // ── Reset filters on tab/tag changes ───────────────────────────────────
+
+  // Auto-open create form when ?action=new
+  useEffect(() => {
+    if (autoCreate) {
+      setEditingNote(null);
+      setFormOpen(true);
+    }
+  }, [autoCreate]);
 
   useEffect(() => {
     if (tab === "archived") {

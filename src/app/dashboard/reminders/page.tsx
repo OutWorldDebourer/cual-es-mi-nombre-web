@@ -14,7 +14,13 @@ import { redirect } from "next/navigation";
 import { ReminderList } from "@/components/reminders/reminder-list";
 import type { Reminder } from "@/types/database";
 
-export default async function RemindersPage() {
+export default async function RemindersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ action?: string }>;
+}) {
+  const params = await searchParams;
+  const autoCreate = params.action === "new";
   const supabase = await createClient();
   const {
     data: { user },
@@ -49,6 +55,7 @@ export default async function RemindersPage() {
       <ReminderList
         initialReminders={(reminders as Reminder[]) ?? []}
         timezone={profile?.timezone}
+        autoCreate={autoCreate}
       />
     </div>
   );

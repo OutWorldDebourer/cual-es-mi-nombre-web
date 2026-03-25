@@ -29,6 +29,8 @@ import { Bell, Search, X } from "lucide-react";
 interface ReminderListProps {
   initialReminders: Reminder[];
   timezone?: string;
+  /** Auto-open the create form (from ?action=new) */
+  autoCreate?: boolean;
 }
 
 type ReminderTab = "upcoming" | "recurring" | "sent" | "all";
@@ -50,6 +52,7 @@ const TAB_STATUSES: Record<ReminderTab, ReminderStatus[]> = {
 export function ReminderList({
   initialReminders,
   timezone,
+  autoCreate,
 }: ReminderListProps) {
   const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
   const [tab, setTab] = useState<ReminderTab>("upcoming");
@@ -96,6 +99,14 @@ export function ReminderList({
     }
     if (!silent) setIsLoading(false);
   }, [supabase, tab]);
+
+  // Auto-open create form when ?action=new
+  useEffect(() => {
+    if (autoCreate) {
+      setEditingReminder(null);
+      setFormOpen(true);
+    }
+  }, [autoCreate]);
 
   useEffect(() => {
     void fetchReminders();
