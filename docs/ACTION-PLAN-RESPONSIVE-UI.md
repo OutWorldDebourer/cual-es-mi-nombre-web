@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-03-25
 **Base:** `AUDIT-RESPONSIVE-UI.md`
-**Estado:** Pendiente
+**Estado:** Fase 1 completada ✅
 
 ---
 
@@ -12,7 +12,7 @@ Tareas defensivas que previenen overflow en todo el proyecto. Se despliegan junt
 
 ---
 
-### Tarea 1.1 — Agregar `overflow-hidden` al componente base `<Card>`
+### ✅ Tarea 1.1 — Agregar `overflow-hidden` al componente base `<Card>`
 
 - **Prioridad:** P0
 - **Complejidad:** S (< 30 min)
@@ -31,7 +31,7 @@ Tareas defensivas que previenen overflow en todo el proyecto. Se despliegan junt
 
 ---
 
-### Tarea 1.2 — Fix `truncate` en saludo del dashboard
+### ✅ Tarea 1.2 — Fix `truncate` en saludo del dashboard
 
 - **Prioridad:** P1
 - **Complejidad:** S (< 30 min)
@@ -47,7 +47,7 @@ Tareas defensivas que previenen overflow en todo el proyecto. Se despliegan junt
 
 ---
 
-### Tarea 1.3 — Fix `w-48` en note-card list layout
+### ✅ Tarea 1.3 — Fix `w-48` en note-card list layout
 
 - **Prioridad:** P1
 - **Complejidad:** S (< 30 min)
@@ -66,7 +66,7 @@ Tareas defensivas que previenen overflow en todo el proyecto. Se despliegan junt
 
 ---
 
-### Tarea 1.4 — Fix `shrink-0` en fecha de reminder-card
+### ✅ Tarea 1.4 — Fix `shrink-0` en fecha de reminder-card
 
 - **Prioridad:** P1
 - **Complejidad:** S (< 30 min)
@@ -85,7 +85,7 @@ Tareas defensivas que previenen overflow en todo el proyecto. Se despliegan junt
 
 ---
 
-### Tarea 1.5 — Fix title + badges overflow en note-view-dialog
+### ✅ Tarea 1.5 — Fix title + badges overflow en note-view-dialog
 
 - **Prioridad:** P1
 - **Complejidad:** S (< 30 min)
