@@ -31,7 +31,7 @@ export function TiltCard({ children, className, tiltDeg = 4 }: TiltCardProps) {
   return (
     <div
       ref={ref}
-      className={cn("transition-transform duration-200 ease-out", className)}
+      className={cn("overflow-hidden transition-transform duration-200 ease-out", className)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
