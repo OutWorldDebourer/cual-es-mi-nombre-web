@@ -110,6 +110,7 @@ export function NoteCard({
             <Button
               variant="ghost"
               size="icon-xs"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Acciones de nota"
             >
               ⋮
