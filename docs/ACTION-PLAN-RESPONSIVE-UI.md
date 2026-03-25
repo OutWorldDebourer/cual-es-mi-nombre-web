@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-03-25
 **Base:** `AUDIT-RESPONSIVE-UI.md`
-**Estado:** Fase 1 ✅ | Fase 2 ✅ | Fase 3 ✅
+**Estado:** Fase 1 ✅ | Fase 2 ✅ | Fase 3 ✅ | Fase 4 ✅
 
 ---
 
@@ -257,13 +257,13 @@ Refinamientos de layout que hacen la app más pulida en mobile.
 
 ---
 
-## Fase 4 — Accesibilidad (P2 a11y)
+## Fase 4 — Accesibilidad (P2 a11y) ✅
 
 Fixes de accesibilidad menores para cumplir WCAG AA.
 
 ---
 
-### Tarea 4.1 — `aria-hidden` en emojis de dropdown menus
+### ✅ Tarea 4.1 — `aria-hidden` en emojis de dropdown menus
 
 - **Prioridad:** P2
 - **Complejidad:** S (< 30 min)
@@ -285,7 +285,7 @@ Fixes de accesibilidad menores para cumplir WCAG AA.
 
 ---
 
-### Tarea 4.2 — Verificar y corregir contraste en badges de notas completadas
+### ✅ Tarea 4.2 — Verificar y corregir contraste en badges de notas completadas
 
 - **Prioridad:** P2
 - **Complejidad:** S (< 30 min)
