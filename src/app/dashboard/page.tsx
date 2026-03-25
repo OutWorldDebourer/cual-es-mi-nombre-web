@@ -23,6 +23,7 @@ import {
   RecentActivity,
   type ActivityItem,
 } from "@/components/dashboard/recent-activity";
+import { UpcomingToday } from "@/components/dashboard/upcoming-today";
 import { getAuthUser, getProfile } from "@/lib/supabase/auth";
 
 export default async function DashboardPage() {
@@ -36,9 +37,24 @@ export default async function DashboardPage() {
 
   const { data: profile } = await getProfile(user.id);
 
+  const userTimezone = (profile?.timezone as string) ?? "America/Lima";
+
+  // Compute today's UTC boundaries in user's timezone
+  const nowInTz = new Date(new Date().toLocaleString("en-US", { timeZone: userTimezone }));
+  const todayStart = new Date(nowInTz);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(nowInTz);
+  todayEnd.setHours(23, 59, 59, 999);
+
+  // Convert back to UTC for DB query — calculate the offset
+  const utcNow = new Date();
+  const tzOffset = nowInTz.getTime() - utcNow.getTime();
+  const todayStartUTC = new Date(todayStart.getTime() - tzOffset).toISOString();
+  const todayEndUTC = new Date(todayEnd.getTime() - tzOffset).toISOString();
+
   // Fetch recent activity in parallel (needs its own client for non-cached queries)
   const supabase = await createClient();
-  const [recentNotes, recentReminders, recentCredits] = await Promise.all([
+  const [recentNotes, recentReminders, recentCredits, todayReminders] = await Promise.all([
     supabase
       .from("notes")
       .select("id, title, content, created_at")
@@ -54,6 +70,14 @@ export default async function DashboardPage() {
       .select("id, amount, action, description, created_at")
       .order("created_at", { ascending: false })
       .limit(3),
+    supabase
+      .from("reminders")
+      .select("*")
+      .gte("trigger_at", todayStartUTC)
+      .lte("trigger_at", todayEndUTC)
+      .in("status", ["pending", "processing"])
+      .order("trigger_at", { ascending: true })
+      .limit(5),
   ]);
 
   // Normalize into unified activity items
@@ -231,6 +255,12 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Upcoming today */}
+      <UpcomingToday
+        reminders={(todayReminders.data ?? []) as import("@/types/database").Reminder[]}
+        timezone={userTimezone}
+      />
 
       {/* Onboarding stepper */}
       {onboarding !== "completed" && (
