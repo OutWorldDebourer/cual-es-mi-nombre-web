@@ -65,7 +65,9 @@ describe("NoteCard", () => {
   it("renders pinned indicator for pinned notes", () => {
     renderCard(<NoteCard note={makeNote({ is_pinned: true })} {...defaultProps} />);
 
-    expect(screen.getByLabelText("Fijada")).toBeInTheDocument();
+    // Pinned notes get a primary border styling
+    const card = screen.getByText("Test Note").closest("[data-slot='card']");
+    expect(card).toHaveClass("border-primary/40");
   });
 
   it("renders tags as badges", () => {
@@ -133,7 +135,7 @@ describe("NoteCard", () => {
     // Open dropdown menu
     await user.click(screen.getByLabelText("Acciones de nota"));
     // Click delete
-    await user.click(screen.getByText("🗑️ Eliminar"));
+    await user.click(screen.getByText("Eliminar"));
     // Confirmation dialog should appear
     expect(screen.getByText("¿Eliminar esta nota?")).toBeInTheDocument();
     // Confirm deletion
@@ -148,7 +150,7 @@ describe("NoteCard", () => {
     renderCard(<NoteCard note={note} {...defaultProps} onEdit={onEdit} />);
 
     await user.click(screen.getByLabelText("Acciones de nota"));
-    await user.click(screen.getByText("✏️ Editar"));
+    await user.click(screen.getByText("Editar"));
     expect(onEdit).toHaveBeenCalledWith(note);
   });
 
@@ -160,7 +162,7 @@ describe("NoteCard", () => {
     );
 
     await user.click(screen.getByLabelText("Acciones de nota"));
-    await user.click(screen.getByText("📌 Fijar"));
+    await user.click(screen.getByText("Fijar"));
     expect(onTogglePin).toHaveBeenCalledWith("note-1", true);
   });
 });

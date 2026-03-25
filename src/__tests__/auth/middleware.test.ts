@@ -16,6 +16,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 const mockGetUser = vi.fn();
 
+// Ensure env vars exist so .trim() doesn't blow up
+process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "test-anon-key";
+
 vi.mock("@supabase/ssr", () => ({
   createServerClient: () => ({
     auth: {
