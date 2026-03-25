@@ -122,9 +122,9 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0">
         {/* Credits */}
-        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
+        <Card className="snap-center min-w-[200px] shrink-0 md:min-w-0 md:shrink transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>Creditos restantes</CardDescription>
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Plan */}
-        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
+        <Card className="snap-center min-w-[200px] shrink-0 md:min-w-0 md:shrink transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>Plan actual</CardDescription>
@@ -164,7 +164,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* WhatsApp */}
-        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
+        <Card className="snap-center min-w-[200px] shrink-0 md:min-w-0 md:shrink transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>WhatsApp</CardDescription>
@@ -198,7 +198,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Google Calendar */}
-        <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
+        <Card className="snap-center min-w-[200px] shrink-0 md:min-w-0 md:shrink transition-all hover:-translate-y-0.5 hover:shadow-md">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardDescription>Google Calendar</CardDescription>
