@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { Reminder } from "@/types/database";
 import { formatDateTime, isPast } from "@/lib/dates";
 import { parseRRule, describeRRule } from "@/lib/rrule";
@@ -81,6 +81,19 @@ export function ReminderCard({
     reminder.is_recurring || !!reminder.recurrence_parent_id;
   const canCancelSeries = canCancel && isRecurringSeries;
 
+  // Detect realtime status changes for highlight animation
+  const prevStatusRef = useRef(reminder.status);
+  const [highlightActive, setHighlightActive] = useState(false);
+
+  useEffect(() => {
+    if (prevStatusRef.current !== reminder.status) {
+      prevStatusRef.current = reminder.status;
+      setHighlightActive(true);
+      const timer = setTimeout(() => setHighlightActive(false), 700);
+      return () => clearTimeout(timer);
+    }
+  }, [reminder.status]);
+
   // Parse RRULE for display
   const rruleDescription = useMemo(() => {
     if (!reminder.recurrence_rule) return null;
@@ -101,7 +114,7 @@ export function ReminderCard({
             : reminder.status === "sent"
               ? "border-success/30 bg-success/5"
               : ""
-        }`}
+        } ${highlightActive ? "animate-[highlight_0.7s_ease-out]" : ""}`}
         onClick={() => onView(reminder)}
       >
         <CardHeader className="pb-2">
