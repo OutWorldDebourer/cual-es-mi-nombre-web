@@ -6,7 +6,7 @@ import { backendApi } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export function GoogleDisconnectButton() {
+export function GoogleDisconnectButton({ className }: { className?: string }) {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const supabaseRef = useRef(createClient());
   const router = useRouter();
@@ -35,6 +35,7 @@ export function GoogleDisconnectButton() {
 
   return (
     <Button
+      className={className}
       disabled={isDisconnecting}
       onClick={handleDisconnect}
       variant="destructive"

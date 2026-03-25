@@ -11,11 +11,13 @@ type ButtonVariant = ComponentProps<typeof Button>["variant"];
 interface GoogleConnectButtonProps {
   connected: boolean;
   variant?: ButtonVariant;
+  className?: string;
 }
 
 export function GoogleConnectButton({
   connected,
   variant,
+  className,
 }: GoogleConnectButtonProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const supabaseRef = useRef(createClient());
@@ -36,7 +38,7 @@ export function GoogleConnectButton({
   }
 
   return (
-    <Button disabled={isConnecting} onClick={handleConnect} variant={variant}>
+    <Button className={className} disabled={isConnecting} onClick={handleConnect} variant={variant}>
       {isConnecting
         ? "Abriendo Google..."
         : connected

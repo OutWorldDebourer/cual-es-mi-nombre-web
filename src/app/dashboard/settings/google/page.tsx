@@ -73,7 +73,7 @@ export default async function GoogleCalendarPage(
         </Card>
       )}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>
             {connected ? "✅ Google Calendar conectado" : "Conectar Google Calendar"}
@@ -91,9 +91,9 @@ export default async function GoogleCalendarPage(
                 El asistente puede crear y consultar eventos en tu calendario
                 principal.
               </p>
-              <div className="flex gap-3">
-                <GoogleConnectButton connected={connected} variant="outline" />
-                <GoogleDisconnectButton />
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <GoogleConnectButton connected={connected} variant="outline" className="w-full sm:w-auto" />
+                <GoogleDisconnectButton className="w-full sm:w-auto" />
               </div>
             </div>
           ) : (
