@@ -50,6 +50,7 @@ const defaultProps = {
   onEdit: vi.fn(),
   onDelete: vi.fn(),
   onCancelSeries: vi.fn(),
+  onView: vi.fn(),
 };
 
 describe("ReminderCard", () => {

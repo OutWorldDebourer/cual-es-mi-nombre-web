@@ -179,13 +179,14 @@ export function ReminderCard({
           <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
             {reminder.is_recurring && rruleDescription && (
               <Badge variant="outline" className="text-xs truncate min-w-0">
-                🔁 {rruleDescription}
-                {reminder.occurrence_number > 0 && (
-                  <span className="ml-1 opacity-70">
-                    #{reminder.occurrence_number}
-                  </span>
-                )}
+                <span className="sm:hidden">🔄</span>
+                <span className="hidden sm:inline">🔁 {rruleDescription}</span>
               </Badge>
+            )}
+            {reminder.occurrence_number > 0 && (
+              <span className="shrink-0 text-xs text-muted-foreground font-medium">
+                #{reminder.occurrence_number}
+              </span>
             )}
             <Badge variant={config.variant} className="whitespace-nowrap shrink-0">{config.label}</Badge>
           </div>
