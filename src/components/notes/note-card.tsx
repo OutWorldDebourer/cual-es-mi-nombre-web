@@ -224,9 +224,9 @@ export function NoteCard({
             <div className="flex items-start justify-between gap-1">
               {dragHandle}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 min-w-0">
                   {priorityDot}
-                  <CardTitle className="text-sm truncate">
+                  <CardTitle className="text-sm truncate min-w-0">
                     {note.is_pinned && (
                       <span className="mr-1" aria-label="Fijada">
                         📌
@@ -312,9 +312,9 @@ export function NoteCard({
             )}
             {/* Title + date + status */}
             <div className="min-w-0 w-48 shrink-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
                 {priorityDot}
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm font-medium truncate min-w-0">
                   {note.is_pinned && (
                     <span className="mr-1" aria-label="Fijada">
                       📌
@@ -404,14 +404,14 @@ export function NoteCard({
             {/* Drag handle */}
             {dragHandle}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
                 {priorityDot}
                 {index != null && (
                   <span className="text-xs font-mono text-muted-foreground/60">
                     #{index}
                   </span>
                 )}
-                <CardTitle className="text-base truncate">
+                <CardTitle className="text-base truncate min-w-0">
                   {note.is_pinned && (
                     <span className="mr-1" aria-label="Fijada">
                       📌
