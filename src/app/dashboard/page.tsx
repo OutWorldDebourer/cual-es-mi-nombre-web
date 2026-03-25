@@ -112,7 +112,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6 stagger-children">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight line-clamp-2">
           {hasDisplayName
             ? `Hola ${displayName}, soy ${assistantName}`
             : `Hola, soy ${assistantName}`}
