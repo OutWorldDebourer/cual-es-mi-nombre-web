@@ -242,7 +242,7 @@ export function NoteCard({
           </CardHeader>
           <CardContent className="px-3 pb-2 pt-0">
             <p className={`text-xs text-muted-foreground line-clamp-2 ${
-              note.status === "completed" ? "line-through opacity-60" : ""
+              note.status === "completed" ? "line-through opacity-75" : ""
             }`}>
               {contentPreview}
             </p>
@@ -338,7 +338,7 @@ export function NoteCard({
             </div>
             {/* Content preview */}
             <p className={`flex-1 min-w-0 text-sm text-muted-foreground truncate ${
-              note.status === "completed" ? "line-through opacity-60" : ""
+              note.status === "completed" ? "line-through opacity-75" : ""
             }`}>
               {contentPreview}
             </p>
@@ -438,7 +438,7 @@ export function NoteCard({
         </CardHeader>
         <CardContent>
           <p className={`text-sm text-muted-foreground whitespace-pre-wrap break-words ${
-            note.status === "completed" ? "line-through opacity-60" : ""
+            note.status === "completed" ? "line-through opacity-75" : ""
           }`}>
             {contentPreview}
           </p>

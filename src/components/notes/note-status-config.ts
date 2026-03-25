@@ -23,12 +23,14 @@ export const NOTE_STATUS_CONFIG: Record<NoteStatus, NoteStatusConfig> = {
   },
   en_curso: {
     label: "En curso",
-    badgeClass: "bg-warning/15 text-warning border-warning/30",
+    badgeClass:
+      "bg-warning/15 text-[oklch(0.45_0.12_84)] dark:text-warning border-warning/30",
     cardBorderClass: "border-l-4 border-l-warning",
   },
   completed: {
     label: "Completada",
-    badgeClass: "bg-success/15 text-success border-success/30",
+    badgeClass:
+      "bg-success/15 text-[oklch(0.40_0.15_155)] dark:text-success border-success/30",
     cardBorderClass: "border-l-4 border-l-success",
   },
 };
