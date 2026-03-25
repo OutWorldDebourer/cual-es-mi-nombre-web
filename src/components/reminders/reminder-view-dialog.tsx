@@ -72,8 +72,8 @@ export function ReminderViewDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {overdue && <span>⚠️</span>}
-            {reminder.status === "sent" && <span>✅</span>}
+            {overdue && <span aria-hidden="true">⚠️</span>}
+            {reminder.status === "sent" && <span aria-hidden="true">✅</span>}
             {formatDateTime(reminder.trigger_at, timezone)}
           </DialogTitle>
           <DialogDescription className="flex items-center gap-2 pt-1">
@@ -135,7 +135,7 @@ export function ReminderViewDialog({
                 onEdit(reminder);
               }}
             >
-              ✏️ Editar
+              <span aria-hidden="true">✏️</span> Editar
             </Button>
           )}
         </DialogFooter>

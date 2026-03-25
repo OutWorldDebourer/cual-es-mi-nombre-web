@@ -108,7 +108,7 @@ export function NoteViewDialog({
               onEdit(note);
             }}
           >
-            ✏️ Editar
+            <span aria-hidden="true">✏️</span> Editar
           </Button>
         </DialogFooter>
       </DialogContent>

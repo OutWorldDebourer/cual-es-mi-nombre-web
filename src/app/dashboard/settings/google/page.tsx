@@ -76,7 +76,7 @@ export default async function GoogleCalendarPage(
       <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>
-            {connected ? "✅ Google Calendar conectado" : "Conectar Google Calendar"}
+            {connected ? <><span aria-hidden="true">✅</span> Google Calendar conectado</> : "Conectar Google Calendar"}
           </CardTitle>
           <CardDescription>
             {connected

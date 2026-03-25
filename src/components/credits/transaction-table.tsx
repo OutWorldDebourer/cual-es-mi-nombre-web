@@ -129,7 +129,7 @@ export function TransactionTable({
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
-                          {actionInfo.emoji} {actionInfo.label}
+                          <span aria-hidden="true">{actionInfo.emoji}</span> {actionInfo.label}
                         </Badge>
                       </TableCell>
                       <TableCell

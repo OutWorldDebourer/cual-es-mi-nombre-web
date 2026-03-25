@@ -174,7 +174,7 @@ export function WhatsAppLinking({ currentPhone }: WhatsAppLinkingProps) {
         <h1 className="text-3xl font-bold">WhatsApp</h1>
         <Card>
           <CardHeader>
-            <CardTitle>✅ WhatsApp vinculado</CardTitle>
+            <CardTitle><span aria-hidden="true">✅</span> WhatsApp vinculado</CardTitle>
             <CardDescription>
               Tu número {phone} ha sido vinculado exitosamente. Ya puedes usar
               el asistente desde WhatsApp.

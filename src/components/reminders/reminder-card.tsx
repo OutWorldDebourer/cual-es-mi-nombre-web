@@ -108,8 +108,8 @@ export function ReminderCard({
           {/* Row 1: Date/time + menu */}
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="text-base truncate min-w-0">
-              {overdue && <span className="mr-1">⚠️</span>}
-              {reminder.status === "sent" && <span className="mr-1">✅</span>}
+              {overdue && <span className="mr-1" aria-hidden="true">⚠️</span>}
+              {reminder.status === "sent" && <span className="mr-1" aria-hidden="true">✅</span>}
               {formatDateTime(reminder.trigger_at, timezone)}
             </CardTitle>
             {(canEdit || canCancel || canDelete) && (
@@ -133,17 +133,17 @@ export function ReminderCard({
                   <DropdownMenuContent align="end">
                     {canEdit && (
                       <DropdownMenuItem onClick={() => onEdit(reminder)}>
-                        ✏️ Editar
+                        <span aria-hidden="true">✏️</span> Editar
                       </DropdownMenuItem>
                     )}
                     {canCancel && (
                       <DropdownMenuItem onClick={() => onCancel(reminder.id)}>
-                        ⏹️ Cancelar
+                        <span aria-hidden="true">⏹️</span> Cancelar
                       </DropdownMenuItem>
                     )}
                     {canCancelSeries && (
                       <DropdownMenuItem onClick={() => onCancelSeries(reminder)}>
-                        ⏹️ Cancelar serie
+                        <span aria-hidden="true">⏹️</span> Cancelar serie
                       </DropdownMenuItem>
                     )}
                     {canDelete && (
@@ -153,7 +153,7 @@ export function ReminderCard({
                           onClick={() => setShowDeleteDialog(true)}
                           className="text-destructive focus:text-destructive"
                         >
-                          🗑️ Eliminar
+                          <span aria-hidden="true">🗑️</span> Eliminar
                         </DropdownMenuItem>
                       </>
                     )}

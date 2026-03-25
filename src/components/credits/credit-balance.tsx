@@ -88,7 +88,7 @@ export function CreditBalance({
 
         {isLow && creditsRemaining > 0 && (
           <p className="text-xs text-warning-foreground">
-            ⚠️ Te quedan pocos créditos. Considera mejorar tu plan.
+            <span aria-hidden="true">⚠️</span> Te quedan pocos créditos. Considera mejorar tu plan.
           </p>
         )}
         {creditsRemaining === 0 && (

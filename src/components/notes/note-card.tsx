@@ -121,32 +121,32 @@ export function NoteCard({
       </Tooltip>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => onEdit(note)}>
-          ✏️ Editar
+          <span aria-hidden="true">✏️</span> Editar
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onTogglePin(note.id, !note.is_pinned)}
         >
-          {note.is_pinned ? "📌 Desfijar" : "📌 Fijar"}
+          <span aria-hidden="true">📌</span> {note.is_pinned ? "Desfijar" : "Fijar"}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onArchive(note.id)}>
-          📦 Archivar
+          <span aria-hidden="true">📦</span> Archivar
         </DropdownMenuItem>
         {onStatusChange && (
           <>
             <DropdownMenuSeparator />
             {note.status !== "en_curso" && (
               <DropdownMenuItem onClick={() => onStatusChange(note.id, "en_curso")}>
-                🔄 Marcar en curso
+                <span aria-hidden="true">🔄</span> Marcar en curso
               </DropdownMenuItem>
             )}
             {note.status !== "completed" && (
               <DropdownMenuItem onClick={() => onStatusChange(note.id, "completed")}>
-                ✅ Marcar completada
+                <span aria-hidden="true">✅</span> Marcar completada
               </DropdownMenuItem>
             )}
             {note.status !== "active" && (
               <DropdownMenuItem onClick={() => onStatusChange(note.id, "active")}>
-                ↩️ Marcar activa
+                <span aria-hidden="true">↩️</span> Marcar activa
               </DropdownMenuItem>
             )}
           </>
@@ -194,7 +194,7 @@ export function NoteCard({
           onClick={() => setShowDeleteDialog(true)}
           className="text-destructive focus:text-destructive"
         >
-          🗑️ Eliminar
+          <span aria-hidden="true">🗑️</span> Eliminar
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -229,7 +229,7 @@ export function NoteCard({
                   {priorityDot}
                   <CardTitle className="text-sm truncate min-w-0">
                     {note.is_pinned && (
-                      <span className="mr-1" aria-label="Fijada">
+                      <span className="mr-1" aria-hidden="true">
                         📌
                       </span>
                     )}
@@ -317,7 +317,7 @@ export function NoteCard({
                 {priorityDot}
                 <p className="text-sm font-medium truncate min-w-0">
                   {note.is_pinned && (
-                    <span className="mr-1" aria-label="Fijada">
+                    <span className="mr-1" aria-hidden="true">
                       📌
                     </span>
                   )}
@@ -414,7 +414,7 @@ export function NoteCard({
                 )}
                 <CardTitle className="text-base truncate min-w-0 shrink">
                   {note.is_pinned && (
-                    <span className="mr-1" aria-label="Fijada">
+                    <span className="mr-1" aria-hidden="true">
                       📌
                     </span>
                   )}
