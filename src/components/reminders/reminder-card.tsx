@@ -95,7 +95,7 @@ export function ReminderCard({
   return (
     <>
       <Card
-        className={`transition-shadow hover:shadow-md cursor-pointer ${
+        className={`overflow-hidden transition-shadow hover:shadow-md cursor-pointer ${
           overdue
             ? "border-destructive/40 bg-destructive/5"
             : reminder.status === "sent"
@@ -104,19 +104,19 @@ export function ReminderCard({
         }`}
         onClick={() => onView(reminder)}
       >
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
+        <CardHeader className="overflow-hidden pb-2">
+          <div className="flex items-start justify-between gap-2 min-w-0">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-base">
+              <CardTitle className="text-base whitespace-nowrap truncate">
                 {overdue && <span className="mr-1">⚠️</span>}
                 {reminder.status === "sent" && <span className="mr-1">✅</span>}
                 {formatDateTime(reminder.trigger_at, timezone)}
               </CardTitle>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0 max-w-[50%] min-w-0">
               {/* Recurring badge */}
               {reminder.is_recurring && rruleDescription && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs whitespace-nowrap truncate max-w-[120px]">
                   🔁 {rruleDescription}
                   {reminder.occurrence_number > 0 && (
                     <span className="ml-1 opacity-70">
@@ -126,7 +126,7 @@ export function ReminderCard({
                 </Badge>
               )}
               {/* Status badge */}
-              <Badge variant={config.variant}>{config.label}</Badge>
+              <Badge variant={config.variant} className="whitespace-nowrap shrink-0">{config.label}</Badge>
               {/* Actions menu */}
               {(canEdit || canCancel || canDelete) && (
                 <div onClick={(e) => e.stopPropagation()}>
