@@ -190,6 +190,13 @@ async function publicFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  if (!API_URL) {
+    throw new ApiError(
+      503,
+      "Backend no configurado. Contacta al administrador.",
+    );
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {

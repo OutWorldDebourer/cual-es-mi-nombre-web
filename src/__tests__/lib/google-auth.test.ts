@@ -38,6 +38,18 @@ describe("google-auth contract helpers", () => {
     });
   });
 
+  it("throws when apiUrl is empty", () => {
+    expect(() => buildGoogleConnectContractUrl("", "jwt-token")).toThrow(
+      "NEXT_PUBLIC_API_URL is required",
+    );
+  });
+
+  it("throws when accessToken is empty", () => {
+    expect(() => buildGoogleConnectContractUrl("https://api.example.com", "")).toThrow(
+      "A valid Supabase access token is required",
+    );
+  });
+
   it("maps backend callback errors to deterministic dashboard messages", () => {
     expect(
       buildGoogleAuthCallbackBanner(
