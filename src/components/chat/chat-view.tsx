@@ -33,6 +33,8 @@ export function ChatView({ assistantName }: ChatViewProps) {
   // ── Load initial history ──────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
+    let retries = 0;
+    const MAX_RETRIES = 2;
 
     async function loadHistory() {
       try {
@@ -43,7 +45,26 @@ export function ChatView({ assistantName }: ChatViewProps) {
         setHasMore(res.has_more);
       } catch (err) {
         if (cancelled) return;
-        const detail = err instanceof ApiError ? err.detail : "Error al cargar historial";
+
+        // Retry on network errors (not auth errors)
+        const isNetworkError = !(err instanceof ApiError);
+        const isServerError = err instanceof ApiError && err.status >= 500;
+        if ((isNetworkError || isServerError) && retries < MAX_RETRIES) {
+          retries++;
+          const delay = 1000 * retries;
+          setTimeout(() => { if (!cancelled) loadHistory(); }, delay);
+          return;
+        }
+
+        let detail: string;
+        if (err instanceof ApiError) {
+          detail = err.detail;
+        } else if (err instanceof TypeError) {
+          // Network/CORS error — fetch throws TypeError
+          detail = "No se pudo conectar al servidor. Verifica tu conexión.";
+        } else {
+          detail = "Error al cargar historial";
+        }
         toast.error(detail);
       } finally {
         if (!cancelled) setIsInitialLoad(false);
