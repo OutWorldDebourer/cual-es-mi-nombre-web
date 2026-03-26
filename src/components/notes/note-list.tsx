@@ -471,8 +471,8 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
 
   const gridClass =
     viewMode === "grid"
-      ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-      : "flex flex-col gap-3";
+      ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 transition-[gap,grid-template-columns] duration-200"
+      : "flex flex-col gap-3 transition-[gap] duration-200";
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -721,6 +721,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
           accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
@@ -809,6 +810,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
           accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}

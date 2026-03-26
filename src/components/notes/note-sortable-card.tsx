@@ -58,11 +58,11 @@ export function NoteSortableCard({
     isDragging,
   } = useSortable({ id: sortableId ?? note.id, disabled });
 
-  // When dragging with DragOverlay, hide the original item in place.
-  // Don't apply sortable transform — it causes the ghost to jump around.
+  // When dragging: hide original in place (overlay follows cursor).
+  // Otherwise: apply full sortable transform (translate + scale for grid compatibility).
   const style: React.CSSProperties = isDragging
     ? { opacity: 0, pointerEvents: "none" }
-    : { transform: CSS.Translate.toString(transform), transition };
+    : { transform: CSS.Transform.toString(transform), transition };
 
   return (
     <div
