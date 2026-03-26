@@ -2,7 +2,7 @@
  * Note Drag Overlay — "Cual es mi nombre" Web
  *
  * Visual overlay that follows the cursor/finger during a drag operation.
- * Renders the NoteCard with elevated styling (shadow, rotation, scale).
+ * Renders the NoteCard with elevated styling (shadow, subtle scale).
  *
  * @module components/notes/note-drag-overlay
  */
@@ -19,7 +19,7 @@ interface NoteDragOverlayProps {
 
 export function NoteDragOverlay({ note, layout }: NoteDragOverlayProps) {
   return (
-    <div className="drag-overlay-enter opacity-[0.97] ring-2 ring-primary/40 rounded-lg cursor-grabbing pointer-events-none">
+    <div className="drag-overlay-enter opacity-[0.97] outline-2 outline-primary/40 rounded-lg cursor-grabbing pointer-events-none">
       <NoteCard
         note={note}
         layout={layout}
