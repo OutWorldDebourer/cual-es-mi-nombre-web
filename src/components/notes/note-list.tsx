@@ -707,7 +707,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
             onPriorityChange={handlePriorityChange}
             onTagClick={setSelectedTag}
           />
-          <DragOverlay>
+          <DragOverlay dropAnimation={{ duration: 150, easing: "ease-out" }}>
             {activeNote && <NoteDragOverlay note={activeNote} layout="compact" />}
           </DragOverlay>
         </DndContext>
@@ -795,7 +795,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
             </div>
           </SortableContext>
 
-          <DragOverlay>
+          <DragOverlay dropAnimation={{ duration: 150, easing: "ease-out" }}>
             {activeNote && <NoteDragOverlay note={activeNote} layout={cardLayout} />}
           </DragOverlay>
         </DndContext>
@@ -843,7 +843,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
               </NoteGroupSection>
             ))}
           </div>
-          <DragOverlay>
+          <DragOverlay dropAnimation={{ duration: 150, easing: "ease-out" }}>
             {activeNote && <NoteDragOverlay note={activeNote} layout={cardLayout} />}
           </DragOverlay>
         </DndContext>
