@@ -110,6 +110,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
     recentlyMovedIds,
     sensors,
     handleDragStart,
+    handleDragOver,
     handleDragEnd,
     handleDragCancel,
   } = useNoteDrag({
@@ -690,6 +691,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           sensors={sensors}
           collisionDetection={kanbanCollisionDetection}
           onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
           accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}

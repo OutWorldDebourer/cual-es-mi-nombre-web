@@ -97,7 +97,7 @@ export function NoteBoardColumn({
         items={notes.map((n) => n.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className={`flex flex-col gap-2 p-2 min-h-[120px] ${
+        <div className={`flex flex-col gap-2 p-2 min-h-[120px] transition-all duration-200 ${
           mobileOpen ? "" : "hidden md:flex"
         }`}>
           {notes.map((note) => (

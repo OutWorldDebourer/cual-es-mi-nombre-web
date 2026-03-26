@@ -5,6 +5,7 @@
  * - Sensors: Mouse (5px), Touch (250ms long-press), Keyboard
  * - Position calculation via fractional-indexing (generateKeyBetween)
  * - Cross-section detection: toggles is_pinned when crossing pinned/unpinned boundary
+ * - Multi-container (board): onDragOver moves items between columns in real-time
  * - Optimistic update + Supabase PATCH
  * - isDraggingRef for pausing Realtime during drag
  *
@@ -20,6 +21,7 @@ import { useRef, useState, useCallback } from "react";
 import {
   type DragStartEvent,
   type DragEndEvent,
+  type DragOverEvent,
   type CollisionDetection,
   MouseSensor,
   TouchSensor,
@@ -91,6 +93,15 @@ export function parseCompositeId(id: string): { tag: string; noteId: string } | 
 /** Extract the real note ID from a potentially composite ID. */
 function toNoteId(id: string): string {
   return parseCompositeId(id)?.noteId ?? id;
+}
+
+/** Resolve which column status a raw droppable/sortable ID targets. */
+function resolveTargetStatus(rawId: string, notes: Note[]): NoteStatus | null {
+  if (rawId.startsWith(COLUMN_PREFIX)) {
+    return rawId.slice(COLUMN_PREFIX.length) as NoteStatus;
+  }
+  const noteId = toNoteId(rawId);
+  return notes.find((n) => n.id === noteId)?.status ?? null;
 }
 
 // ── Pure computation — extracted for testability and Phase 5/6 reuse ────
@@ -223,6 +234,10 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
   const [recentlyMovedIds, setRecentlyMovedIds] = useState<Set<string>>(new Set());
   const highlightTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  // ── Board mode: track cross-column moves from onDragOver ──
+  const activeIdRef = useRef<string | null>(null);
+  const originalStatusRef = useRef<NoteStatus | null>(null);
+
   const markRecentlyMoved = useCallback((noteId: string) => {
     // Clear existing timer for this note if any
     const existing = highlightTimers.current.get(noteId);
@@ -238,6 +253,23 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       highlightTimers.current.delete(noteId);
     }, 700);
     highlightTimers.current.set(noteId, timer);
+  }, []);
+
+  /** Revert status change applied by onDragOver (cancel / failed drop). */
+  const revertDragOverStatus = useCallback(() => {
+    if (originalStatusRef.current !== null && activeIdRef.current) {
+      const revertId = activeIdRef.current;
+      const revertStatus = originalStatusRef.current;
+      setNotes((prev) =>
+        prev.map((n) => (n.id === revertId ? { ...n, status: revertStatus } : n)),
+      );
+    }
+    originalStatusRef.current = null;
+  }, [setNotes]);
+
+  const cleanupRefs = useCallback(() => {
+    activeIdRef.current = null;
+    originalStatusRef.current = null;
   }, []);
 
   const sensors = useSensors(
@@ -258,11 +290,40 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       const note = notesRef.current.find((n) => n.id === noteId);
       if (note) {
         setActiveNote(note);
+        activeIdRef.current = noteId;
         dragCountRef.current++;
         isDraggingRef.current = true;
       }
     },
     [],
+  );
+
+  // ── Board: move item between columns in real-time during drag ──────
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      if (!boardMode) return;
+
+      const { active, over } = event;
+      if (!over) return;
+
+      const draggedId = toNoteId(active.id as string);
+      const targetStatus = resolveTargetStatus(over.id as string, notesRef.current);
+      if (!targetStatus) return;
+
+      const activeNote = notesRef.current.find((n) => n.id === draggedId);
+      if (!activeNote || activeNote.status === targetStatus) return;
+
+      // Save original status on first cross-column move only
+      if (originalStatusRef.current === null) {
+        originalStatusRef.current = activeNote.status;
+      }
+
+      // Move item to target column (visual only — no persistence yet)
+      setNotes((prev) =>
+        prev.map((n) => (n.id === draggedId ? { ...n, status: targetStatus } : n)),
+      );
+    },
+    [boardMode, setNotes],
   );
 
   const handleDragEnd = useCallback(
@@ -275,7 +336,10 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         isDraggingRef.current = dragCountRef.current > 0;
       };
 
+      // No valid drop target → revert any onDragOver status change
       if (!over || active.id === over.id) {
+        revertDragOverStatus();
+        cleanupRefs();
         releaseDrag();
         return;
       }
@@ -291,6 +355,8 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         const activeParsed = parseCompositeId(rawActiveId);
         const overParsed = parseCompositeId(rawOverId);
         if (activeParsed && overParsed && activeParsed.tag !== overParsed.tag) {
+          revertDragOverStatus();
+          cleanupRefs();
           releaseDrag();
           return;
         }
@@ -299,6 +365,11 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       const overId = overNoteId;
       const activeId = activeNoteId;
       const currentNotes = notesRef.current;
+
+      // Did onDragOver change the status during this drag?
+      const crossColumnMove = originalStatusRef.current !== null;
+      const preDragStatus = originalStatusRef.current;
+
       const isBoardDrop = boardMode && (
         rawOverId.startsWith(COLUMN_PREFIX) ||
         currentNotes.find((n) => n.id === overId)?.status !== currentNotes.find((n) => n.id === activeId)?.status
@@ -310,12 +381,16 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         try {
           boardResult = computeBoardDragMove(currentNotes, activeId, overId);
         } catch {
+          revertDragOverStatus();
+          cleanupRefs();
           releaseDrag();
           toast.error("Error al calcular posición");
           return;
         }
 
         if (!boardResult) {
+          revertDragOverStatus();
+          cleanupRefs();
           releaseDrag();
           return;
         }
@@ -336,7 +411,8 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
         try {
           const supabase = createClient();
           const updatePayload: { position: string; status?: NoteStatus } = { position: newPosition };
-          if (statusChanged) updatePayload.status = newStatus;
+          // Persist status if changed by computeBoardDragMove OR by onDragOver
+          if (statusChanged || crossColumnMove) updatePayload.status = newStatus;
 
           const { error } = await supabase
             .from("notes")
@@ -344,13 +420,23 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
             .eq("id", activeId);
 
           if (error) {
-            setNotes(snapshot);
+            // Revert to pre-drag state
+            setNotes(
+              crossColumnMove && preDragStatus
+                ? snapshot.map((n) => (n.id === activeId ? { ...n, status: preDragStatus } : n))
+                : snapshot,
+            );
             toast.error("Error al guardar orden");
           }
         } catch {
-          setNotes(snapshot);
+          setNotes(
+            crossColumnMove && preDragStatus
+              ? snapshot.map((n) => (n.id === activeId ? { ...n, status: preDragStatus } : n))
+              : snapshot,
+          );
           toast.error("Error al guardar orden");
         } finally {
+          cleanupRefs();
           releaseDrag();
         }
         return;
@@ -361,12 +447,16 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       try {
         result = computeDragMove(currentNotes, activeId, overId);
       } catch {
+        revertDragOverStatus();
+        cleanupRefs();
         releaseDrag();
         toast.error("Error al calcular posición");
         return;
       }
 
       if (!result) {
+        revertDragOverStatus();
+        cleanupRefs();
         releaseDrag();
         return;
       }
@@ -386,8 +476,20 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
 
       try {
         const supabase = createClient();
-        const updatePayload: { position: string; is_pinned?: boolean } = { position: newPosition };
+        const updatePayload: { position: string; is_pinned?: boolean; status?: NoteStatus } = {
+          position: newPosition,
+        };
         if (crossedPinBoundary) updatePayload.is_pinned = newIsPinned;
+
+        // Persist status change from onDragOver (card moved to new column, then
+        // dropped on a card within that column — isBoardDrop was false because
+        // both cards now share the same status after onDragOver)
+        if (crossColumnMove) {
+          const currentNote = currentNotes.find((n) => n.id === activeId);
+          if (currentNote && currentNote.status !== preDragStatus) {
+            updatePayload.status = currentNote.status;
+          }
+        }
 
         const { error } = await supabase
           .from("notes")
@@ -395,24 +497,35 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
           .eq("id", activeId);
 
         if (error) {
-          setNotes(snapshot);
+          setNotes(
+            crossColumnMove && preDragStatus
+              ? snapshot.map((n) => (n.id === activeId ? { ...n, status: preDragStatus } : n))
+              : snapshot,
+          );
           toast.error("Error al guardar orden");
         }
       } catch {
-        setNotes(snapshot);
+        setNotes(
+          crossColumnMove && preDragStatus
+            ? snapshot.map((n) => (n.id === activeId ? { ...n, status: preDragStatus } : n))
+            : snapshot,
+        );
         toast.error("Error al guardar orden");
       } finally {
+        cleanupRefs();
         releaseDrag();
       }
     },
-    [setNotes, boardMode, groupMode, markRecentlyMoved],
+    [setNotes, boardMode, groupMode, markRecentlyMoved, revertDragOverStatus, cleanupRefs],
   );
 
   const handleDragCancel = useCallback(() => {
+    revertDragOverStatus();
+    cleanupRefs();
     setActiveNote(null);
     dragCountRef.current = Math.max(0, dragCountRef.current - 1);
     isDraggingRef.current = dragCountRef.current > 0;
-  }, []);
+  }, [revertDragOverStatus, cleanupRefs]);
 
   return {
     activeNote,
@@ -420,6 +533,7 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
     recentlyMovedIds,
     sensors,
     handleDragStart,
+    handleDragOver,
     handleDragEnd,
     handleDragCancel,
   };
