@@ -16,7 +16,6 @@ import {
   buildRRule,
   parseRRule,
   describeRRule,
-  defaultRecurrenceParams,
   DAY_OPTIONS,
 } from "@/lib/rrule";
 import { toLocalInputValue, toUTCISOString } from "@/lib/dates";

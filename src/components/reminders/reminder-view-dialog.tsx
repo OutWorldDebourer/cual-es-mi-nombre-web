@@ -51,15 +51,16 @@ export function ReminderViewDialog({
   onEdit,
   timezone,
 }: ReminderViewDialogProps) {
+  const recurrenceRule = reminder?.recurrence_rule ?? null;
   const rruleDescription = useMemo(() => {
-    if (!reminder?.recurrence_rule) return null;
+    if (!recurrenceRule) return null;
     try {
-      const params = parseRRule(reminder.recurrence_rule);
+      const params = parseRRule(recurrenceRule);
       return describeRRule(params);
     } catch {
       return null;
     }
-  }, [reminder?.recurrence_rule]);
+  }, [recurrenceRule]);
 
   if (!reminder) return null;
 

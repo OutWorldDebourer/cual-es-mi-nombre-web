@@ -78,34 +78,36 @@ export function PhoneInput({
   const initialCountry =
     getCountryByCode(defaultCountryCode ?? "PE") ?? getDefaultCountry();
 
-  const [selectedCountry, setSelectedCountry] =
-    useState<Country>(initialCountry);
-  const [nationalNumber, setNationalNumber] = useState("");
+  // Parse initial value to derive country and national number on mount.
+  const [selectedCountry, setSelectedCountry] = useState<Country>(() => {
+    if (value) {
+      const sorted = [...COUNTRIES].sort(
+        (a, b) => b.dialCode.length - a.dialCode.length,
+      );
+      for (const country of sorted) {
+        if (value.startsWith(country.dialCode)) return country;
+      }
+    }
+    return initialCountry;
+  });
+  const [nationalNumber, setNationalNumber] = useState(() => {
+    if (value) {
+      const sorted = [...COUNTRIES].sort(
+        (a, b) => b.dialCode.length - a.dialCode.length,
+      );
+      for (const country of sorted) {
+        if (value.startsWith(country.dialCode))
+          return value.slice(country.dialCode.length);
+      }
+    }
+    return "";
+  });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-
-  // --- Sync from external value prop (controlled mode) --------------------
-
-  useEffect(() => {
-    if (!value) return;
-    // Try to match the value to a known country dial code
-    // Sort countries by dial code length desc so longer codes match first
-    const sorted = [...COUNTRIES].sort(
-      (a, b) => b.dialCode.length - a.dialCode.length,
-    );
-    for (const country of sorted) {
-      if (value.startsWith(country.dialCode)) {
-        setSelectedCountry(country);
-        setNationalNumber(value.slice(country.dialCode.length));
-        return;
-      }
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // Only sync on mount — after that the component is the source of truth.
 
   // --- Emit E.164 on changes ---------------------------------------------
 

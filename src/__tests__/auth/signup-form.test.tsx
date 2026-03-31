@@ -336,7 +336,7 @@ describe("SignupForm — Step 2 (OTP Verification)", () => {
   });
 
   it("can resend OTP via signUp call", async () => {
-    const user = await goToOtpStep();
+    await goToOtpStep();
 
     // The resend button should be disabled initially (timer active)
     const resendBtn = screen.getByRole("button", { name: "Reenviar código" });

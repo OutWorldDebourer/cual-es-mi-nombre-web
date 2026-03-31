@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Test chat retry logic in chat-overlay.tsx.
@@ -24,7 +25,7 @@ describe("chat retry logic", () => {
           data: { session: { access_token: "token" } },
         }),
       },
-    } as any;
+    } as unknown as SupabaseClient;
 
     // First call fails, second succeeds
     const fetchSpy = vi
@@ -61,7 +62,7 @@ describe("chat retry logic", () => {
           data: { session: { access_token: "token" } },
         }),
       },
-    } as any;
+    } as unknown as SupabaseClient;
 
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ detail: "Internal server error" }), {

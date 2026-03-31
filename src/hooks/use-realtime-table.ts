@@ -10,7 +10,10 @@ import { createClient } from "@/lib/supabase/client";
  */
 export function useRealtimeTable(table: string, onEvent: () => void, debounceMs = 300) {
   const callbackRef = useRef(onEvent);
-  callbackRef.current = onEvent;
+
+  useEffect(() => {
+    callbackRef.current = onEvent;
+  });
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const channelName = useRef(`realtime:${table}:${crypto.randomUUID()}`);
 

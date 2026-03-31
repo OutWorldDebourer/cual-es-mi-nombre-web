@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Reminder } from "@/types/database";
 import { formatDateTime, isPast } from "@/lib/dates";
 import { parseRRule, describeRRule } from "@/lib/rrule";
@@ -82,17 +82,21 @@ export function ReminderCard({
   const canCancelSeries = canCancel && isRecurringSeries;
 
   // Detect realtime status changes for highlight animation
-  const prevStatusRef = useRef(reminder.status);
+  const [prevStatus, setPrevStatus] = useState(reminder.status);
   const [highlightActive, setHighlightActive] = useState(false);
 
+  // Trigger highlight during render when status changes
+  if (reminder.status !== prevStatus) {
+    setPrevStatus(reminder.status);
+    setHighlightActive(true);
+  }
+
+  // Auto-dismiss highlight after animation duration
   useEffect(() => {
-    if (prevStatusRef.current !== reminder.status) {
-      prevStatusRef.current = reminder.status;
-      setHighlightActive(true);
-      const timer = setTimeout(() => setHighlightActive(false), 700);
-      return () => clearTimeout(timer);
-    }
-  }, [reminder.status]);
+    if (!highlightActive) return;
+    const timer = setTimeout(() => setHighlightActive(false), 700);
+    return () => clearTimeout(timer);
+  }, [highlightActive]);
 
   // Parse RRULE for display
   const rruleDescription = useMemo(() => {
