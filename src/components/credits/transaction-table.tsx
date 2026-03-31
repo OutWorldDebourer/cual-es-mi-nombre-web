@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
 import type { CreditTransaction, CreditAction } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { formatDateTime } from "@/lib/dates";
@@ -60,32 +60,29 @@ export function TransactionTable({
 
   const supabase = createClient();
 
-  const fetchTransactions = useCallback(
-    async (pageNum: number) => {
-      setIsLoading(true);
-      const from = pageNum * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      const { data, error } = await supabase
-        .from("credit_transactions")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .range(from, to);
-
-      if (!error && data) {
-        setTransactions(data as CreditTransaction[]);
-        setHasMore(data.length === PAGE_SIZE);
-      }
-      setIsLoading(false);
-    },
-    [supabase],
-  );
-
-  useEffect(() => {
-    if (page > 0) {
-      void fetchTransactions(page);
+  async function goToPage(newPage: number) {
+    setPage(newPage);
+    if (newPage === 0) {
+      setTransactions(initialTransactions);
+      setHasMore(initialTransactions.length === PAGE_SIZE);
+      return;
     }
-  }, [page, fetchTransactions]);
+    setIsLoading(true);
+    const from = newPage * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
+      .from("credit_transactions")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (!error && data) {
+      setTransactions(data as CreditTransaction[]);
+      setHasMore(data.length === PAGE_SIZE);
+    }
+    setIsLoading(false);
+  }
 
   return (
     <div className="space-y-4">
@@ -162,7 +159,7 @@ export function TransactionTable({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                onClick={() => goToPage(Math.max(0, page - 1))}
                 disabled={page === 0 || isLoading}
               >
                 ← Anterior
@@ -170,7 +167,7 @@ export function TransactionTable({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => goToPage(page + 1)}
                 disabled={!hasMore || isLoading}
               >
                 Siguiente →

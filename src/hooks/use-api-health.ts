@@ -12,16 +12,18 @@ const RETRY_DELAY_MS = 3000;
  * Retries up to MAX_RETRIES times before reporting unreachable,
  * preventing false positives from transient network issues.
  */
+function getInitialStatus(): ApiHealthStatus {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+  return apiUrl ? "checking" : "unconfigured";
+}
+
 export function useApiHealth(): ApiHealthStatus {
-  const [status, setStatus] = useState<ApiHealthStatus>("checking");
+  const [status, setStatus] = useState<ApiHealthStatus>(getInitialStatus);
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-    if (!apiUrl) {
-      setStatus("unconfigured");
-      return;
-    }
+    if (!apiUrl) return;
 
     let cancelled = false;
 

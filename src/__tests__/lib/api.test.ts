@@ -1,4 +1,5 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // We need to test backendApi and publicFetch behavior when API_URL is empty.
 // Since API_URL is read at module level from process.env, we use dynamic imports.
@@ -25,7 +26,7 @@ describe("backendApi — API_URL validation", () => {
           data: { session: { access_token: "token" } },
         }),
       },
-    } as any;
+    } as unknown as SupabaseClient;
 
     const api = backendApi(mockSupabase);
 
@@ -53,7 +54,7 @@ describe("backendApi — API_URL validation", () => {
           data: { session: { access_token: "token" } },
         }),
       },
-    } as any;
+    } as unknown as SupabaseClient;
 
     // Mock fetch to return a successful response
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -64,7 +65,7 @@ describe("backendApi — API_URL validation", () => {
     );
 
     const api = backendApi(mockSupabase);
-    const result = await api.chat.history();
+    await api.chat.history();
 
     expect(fetchSpy).toHaveBeenCalledWith(
       "https://api.example.com/api/chat/history",

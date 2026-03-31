@@ -14,17 +14,14 @@ interface CountUpProps {
  */
 export function CountUp({ end, duration = 800, className }: CountUpProps) {
   const [value, setValue] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (hasAnimated.current || end === 0) {
-      setValue(end);
-      return;
-    }
+    if (end === 0 || hasAnimated) return;
 
-    hasAnimated.current = true;
     const start = performance.now();
+    let rafId: number;
 
     function tick(now: number) {
       const elapsed = now - start;
@@ -34,12 +31,18 @@ export function CountUp({ end, duration = 800, className }: CountUpProps) {
       setValue(Math.round(eased * end));
 
       if (progress < 1) {
-        requestAnimationFrame(tick);
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setHasAnimated(true);
       }
     }
 
-    requestAnimationFrame(tick);
-  }, [end, duration]);
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [end, duration, hasAnimated]);
 
-  return <span ref={ref} className={className}>{value}</span>;
+  // After animation completes or for zero, show end directly
+  const displayValue = hasAnimated || end === 0 ? end : value;
+
+  return <span ref={ref} className={className}>{displayValue}</span>;
 }

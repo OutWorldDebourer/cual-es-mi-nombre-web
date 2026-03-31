@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import type { Reminder, ReminderStatus } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
@@ -58,7 +58,7 @@ export function ReminderList({
   const [tab, setTab] = useState<ReminderTab>("upcoming");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(!!autoCreate);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
   const [viewingReminder, setViewingReminder] = useState<Reminder | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,17 +71,16 @@ export function ReminderList({
 
   // ── Fetch reminders from Supabase ──────────────────────────────────────
 
-  const fetchReminders = useCallback(async (silent = false) => {
+  const fetchReminders = useCallback(async (currentTab: ReminderTab, silent = false) => {
     lastFetchRef.current = Date.now();
-    if (!silent) setIsLoading(true);
-    const statuses = TAB_STATUSES[tab];
+    const statuses = TAB_STATUSES[currentTab];
     let query = supabase
       .from("reminders")
       .select("*")
       .in("status", statuses)
-      .order("trigger_at", { ascending: tab === "upcoming" || tab === "recurring" });
+      .order("trigger_at", { ascending: currentTab === "upcoming" || currentTab === "recurring" });
 
-    if (tab === "recurring") {
+    if (currentTab === "recurring") {
       query = query.eq("is_recurring", true);
     }
 
@@ -98,25 +97,13 @@ export function ReminderList({
       );
     }
     if (!silent) setIsLoading(false);
-  }, [supabase, tab]);
-
-  // Auto-open create form when ?action=new
-  useEffect(() => {
-    if (autoCreate) {
-      setEditingReminder(null);
-      setFormOpen(true);
-    }
-  }, [autoCreate]);
-
-  useEffect(() => {
-    void fetchReminders();
-  }, [fetchReminders]);
+  }, [supabase]);
 
   // Silent refetch on Realtime events (no skeleton, dedup with manual fetches)
   const realtimeFetch = useCallback(() => {
     if (Date.now() - lastFetchRef.current < 500) return;
-    void fetchReminders(true);
-  }, [fetchReminders]);
+    void fetchReminders(tab, true);
+  }, [fetchReminders, tab]);
 
   useRealtimeTable("reminders", realtimeFetch);
 
@@ -140,7 +127,7 @@ export function ReminderList({
     });
 
     if (error) throw new Error(error.message);
-    await fetchReminders();
+    await fetchReminders(tab);
   }
 
   async function handleUpdate(data: ReminderFormData) {
@@ -159,7 +146,7 @@ export function ReminderList({
 
     if (error) throw new Error(error.message);
     setEditingReminder(null);
-    await fetchReminders();
+    await fetchReminders(tab);
   }
 
   async function handleCancel(reminderId: string) {
@@ -261,7 +248,12 @@ export function ReminderList({
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={tab} onValueChange={(v) => setTab(v as ReminderTab)}>
+        <Tabs value={tab} onValueChange={(v) => {
+          const newTab = v as ReminderTab;
+          setTab(newTab);
+          setIsLoading(true);
+          void fetchReminders(newTab);
+        }}>
           <TabsList>
             <TabsTrigger value="upcoming">Próximos</TabsTrigger>
             <TabsTrigger value="recurring">Recurrentes</TabsTrigger>

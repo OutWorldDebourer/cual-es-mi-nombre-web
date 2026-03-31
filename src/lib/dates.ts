@@ -135,16 +135,6 @@ export function toUTCISOString(localValue: string, timezone: string): string {
     hour12: false,
   });
 
-  const utcFmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
   // Iterate to find the correct UTC time that produces the desired local time
   // Start with assuming the local value IS UTC, then adjust
   const getParts = (fmt: Intl.DateTimeFormat, d: Date) => {
@@ -155,8 +145,6 @@ export function toUTCISOString(localValue: string, timezone: string): string {
 
   // Compare what `rough` looks like in target timezone vs what we want
   const localParts = getParts(localFmt, rough);
-  const utcParts = getParts(utcFmt, rough);
-
   // Diff in minutes between what we got locally and what we wanted
   const gotMinutes = localParts.hour * 60 + localParts.minute;
   const wantMinutes = hour * 60 + minute;

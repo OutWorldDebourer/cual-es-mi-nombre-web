@@ -13,7 +13,7 @@
 
 "use client";
 
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { DndContext, closestCenter, DragOverlay, type Announcements } from "@dnd-kit/core";
 import {
@@ -81,20 +81,24 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const [groupMode, setGroupModeState] = useState<GroupMode>(() => readStorage("notes-groupMode", "none", ["none", "tag"] as const));
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(!!autoCreate);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const setViewMode = useCallback((mode: ViewMode) => {
-    setViewModeState(mode);
-    try { localStorage.setItem("notes-viewMode", JSON.stringify(mode)); } catch { /* noop */ }
-  }, []);
 
   const setGroupMode = useCallback((mode: GroupMode) => {
     setGroupModeState(mode);
     try { localStorage.setItem("notes-groupMode", JSON.stringify(mode)); } catch { /* noop */ }
   }, []);
+
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeState(mode);
+    if (mode === "board") {
+      setGroupMode("none");
+      setStatusFilter("all");
+    }
+    try { localStorage.setItem("notes-viewMode", JSON.stringify(mode)); } catch { /* noop */ }
+  }, [setGroupMode]);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastFetchRef = useRef(0);
@@ -153,44 +157,31 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
     };
   }, [notes]);
 
-  // ── Reset filters on tab/tag changes ───────────────────────────────────
+  // ── Event handlers for state-driven resets ────────────────────────────
 
-  // Auto-open create form when ?action=new
-  useEffect(() => {
-    if (autoCreate) {
-      setEditingNote(null);
-      setFormOpen(true);
-    }
-  }, [autoCreate]);
-
-  useEffect(() => {
-    if (tab === "archived") {
+  function handleTabChange(newTab: NoteTab) {
+    setTab(newTab);
+    if (newTab === "archived") {
       setStatusFilter("all");
       setPriorityFilter("all");
     }
-  }, [tab]);
+    setIsLoading(true);
+    void fetchNotes(newTab);
+  }
 
-  useEffect(() => {
-    if (selectedTag) setGroupMode("none");
-  }, [selectedTag, setGroupMode]);
-
-  // Board and group-by-tag are mutually exclusive; board shows all statuses
-  useEffect(() => {
-    if (viewMode === "board") {
-      setGroupMode("none");
-      setStatusFilter("all");
-    }
-  }, [viewMode, setGroupMode]);
+  function handleTagClick(tag: string | null) {
+    setSelectedTag(tag);
+    if (tag) setGroupMode("none");
+  }
 
   // ── Fetch notes from Supabase ──────────────────────────────────────────
 
-  const fetchNotes = useCallback(async (silent = false) => {
+  async function fetchNotes(currentTab: NoteTab, silent = false) {
     lastFetchRef.current = Date.now();
-    if (!silent) setIsLoading(true);
     const { data, error } = await supabase
       .from("notes")
       .select("*")
-      .eq("is_archived", tab === "archived")
+      .eq("is_archived", currentTab === "archived")
       .order("is_pinned", { ascending: false })
       .order("position", { ascending: true })
       .order("updated_at", { ascending: false });
@@ -206,20 +197,15 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
       );
     }
     if (!silent) setIsLoading(false);
-  }, [supabase, tab]);
-
-  // Refetch when tab changes
-  useEffect(() => {
-    void fetchNotes();
-  }, [fetchNotes]);
+  }
 
   // Silent refetch on Realtime events (no skeleton, dedup with manual fetches)
   // Skip during drag to prevent stale positions from reverting optimistic updates.
-  const realtimeFetch = useCallback(() => {
+  function realtimeFetch() {
     if (isDraggingRef.current) return;
     if (Date.now() - lastFetchRef.current < 500) return;
-    void fetchNotes(true);
-  }, [fetchNotes, isDraggingRef]);
+    void fetchNotes(tab, true);
+  }
 
   useRealtimeTable("notes", realtimeFetch);
 
@@ -249,7 +235,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
     });
 
     if (error) throw new Error(error.message);
-    await fetchNotes();
+    await fetchNotes(tab);
   }
 
   async function handleUpdate(data: { title: string; content: string; status?: NoteStatus; priority?: NotePriority }) {
@@ -268,7 +254,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
 
     if (error) throw new Error(error.message);
     setEditingNote(null);
-    await fetchNotes();
+    await fetchNotes(tab);
   }
 
   function handleDelete(noteId: string) {
@@ -483,7 +469,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
         <div className="flex items-center gap-2">
           <Tabs
             value={tab}
-            onValueChange={(v) => setTab(v as NoteTab)}
+            onValueChange={(v) => handleTabChange(v as NoteTab)}
           >
             <TabsList>
               <TabsTrigger value="active" className="text-xs sm:text-sm">
@@ -707,7 +693,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
             onArchive={handleArchive}
             onStatusChange={handleStatusChange}
             onPriorityChange={handlePriorityChange}
-            onTagClick={setSelectedTag}
+            onTagClick={handleTagClick}
           />
           <DragOverlay dropAnimation={{ duration: 150, easing: "ease-out" }}>
             {activeNote && <NoteDragOverlay note={activeNote} layout="compact" />}
@@ -755,7 +741,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                       onArchive={handleArchive}
                       onStatusChange={handleStatusChange}
                       onPriorityChange={handlePriorityChange}
-                      onTagClick={setSelectedTag}
+                      onTagClick={handleTagClick}
                     />
                   ))}
                 </div>
@@ -790,7 +776,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                       onArchive={handleArchive}
                       onStatusChange={handleStatusChange}
                       onPriorityChange={handlePriorityChange}
-                      onTagClick={setSelectedTag}
+                      onTagClick={handleTagClick}
                     />
                   ))}
                 </div>
@@ -839,7 +825,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                         onArchive={handleArchive}
                         onStatusChange={handleStatusChange}
                         onPriorityChange={handlePriorityChange}
-                        onTagClick={setSelectedTag}
+                        onTagClick={handleTagClick}
                       />
                     ))}
                   </div>

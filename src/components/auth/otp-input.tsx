@@ -77,15 +77,15 @@ export function OTPInput({
     parseDigits(value, length),
   );
 
-  // Track last value we emitted so we can distinguish external changes.
-  const lastEmittedRef = useRef<string | undefined>(undefined);
-
   // Sync from external value prop (e.g. parent clears the OTP).
-  useEffect(() => {
-    if (value !== undefined && value !== lastEmittedRef.current) {
+  // Uses "adjust state during render" pattern per React docs.
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    if (value !== undefined && value !== digits.join("")) {
       setDigits(parseDigits(value, length));
     }
-  }, [value, length]);
+  }
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -111,7 +111,6 @@ export function OTPInput({
     (newDigits: string[]) => {
       setDigits(newDigits);
       const otp = newDigits.join("");
-      lastEmittedRef.current = otp;
       onChange?.(otp);
       if (otp.length === length && newDigits.every((d) => d !== "")) {
         onComplete?.(otp);
@@ -258,11 +257,13 @@ export function useOTPTimer({
   const [seconds, setSeconds] = useState(autoStart ? initialSeconds : 0);
   const [isActive, setIsActive] = useState(autoStart);
 
+  // Stop timer during render when countdown reaches zero
+  if (isActive && seconds <= 0) {
+    setIsActive(false);
+  }
+
   useEffect(() => {
-    if (!isActive || seconds <= 0) {
-      if (isActive && seconds <= 0) setIsActive(false);
-      return;
-    }
+    if (!isActive || seconds <= 0) return;
 
     const interval = setInterval(() => {
       setSeconds((s) => Math.max(0, s - 1));
