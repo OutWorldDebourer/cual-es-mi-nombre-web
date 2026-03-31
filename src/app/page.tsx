@@ -1,3 +1,4 @@
+// Frontend Agent (Kaizen) was here - E2E test 2026-03-31
 /**
  * Landing Page — "Cual es mi nombre" Web
  *
