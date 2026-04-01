@@ -61,7 +61,7 @@ export default function AuthLayout({
           {/* Brand mark */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 group w-fit"
+            className="flex items-center gap-2.5 group w-fit rounded-lg focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
             style={{ animation: "fade-in-up 0.6s ease-out both" }}
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm border border-white/[0.08] group-hover:bg-white/[0.15] transition-colors">
@@ -180,7 +180,7 @@ function FeatureCard({
 }) {
   return (
     <div
-      className="flex items-center gap-4 rounded-xl bg-white/[0.06] backdrop-blur-sm border border-white/[0.06] px-4 py-3 hover:bg-white/[0.10] transition-colors"
+      className="flex items-center gap-4 rounded-xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.06] px-4 py-3 hover:bg-white/[0.10] hover:scale-[1.02] transition-transform duration-200"
       style={{ animation: `fade-in-up 0.5s ease-out ${delay}s both` }}
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.08]">

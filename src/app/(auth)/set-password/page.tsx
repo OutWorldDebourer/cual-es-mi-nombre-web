@@ -21,6 +21,8 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RecoveryForm } from "@/components/auth/recovery-form";
+import { MotionReveal } from "@/components/landing/motion-reveal";
+import { AuthFormSkeleton } from "@/components/auth/auth-form-skeleton";
 import { isValidE164 } from "@/lib/phone-utils";
 
 // ---------------------------------------------------------------------------
@@ -68,18 +70,20 @@ function SetPasswordContent() {
 
 export default function SetPasswordPage() {
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Crear Contraseña</CardTitle>
-        <p className="text-sm text-muted-foreground mt-1">
-          Crea una contraseña para acceder desde la web
-        </p>
-      </CardHeader>
-      <CardContent>
-        <Suspense fallback={null}>
-          <SetPasswordContent />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <MotionReveal direction="up">
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Crear Contraseña</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Crea una contraseña para acceder desde la web
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<AuthFormSkeleton />}>
+            <SetPasswordContent />
+          </Suspense>
+        </CardContent>
+      </Card>
+    </MotionReveal>
   );
 }
