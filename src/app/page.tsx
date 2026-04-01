@@ -22,6 +22,7 @@ import { MotionReveal, StaggerContainer, StaggerItem } from "@/components/landin
 import { FeatureGrid } from "@/components/landing/feature-card";
 import { AnimatedSteps } from "@/components/landing/animated-steps";
 import { PricingSection } from "@/components/landing/pricing-section";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Sparkles, Instagram, Twitter } from "lucide-react";
 
 /* ── Page Component ──────────────────────────────────────────── */
@@ -71,8 +72,9 @@ export default async function HomePage() {
       </section>
 
       {/* ── Features — M2.2 ── */}
-      <section className="border-t bg-card/50 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <section className="relative overflow-hidden border-t bg-card/50 py-20 sm:py-24">
+        <FloatingOrbs count={2} />
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -90,8 +92,9 @@ export default async function HomePage() {
       </section>
 
       {/* ── How it works — M2.4 ── */}
-      <section className="py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <section className="relative overflow-hidden py-20 sm:py-24">
+        <FloatingOrbs count={2} />
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -126,9 +129,10 @@ export default async function HomePage() {
       {/* ── Pricing Preview — M2.3 ── */}
       <section
         id="planes"
-        className="scroll-mt-20 border-t bg-card/50 py-20 sm:py-24"
+        className="relative overflow-hidden scroll-mt-20 border-t bg-card/50 py-20 sm:py-24"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <FloatingOrbs count={2} />
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
