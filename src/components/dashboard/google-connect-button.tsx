@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { ComponentProps } from "react";
+import { toast } from "sonner";
 import { backendApi } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,13 +33,13 @@ export function GoogleConnectButton({
       const message = error instanceof Error
         ? error.message
         : "Sesión expirada. Recarga la página.";
-      alert(message);
+      toast.error(message);
       setIsConnecting(false);
     }
   }
 
   return (
-    <Button className={className} disabled={isConnecting} onClick={handleConnect} variant={variant}>
+    <Button className={className} loading={isConnecting} disabled={isConnecting} onClick={handleConnect} variant={variant}>
       {isConnecting
         ? "Abriendo Google..."
         : connected
