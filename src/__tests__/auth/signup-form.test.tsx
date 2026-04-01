@@ -229,7 +229,7 @@ describe("SignupForm — Step 1 (Phone + Password)", () => {
     await fillPasswordFields(user, "password123");
     await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
 
-    expect(screen.getByRole("button", { name: "Verificando..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Verificando/ })).toBeDisabled();
   });
 });
 

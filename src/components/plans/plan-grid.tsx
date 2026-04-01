@@ -69,11 +69,11 @@ export function PlanGrid({
     <div className="space-y-6">
       {/* Grace period banner */}
       {showGraceBanner && (
-        <div className="rounded-lg border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-200">
+        <div className="rounded-lg border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-warning">
           <p className="font-medium">
             Tu suscripción fue cancelada
           </p>
-          <p className="mt-1 text-amber-700 dark:text-amber-300">
+          <p className="mt-1 text-warning/80">
             {daysLeft > 0
               ? `Mantienes el acceso por ${daysLeft} día${daysLeft !== 1 ? "s" : ""} más como período de gracia.`
               : "Tu período de gracia está por finalizar."}

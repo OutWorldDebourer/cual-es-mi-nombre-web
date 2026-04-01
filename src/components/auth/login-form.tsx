@@ -234,7 +234,7 @@ export function LoginForm() {
 
       <FormError message={error} />
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading} loading={loading}>
         {loading ? "Ingresando..." : "Ingresar"}
       </Button>
     </form>

@@ -185,7 +185,7 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="timezone">Zona horaria</Label>
               <Select value={timezone} onValueChange={setTimezone}>
-                <SelectTrigger id="timezone" className="h-10">
+                <SelectTrigger id="timezone">
                   <SelectValue placeholder="Selecciona zona horaria" />
                 </SelectTrigger>
                 <SelectContent>
@@ -234,7 +234,7 @@ export default function SettingsPage() {
 
         <div className="max-w-md">
           <FormError message={error} />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} loading={loading}>
             {loading ? "Guardando..." : "Guardar cambios"}
           </Button>
         </div>
