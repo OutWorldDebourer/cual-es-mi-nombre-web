@@ -6,7 +6,7 @@ Authentication route group — shared split-panel layout (branding left, form ri
 | File | Description | Last Modified |
 |------|-------------|---------------|
 | `actions.ts` | Server action for logout — signs out via Supabase, revalidates cache, redirects to /login | initial · 2026-03-30 |
-| `layout.tsx` | Auth layout — desktop split panel (teal branding + form), mobile compact header + centered form | initial · 2026-03-30 |
+| `layout.tsx` | Auth layout — desktop split panel (teal branding + form), mobile compact header + centered form; orbs animated with float-orb keyframes | T6 · 2026-04-01 |
 
 ## Subdirectories
 | Directory | Description |
