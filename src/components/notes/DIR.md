@@ -8,7 +8,7 @@ Notes CRUD interface with Kanban board, drag-and-drop, grouping, and filtering.
 | `note-board-column.tsx` | Single Kanban column for one note status, droppable zone with collapsible header on mobile | initial · 2026-03-30 |
 | `note-board-view.tsx` | Kanban board layout splitting notes into 3 columns by status (active/en_curso/completed) | initial · 2026-03-30 |
 | `note-card.tsx` | Note display card (variant=interactive) with title, content preview, tags, priority, status, pin/archive/edit/delete actions | T1 · 2026-03-31 |
-| `note-drag-overlay.tsx` | Elevated card overlay that follows the cursor during drag-and-drop operations | initial · 2026-03-30 |
+| `note-drag-overlay.tsx` | Elevated card overlay (static shadow-xl, transform-only animation) that follows the cursor during drag-and-drop operations | T17 · 2026-04-01 |
 | `note-form.tsx` | Dialog form for creating and editing notes with title, content, status, priority, and tags fields | initial · 2026-03-30 |
 | `note-group-section.tsx` | Collapsible section header for tag-based note grouping with color-coded badge and count | initial · 2026-03-30 |
 | `note-list.tsx` | Main notes orchestrator: CRUD, search, filters, drag-and-drop reordering, realtime sync, and layout modes | initial · 2026-03-30 |
