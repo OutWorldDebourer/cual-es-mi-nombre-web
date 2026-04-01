@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function DashboardCardSkeleton() {
   return (
-    <Card>
+    <Card className="snap-center min-w-[200px] shrink-0 md:min-w-0 md:shrink">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <Skeleton className="h-4 w-28" />
@@ -25,7 +25,7 @@ export function DashboardSkeleton() {
         <Skeleton className="h-9 w-64" />
         <Skeleton className="h-4 w-80 mt-2" />
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0">
         <DashboardCardSkeleton />
         <DashboardCardSkeleton />
         <DashboardCardSkeleton />
