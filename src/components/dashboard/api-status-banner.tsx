@@ -17,7 +17,7 @@ export function ApiStatusBanner() {
   return (
     <div
       role="alert"
-      className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+      className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive animate-[fade-in-up_0.3s_ease-out_both]"
     >
       {isUnconfigured ? (
         <AlertTriangle className="size-4 shrink-0" />

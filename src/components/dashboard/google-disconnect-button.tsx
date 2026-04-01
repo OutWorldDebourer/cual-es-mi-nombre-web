@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { backendApi } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ export function GoogleDisconnectButton({ className }: { className?: string }) {
       const message = error instanceof Error
         ? error.message
         : "Error al desconectar. Intenta de nuevo.";
-      alert(message);
+      toast.error(message);
     } finally {
       setIsDisconnecting(false);
     }
@@ -36,6 +37,7 @@ export function GoogleDisconnectButton({ className }: { className?: string }) {
   return (
     <Button
       className={className}
+      loading={isDisconnecting}
       disabled={isDisconnecting}
       onClick={handleDisconnect}
       variant="destructive"
