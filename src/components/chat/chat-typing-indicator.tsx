@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 export function ChatTypingIndicator() {
   return (
     <div className="flex justify-start px-4 py-2">
@@ -8,11 +6,8 @@ export function ChatTypingIndicator() {
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className={cn(
-                "inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/60",
-                "animate-bounce",
-              )}
-              style={{ animationDelay: `${i * 150}ms`, animationDuration: "0.8s" }}
+              className="inline-block h-1.5 w-1.5 animate-[typing-bounce_0.6s_ease-in-out_infinite] rounded-full bg-muted-foreground/60"
+              style={{ animationDelay: `${i * 0.15}s` }}
             />
           ))}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import type { ChatMessage as ChatMessageType } from "@/types/chat";
 import { ChatMessage } from "./chat-message";
 import { ChatTypingIndicator } from "./chat-typing-indicator";
@@ -23,6 +24,30 @@ export function ChatMessageList({
   const bottomRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const lastMsgIdRef = useRef<string | null>(null);
+
+  // Track which messages should NOT animate (history + load-more).
+  // Uses React 19 "setState during render" pattern to derive animation
+  // state from props without accessing refs during render.
+  const [staticMsgIds, setStaticMsgIds] = useState<Set<string>>(() =>
+    new Set(messages.map((m) => m.id)),
+  );
+  const [prevMessages, setPrevMessages] = useState(messages);
+
+  if (messages !== prevMessages) {
+    const prevLastId = prevMessages[prevMessages.length - 1]?.id ?? null;
+    const currLastId = messages[messages.length - 1]?.id ?? null;
+
+    // Same or null last ID → load-more (prepended) → mark all new as static
+    if (currLastId === prevLastId || currLastId === null) {
+      const next = new Set(staticMsgIds);
+      for (const msg of messages) {
+        next.add(msg.id);
+      }
+      setStaticMsgIds(next);
+    }
+    // Otherwise: real-time append → new IDs stay out of staticMsgIds → animate
+    setPrevMessages(messages);
+  }
 
   // Auto-scroll to bottom only when a NEW message appears at the end
   // (send/receive), not when older messages are prepended (loadMore).
@@ -86,9 +111,15 @@ export function ChatMessageList({
       )}
 
       {/* Messages */}
-      {messages.map((msg) => (
-        <ChatMessage key={msg.id} message={msg} />
-      ))}
+      <AnimatePresence>
+        {messages.map((msg) => (
+          <ChatMessage
+            key={msg.id}
+            message={msg}
+            shouldAnimate={!staticMsgIds.has(msg.id)}
+          />
+        ))}
+      </AnimatePresence>
 
       {/* Typing indicator */}
       {isSending && <ChatTypingIndicator />}
