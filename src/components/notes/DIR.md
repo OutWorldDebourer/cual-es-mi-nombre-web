@@ -15,6 +15,6 @@ Notes CRUD interface with Kanban board, drag-and-drop, grouping, and filtering.
 | `note-priority-config.ts` | Priority level definitions (urgent/high/normal/low) with labels, badge classes, and icons | initial · 2026-03-30 |
 | `note-priority-filter.tsx` | Filter pill bar for selecting notes by priority level | initial · 2026-03-30 |
 | `note-sortable-card.tsx` | dnd-kit sortable wrapper around NoteCard enabling drag handle and smooth reorder transitions | initial · 2026-03-30 |
-| `note-status-config.ts` | Status definitions (active/en_curso/completed) with labels, badge classes, and card border accents | initial · 2026-03-30 |
+| `note-status-config.ts` | Status definitions (active/en_curso/completed) with labels, badge classes (semantic warning/success tokens), and card border accents | T8 · 2026-04-01 |
 | `note-tag-colors.ts` | Deterministic tag-to-color mapping utility using string hash over a 6-color palette | initial · 2026-03-30 |
 | `note-view-dialog.tsx` | Read-only dialog displaying full note content with status, priority, tags, and edit action | initial · 2026-03-30 |
