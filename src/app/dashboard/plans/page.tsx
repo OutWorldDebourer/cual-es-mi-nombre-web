@@ -118,7 +118,7 @@ export default async function PlansPage() {
   return (
     <div className="space-y-6 stagger-children">
       <div>
-        <h1 className="text-3xl font-bold">Planes</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Planes</h1>
         <p className="text-muted-foreground mt-1">
           Elige el plan que mejor se adapte a tus necesidades.
         </p>
