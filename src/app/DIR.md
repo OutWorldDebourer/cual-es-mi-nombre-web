@@ -5,7 +5,7 @@ Next.js App Router root. Contains global styles, layout, and route groups.
 ## Key Files
 | File | Description | Last Modified |
 |------|-------------|---------------|
-| `globals.css` | Design system tokens (OKLCh), light/dark themes, keyframe animations, custom scrollbar (6px teal-tinted, Webkit + Firefox, light/dark) | T15 · 2026-04-01 |
+| `globals.css` | Design system tokens (OKLCh), light/dark themes, keyframe animations (drag-lift: transform-only, GPU-compositable), custom scrollbar (6px teal-tinted, Webkit + Firefox, light/dark) | T17 · 2026-04-01 |
 | `layout.tsx` | Root layout with fonts, theme provider, Toaster | initial · 2026-03-30 |
 | `not-found.tsx` | 404 page with FloatingOrbs, MotionReveal entrance, spring scale-in on "404" number | T11 · 2026-04-01 |
 | `error.tsx` | Error boundary page with FloatingOrbs, MotionReveal entrance, pulse-glow on icon; preserves `reset()` | T11 · 2026-04-01 |
