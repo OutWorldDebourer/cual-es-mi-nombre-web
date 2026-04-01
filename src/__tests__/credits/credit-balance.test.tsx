@@ -7,9 +7,15 @@
  * @module __tests__/credits/credit-balance.test
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { CreditBalance } from "@/components/credits/credit-balance";
+
+vi.mock("@/components/dashboard/count-up", () => ({
+  CountUp: ({ end, suffix, className }: { end: number; suffix?: string; className?: string }) => (
+    <span className={className}>{end}{suffix}</span>
+  ),
+}));
 
 describe("CreditBalance", () => {
   it("renders credit count and plan", () => {

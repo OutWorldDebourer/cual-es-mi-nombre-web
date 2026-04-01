@@ -7,6 +7,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TiltCard } from "./tilt-card";
 import { StaggerContainer, StaggerItem } from "./motion-reveal";
+import { CountUp } from "@/components/dashboard/count-up";
 
 interface Plan {
   name: string;
@@ -68,7 +69,7 @@ export function PricingSection() {
       className="mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3"
       staggerDelay={0.12}
     >
-      {plans.map((plan) => (
+      {plans.map((plan, index) => (
         <StaggerItem key={plan.name}>
           <TiltCard>
             <div
@@ -108,7 +109,7 @@ export function PricingSection() {
                 <div className="mt-4 flex items-baseline justify-center gap-1">
                   <span className="text-sm text-muted-foreground">S/</span>
                   <span className="text-4xl font-bold tabular-nums">
-                    {plan.price}
+                    <CountUp end={parseFloat(plan.price)} decimals={2} delay={index * 200} />
                   </span>
                   <span className="text-sm text-muted-foreground">/mes</span>
                 </div>

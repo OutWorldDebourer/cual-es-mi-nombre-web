@@ -8,6 +8,7 @@ import {
   Check,
   ArrowRight,
 } from "lucide-react";
+import { CountUp } from "@/components/dashboard/count-up";
 
 interface OnboardingStep {
   key: string;
@@ -94,7 +95,7 @@ export function OnboardingStepper({
           </p>
         </div>
         <div className="text-2xl font-bold text-primary tabular-nums">
-          {Math.round(progressPercent)}%
+          <CountUp end={Math.round(progressPercent)} suffix="%" />
         </div>
       </div>
 

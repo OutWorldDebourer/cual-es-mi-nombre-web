@@ -14,6 +14,7 @@ import type { SubscriptionPlan } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { CountUp } from "@/components/dashboard/count-up";
 
 interface CreditBalanceProps {
   creditsRemaining: number;
@@ -51,7 +52,7 @@ export function CreditBalance({
       <CardContent className="space-y-4">
         <div className="flex items-baseline gap-2">
           <span className="text-5xl font-bold tabular-nums">
-            {creditsRemaining}
+            <CountUp end={creditsRemaining} />
           </span>
           {maxCredits > 0 && (
             <span className="text-sm text-muted-foreground">

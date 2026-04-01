@@ -5,7 +5,7 @@ Vitest test suites organized by feature area, with shared test setup and mocks.
 ## Files
 | File | Description | Last Modified |
 |------|-------------|---------------|
-| `setup.ts` | Test environment setup: jest-dom matchers, Supabase client mocks, next/navigation mocks, matchMedia polyfill | initial · 2026-03-31 |
+| `setup.ts` | Test environment setup: jest-dom matchers, Supabase client mocks, next/navigation mocks, matchMedia polyfill (reduced-motion), IntersectionObserver mock | T4 · 2026-03-31 |
 
 ## Subdirectories
 | Directory | Description |

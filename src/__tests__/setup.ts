@@ -12,12 +12,13 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
-// ── Mock: window.matchMedia (required by useIsMobile hook) ───────────────
+// ── Mock: window.matchMedia (required by useIsMobile hook & useReducedMotion) ─
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
+    // Return true for reduced-motion so CountUp shows final values immediately
+    matches: query === "(prefers-reduced-motion: reduce)",
     media: query,
     onchange: null,
     addListener: vi.fn(),
@@ -26,6 +27,27 @@ Object.defineProperty(window, "matchMedia", {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
+});
+
+// ── Mock: IntersectionObserver (required by motion's useInView) ──────────
+
+class MockIntersectionObserver implements IntersectionObserver {
+  readonly root: Element | Document | null = null;
+  readonly rootMargin: string = "";
+  readonly thresholds: ReadonlyArray<number> = [];
+  constructor(private cb: IntersectionObserverCallback) {
+    // Immediately report all observed elements as intersecting
+    setTimeout(() => this.cb([] as unknown as IntersectionObserverEntry[], this), 0);
+  }
+  observe() { /* noop */ }
+  unobserve() { /* noop */ }
+  disconnect() { /* noop */ }
+  takeRecords(): IntersectionObserverEntry[] { return []; }
+}
+
+Object.defineProperty(window, "IntersectionObserver", {
+  writable: true,
+  value: MockIntersectionObserver,
 });
 
 // ── Mock: Supabase browser client ────────────────────────────────────────
