@@ -5,7 +5,7 @@ Route group for legal pages (privacy policy, terms of service) with shared navig
 ## Files
 | File | Description | Last Modified |
 |------|-------------|---------------|
-| `layout.tsx` | Shared layout with sticky navbar (logo + "Volver" back button) and centered content container | initial · 2026-03-30 |
+| `layout.tsx` | Shared layout with sticky navbar (backdrop-blur-xl, themed borders), FloatingOrbs(count=2), and z-10 content wrapper | T18 · 2026-04-01 |
 
 ## Subdirectories
 | Directory | Description |
