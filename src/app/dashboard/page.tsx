@@ -169,7 +169,7 @@ export default async function DashboardPage() {
               <Coins className="h-4 w-4 text-muted-foreground" />
             </div>
             <CardTitle className="text-4xl tabular-nums">
-              <CountUp end={credits} />
+              <CountUp end={credits} delay={0} />
             </CardTitle>
           </CardHeader>
           <CardContent>
