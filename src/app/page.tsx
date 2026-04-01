@@ -14,10 +14,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HeroContent } from "@/components/landing/hero-content";
 import { AnimatedChatDemo } from "@/components/landing/animated-chat-demo";
+import { LandingNavbar } from "@/components/landing/navbar";
 import { MotionReveal, StaggerContainer, StaggerItem } from "@/components/landing/motion-reveal";
 import { FeatureGrid } from "@/components/landing/feature-card";
 import { AnimatedSteps } from "@/components/landing/animated-steps";
@@ -39,27 +39,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── Navigation ── */}
-      <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Sparkles
-              className="size-6 text-primary"
-              style={{ animation: "sparkle-pulse 3s ease-in-out infinite" }}
-            />
-            <span className="text-lg font-bold">
-              Cual es mi nombre
-            </span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Iniciar Sesion</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/signup">Crear Cuenta</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <LandingNavbar />
 
       {/* ── Hero — M2.1 ── */}
       <section className="relative overflow-hidden">
