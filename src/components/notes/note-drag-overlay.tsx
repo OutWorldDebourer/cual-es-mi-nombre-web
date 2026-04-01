@@ -19,7 +19,7 @@ interface NoteDragOverlayProps {
 
 export function NoteDragOverlay({ note, layout }: NoteDragOverlayProps) {
   return (
-    <div className="drag-overlay-enter opacity-[0.97] outline-2 outline-primary/40 rounded-lg cursor-grabbing pointer-events-none">
+    <div className="drag-overlay-enter shadow-xl opacity-[0.97] outline-2 outline-primary/40 rounded-lg cursor-grabbing pointer-events-none">
       <NoteCard
         note={note}
         layout={layout}
