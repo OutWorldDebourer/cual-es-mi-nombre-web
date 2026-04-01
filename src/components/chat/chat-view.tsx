@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
 import type { ChatMessage } from "@/types/chat";
+import { motion } from "motion/react";
 import { ChatHeader } from "./chat-header";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatInput } from "./chat-input";
+import { ChatSkeleton } from "./chat-skeleton";
 
 interface ChatViewProps {
   assistantName: string;
@@ -157,17 +159,19 @@ export function ChatView({ assistantName }: ChatViewProps) {
   // ── Initial loading state ─────────────────────────────────────────────
   if (isInitialLoad) {
     return (
-      <div className="flex h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm">
-        <ChatHeader assistantName={assistantName} isSending={false} />
-        <div className="flex flex-1 items-center justify-center" role="status" aria-label="Cargando mensajes">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
-        </div>
+      <div className="flex h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm" role="status" aria-label="Cargando mensajes">
+        <ChatSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="flex h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)] flex-col rounded-xl border bg-card shadow-sm"
+    >
       <ChatHeader assistantName={assistantName} isSending={isSending} />
       <ChatMessageList
         messages={messages}
@@ -177,6 +181,6 @@ export function ChatView({ assistantName }: ChatViewProps) {
         isLoadingMore={isLoadingMore}
       />
       <ChatInput onSend={handleSend} disabled={isSending} />
-    </div>
+    </motion.div>
   );
 }
