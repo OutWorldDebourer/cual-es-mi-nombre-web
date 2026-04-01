@@ -40,10 +40,10 @@ export default function AuthLayout({
 
         {/* Gradient mesh — layered orbs for depth */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-[oklch(0.36_0.11_195)] opacity-50 blur-[100px]" />
-          <div className="absolute top-1/3 -right-20 w-[380px] h-[380px] rounded-full bg-[oklch(0.72_0.11_75)] opacity-[0.12] blur-[80px]" />
-          <div className="absolute -bottom-36 left-1/4 w-[420px] h-[420px] rounded-full bg-[oklch(0.40_0.13_195)] opacity-40 blur-[100px]" />
-          <div className="absolute top-3/4 right-1/4 w-[180px] h-[180px] rounded-full bg-[oklch(0.78_0.10_75)] opacity-[0.08] blur-[50px]" />
+          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-[oklch(0.36_0.11_195)] opacity-50 blur-[100px] will-change-transform" style={{ animation: "float-orb-1 18s ease-in-out infinite" }} />
+          <div className="absolute top-1/3 -right-20 w-[380px] h-[380px] rounded-full bg-[oklch(0.72_0.11_75)] opacity-[0.12] blur-[80px] will-change-transform" style={{ animation: "float-orb-2 22s ease-in-out infinite" }} />
+          <div className="absolute -bottom-36 left-1/4 w-[420px] h-[420px] rounded-full bg-[oklch(0.40_0.13_195)] opacity-40 blur-[100px] will-change-transform" style={{ animation: "float-orb-1 18s ease-in-out 3s infinite" }} />
+          <div className="absolute top-3/4 right-1/4 w-[180px] h-[180px] rounded-full bg-[oklch(0.78_0.10_75)] opacity-[0.08] blur-[50px] will-change-transform" style={{ animation: "float-orb-2 22s ease-in-out 5s infinite" }} />
         </div>
 
         {/* Dot grid texture overlay */}
@@ -136,8 +136,8 @@ export default function AuthLayout({
         <div className="lg:hidden relative overflow-hidden">
           <div className="absolute inset-0 bg-[oklch(0.26_0.07_195)]" />
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-12 -left-12 w-40 h-40 rounded-full bg-[oklch(0.36_0.11_195)] opacity-50 blur-[50px]" />
-            <div className="absolute -bottom-8 right-0 w-32 h-32 rounded-full bg-[oklch(0.72_0.11_75)] opacity-[0.15] blur-[40px]" />
+            <div className="absolute -top-12 -left-12 w-40 h-40 rounded-full bg-[oklch(0.36_0.11_195)] opacity-50 blur-[50px] will-change-transform" style={{ animation: "float-orb-1 18s ease-in-out infinite" }} />
+            <div className="absolute -bottom-8 right-0 w-32 h-32 rounded-full bg-[oklch(0.72_0.11_75)] opacity-[0.15] blur-[40px] will-change-transform" style={{ animation: "float-orb-2 22s ease-in-out infinite" }} />
           </div>
           <div className="relative z-10 flex flex-col items-center gap-1 py-6 text-white">
             <div className="flex items-center gap-2">

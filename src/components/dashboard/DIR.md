@@ -14,7 +14,7 @@ Dashboard layout shell, navigation, and widget components.
 | `logout-button.tsx` | Simple sign-out button using Supabase client auth, redirects to /login | initial · 2026-03-30 |
 | `onboarding-stepper.tsx` | Checklist-style onboarding guide showing setup progress (phone, name, Google, plan) with CountUp on progress % | T4 · 2026-03-31 |
 | `recent-activity.tsx` | Activity feed widget displaying recent notes, reminders, and credit events with icons | initial · 2026-03-30 |
-| `shell.tsx` | Main dashboard layout shell with collapsible sidebar, top bar, breadcrumbs, bottom nav, and chat overlay | T2 · 2026-03-31 |
+| `shell.tsx` | Main dashboard layout shell with collapsible sidebar, top bar, breadcrumbs, bottom nav, chat overlay, and FloatingOrbs background | T6 · 2026-04-01 |
 | `theme-toggle.tsx` | Light/dark/system theme dropdown toggle using next-themes | initial · 2026-03-30 |
 | `upcoming-today.tsx` | Widget card listing today's upcoming reminders with status badges and formatted times | initial · 2026-03-30 |
 | `user-menu.tsx` | Avatar dropdown menu with links to settings, plans, and logout | initial · 2026-03-30 |
