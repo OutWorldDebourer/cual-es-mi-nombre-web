@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MotionReveal } from "@/components/landing/motion-reveal";
 
 export const metadata: Metadata = {
   title: "Política de Privacidad",
@@ -6,6 +7,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
+    <MotionReveal direction="up">
     <article className="space-y-8">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -103,5 +105,6 @@ export default function PrivacyPage() {
         </p>
       </section>
     </article>
+    </MotionReveal>
   );
 }
