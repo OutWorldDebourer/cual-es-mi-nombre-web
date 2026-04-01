@@ -380,3 +380,44 @@
   0% { background-color: hsl(var(--primary) / 0.15); }
   100% { background-color: transparent; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR — subtle teal tint, nearly invisible until hover
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.52 0.02 195 / 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.52 0.02 195 / 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.68 0.02 195 / 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.68 0.02 195 / 0.45);
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.52 0.02 195 / 0.25) transparent;
+}
+
+.dark {
+  scrollbar-color: oklch(0.68 0.02 195 / 0.2) transparent;
+}
