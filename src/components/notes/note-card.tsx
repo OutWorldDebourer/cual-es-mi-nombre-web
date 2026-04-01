@@ -216,7 +216,8 @@ export function NoteCard({
     return (
       <>
         <Card
-          className={`group transition-shadow hover:shadow-md cursor-pointer ${
+          variant="interactive"
+          className={`group cursor-pointer ${
             note.is_pinned ? "border-primary/40 bg-primary/5" : ""
           } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
           onClick={() => onView(note)}
@@ -297,7 +298,8 @@ export function NoteCard({
     return (
       <>
         <Card
-          className={`group transition-shadow hover:shadow-md cursor-pointer ${
+          variant="interactive"
+          className={`group cursor-pointer ${
             note.is_pinned ? "border-primary/40 bg-primary/5" : ""
           } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
           onClick={() => onView(note)}
@@ -395,7 +397,8 @@ export function NoteCard({
   return (
     <>
       <Card
-        className={`group overflow-hidden transition-shadow hover:shadow-md cursor-pointer ${
+        variant="interactive"
+        className={`group cursor-pointer ${
           note.is_pinned ? "border-primary/40 bg-primary/5" : ""
         } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
         onClick={() => onView(note)}

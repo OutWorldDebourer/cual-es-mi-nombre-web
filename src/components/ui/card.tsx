@@ -2,12 +2,26 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+type CardVariant = "static" | "interactive"
+
+interface CardProps extends React.ComponentProps<"div"> {
+  variant?: CardVariant
+}
+
+function Card({ className, variant = "static", ...props }: CardProps) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm overflow-hidden",
+        "flex flex-col gap-6 rounded-2xl py-6 text-card-foreground overflow-hidden",
+        "bg-white/60 border border-black/[0.06] backdrop-blur-xl shadow-lg shadow-black/5",
+        "dark:bg-white/[0.04] dark:border-white/[0.08]",
+        variant === "interactive" && [
+          "transition-all duration-200",
+          "hover:scale-[1.02] hover:shadow-xl",
+          "hover:border-black/[0.12] dark:hover:border-white/20",
+          "motion-reduce:hover:scale-100",
+        ],
         className
       )}
       {...props}
@@ -32,7 +46,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("leading-none font-semibold", className)}
+      className={cn("leading-none font-semibold tracking-tight", className)}
       {...props}
     />
   )

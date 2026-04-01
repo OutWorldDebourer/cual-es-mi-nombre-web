@@ -112,7 +112,8 @@ export function ReminderCard({
   return (
     <>
       <Card
-        className={`overflow-hidden transition-shadow hover:shadow-md cursor-pointer ${
+        variant="interactive"
+        className={`cursor-pointer ${
           overdue
             ? "border-destructive/40 bg-destructive/5"
             : reminder.status === "sent"
