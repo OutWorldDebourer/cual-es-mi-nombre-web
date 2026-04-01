@@ -55,9 +55,9 @@ export function PlanCard({
 
   return (
     <Card
+      variant="interactive"
       className={cn(
-        "flex flex-col relative overflow-hidden transition-all duration-300",
-        "hover:-translate-y-1 hover:shadow-lg",
+        "relative",
         "animate-[fade-in-up_0.5s_ease-out_both]",
         plan.is_highlighted
           ? "border-primary shadow-xl ring-2 ring-primary/20 pb-2"
