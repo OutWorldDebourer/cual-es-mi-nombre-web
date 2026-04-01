@@ -7,7 +7,7 @@ Authenticated dashboard area with overview stats, activity feed, and onboarding 
 |------|-------------|---------------|
 | `layout.tsx` | Async Server Component layout that fetches the authenticated user and profile, redirects to /login if unauthenticated, and wraps children in DashboardShell | initial · 2026-03-30 |
 | `loading.tsx` | Suspense fallback that renders a DashboardSkeleton placeholder while the page loads | initial · 2026-03-30 |
-| `page.tsx` | Main dashboard page showing credit/plan/WhatsApp/Calendar stat cards, today's upcoming reminders, onboarding stepper, and recent activity feed | initial · 2026-03-30 |
+| `page.tsx` | Main dashboard page showing credit/plan/WhatsApp/Calendar stat cards (CountUp with delay), today's upcoming reminders, onboarding stepper, and recent activity feed | T4 · 2026-03-31 |
 
 ## Subdirectories
 | Directory | Description |
