@@ -6,4 +6,4 @@ Next.js route for the reminders management page.
 | File | Description | Last Modified |
 |------|-------------|---------------|
 | `loading.tsx` | Suspense loading skeleton using RemindersListSkeleton component | initial · 2026-03-30 |
-| `page.tsx` | Server Component that fetches pending/processing reminders ordered by trigger time from Supabase, renders ReminderList with user timezone and optional auto-create via `?action=new` | initial · 2026-03-30 |
+| `page.tsx` | Server Component that fetches pending/processing reminders ordered by trigger time from Supabase, renders ReminderList with user timezone and optional auto-create via `?action=new` | T5 · 2026-04-01 |

@@ -6,4 +6,4 @@ Next.js route for the notes management page.
 | File | Description | Last Modified |
 |------|-------------|---------------|
 | `loading.tsx` | Suspense loading skeleton using NotesGridSkeleton component | initial · 2026-03-30 |
-| `page.tsx` | Server Component that fetches active notes (pinned first, then by position/date) from Supabase and renders NoteList with optional auto-create via `?action=new` | initial · 2026-03-30 |
+| `page.tsx` | Server Component that fetches active notes (pinned first, then by position/date) from Supabase and renders NoteList with optional auto-create via `?action=new` | T5 · 2026-04-01 |

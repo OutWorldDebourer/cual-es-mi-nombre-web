@@ -128,7 +128,7 @@ export function WhatsAppLinking({ currentPhone }: WhatsAppLinkingProps) {
     return (
       <div className="space-y-6 stagger-children">
         <div>
-          <h1 className="text-3xl font-bold">WhatsApp</h1>
+          <h1 className="text-3xl font-bold tracking-tight">WhatsApp</h1>
           <p className="text-muted-foreground mt-1">
             Tu número de WhatsApp vinculado al asistente.
           </p>
@@ -171,7 +171,7 @@ export function WhatsAppLinking({ currentPhone }: WhatsAppLinkingProps) {
   if (step === "success") {
     return (
       <div className="space-y-6 stagger-children">
-        <h1 className="text-3xl font-bold">WhatsApp</h1>
+        <h1 className="text-3xl font-bold tracking-tight">WhatsApp</h1>
         <Card>
           <CardHeader>
             <CardTitle><span aria-hidden="true">✅</span> WhatsApp vinculado</CardTitle>
@@ -190,7 +190,7 @@ export function WhatsAppLinking({ currentPhone }: WhatsAppLinkingProps) {
   return (
     <div className="space-y-6 stagger-children">
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold tracking-tight">
           {currentPhone ? "Cambiar número" : "Vincular WhatsApp"}
         </h1>
         <p className="text-muted-foreground mt-1">

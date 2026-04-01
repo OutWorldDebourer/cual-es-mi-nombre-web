@@ -42,7 +42,7 @@ export default async function NotesPage({
   return (
     <div className="space-y-6 stagger-children">
       <div>
-        <h1 className="text-3xl font-bold">Notas</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Notas</h1>
         <p className="text-muted-foreground mt-1">
           Gestiona tus notas. También puedes crear notas por WhatsApp.
         </p>

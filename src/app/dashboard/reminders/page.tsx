@@ -47,7 +47,7 @@ export default async function RemindersPage({
   return (
     <div className="space-y-6 stagger-children">
       <div>
-        <h1 className="text-3xl font-bold">Recordatorios</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Recordatorios</h1>
         <p className="text-muted-foreground mt-1">
           Gestiona tus recordatorios desde aquí o por WhatsApp.
         </p>

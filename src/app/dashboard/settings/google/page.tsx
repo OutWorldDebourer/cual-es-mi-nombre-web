@@ -56,7 +56,7 @@ export default async function GoogleCalendarPage(
   return (
     <div className="space-y-6 stagger-children">
       <div>
-        <h1 className="text-3xl font-bold">Google Calendar</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Google Calendar</h1>
         <p className="text-muted-foreground mt-1">
           Conecta tu Google Calendar para que el asistente gestione tus eventos.
         </p>
