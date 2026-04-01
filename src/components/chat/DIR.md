@@ -12,4 +12,5 @@ Chat UI components for the in-app AI assistant conversation interface.
 | `chat-message.tsx` | Single message bubble (motion.div) with spring entrance animation (user from right, assistant from left), agent-type badge, relative timestamps, and useReducedMotion support | T7 · 2026-04-01 |
 | `chat-overlay.tsx` | Responsive chat panel: bottom Drawer on mobile, right-side Sheet on desktop, loads messages on open | initial · 2026-03-30 |
 | `chat-typing-indicator.tsx` | Three-dot typing indicator using custom typing-bounce keyframe (subtle translateY) with staggered delays | T7 · 2026-04-01 |
-| `chat-view.tsx` | Full chat view composing header, message list, and input with message fetching and send logic via backend API | initial · 2026-03-30 |
+| `chat-skeleton.tsx` | Full chat skeleton (header bar + 4 alternating message bubbles + input bar) matching chat-view dimensions, used during initial load | T12 · 2026-04-01 |
+| `chat-view.tsx` | Full chat view composing header, message list, and input with message fetching and send logic via backend API; uses ChatSkeleton for initial load + motion.div fade-in transition | T12 · 2026-04-01 |
