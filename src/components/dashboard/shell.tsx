@@ -16,6 +16,7 @@ import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb-nav";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { ChatFab } from "@/components/chat/chat-fab";
 import { ChatOverlay } from "@/components/chat/chat-overlay";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import {
   Home,
   StickyNote,
@@ -322,7 +323,9 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
       )}
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="relative flex flex-1 flex-col min-w-0">
+        <FloatingOrbs count={3} />
+
         {/* Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl">
           <div className="flex h-14 items-center justify-between border-b border-black/[0.06] dark:border-white/[0.08] px-4 md:px-6">
@@ -347,7 +350,7 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
         </header>
 
         {/* Page content */}
-        <main id="main-content" className="flex-1 p-4 pb-28 md:p-6 md:pb-6">
+        <main id="main-content" className="relative z-10 flex-1 p-4 pb-28 md:p-6 md:pb-6">
           <ApiStatusBanner />
           {children}
         </main>
