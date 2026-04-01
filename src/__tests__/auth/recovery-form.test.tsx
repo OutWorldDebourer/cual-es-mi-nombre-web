@@ -178,7 +178,7 @@ describe("RecoveryForm — Request OTP", () => {
     await typePhone(user, "999888777");
     await submitPhone(user);
 
-    expect(screen.getByRole("button", { name: "Enviando..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Enviando/ })).toBeDisabled();
   });
 
   it("shows error for 404 (user not found)", async () => {
@@ -434,7 +434,7 @@ describe("RecoveryForm — Password step (recovery)", () => {
     await user.type(screen.getByLabelText("Confirmar contraseña"), "newpassword123");
     await user.click(screen.getByRole("button", { name: "Cambiar contraseña" }));
 
-    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Guardando/ })).toBeDisabled();
   });
 });
 

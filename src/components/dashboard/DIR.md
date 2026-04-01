@@ -17,4 +17,4 @@ Dashboard layout shell, navigation, and widget components.
 | `shell.tsx` | Main dashboard layout shell with collapsible sidebar, top bar, breadcrumbs, bottom nav, chat overlay, and FloatingOrbs background | T6 · 2026-04-01 |
 | `theme-toggle.tsx` | Light/dark/system theme dropdown toggle using next-themes | initial · 2026-03-30 |
 | `upcoming-today.tsx` | Widget card listing today's upcoming reminders with status badges and formatted times | initial · 2026-03-30 |
-| `user-menu.tsx` | Avatar dropdown menu with links to settings, plans, and logout | initial · 2026-03-30 |
+| `user-menu.tsx` | Avatar dropdown menu with links to settings, plans, and logout; avatar size-10 for 40px touch target | T8 · 2026-04-01 |

@@ -391,7 +391,7 @@ export function SignupForm() {
 
         <FormError message={error} />
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading} loading={loading}>
           {loading ? "Verificando..." : "Crear cuenta"}
         </Button>
       </form>
@@ -442,6 +442,7 @@ export function SignupForm() {
           type="button"
           className="w-full"
           disabled={loading || otp.length !== 6}
+          loading={loading}
           onClick={() => handleVerifyOtp()}
         >
           {loading ? "Verificando..." : "Verificar código"}
@@ -452,6 +453,7 @@ export function SignupForm() {
           variant="ghost"
           className="w-full"
           disabled={!canResend || loading}
+          loading={resending}
           onClick={handleResend}
         >
           {resending ? "Reenviando..." : "Reenviar código"}

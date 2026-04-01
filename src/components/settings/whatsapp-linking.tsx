@@ -226,7 +226,7 @@ export function WhatsAppLinking({ currentPhone }: WhatsAppLinkingProps) {
               <FormError message={error} />
 
               <div className="flex gap-3">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} loading={loading}>
                   {loading ? "Enviando..." : "Enviar código"}
                 </Button>
                 {currentPhone && (
@@ -262,7 +262,7 @@ export function WhatsAppLinking({ currentPhone }: WhatsAppLinkingProps) {
               <FormError message={error} />
 
               <div className="flex gap-3">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} loading={loading}>
                   {loading ? "Verificando..." : "Verificar"}
                 </Button>
                 <Button

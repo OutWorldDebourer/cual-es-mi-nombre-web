@@ -40,8 +40,8 @@ function SetPasswordContent() {
   return (
     <>
       {showSignupBanner && (
-        <div className="rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 text-sm mb-4">
-          <p className="text-green-800 dark:text-green-200">
+        <div className="rounded-md bg-success/10 border border-success/20 p-4 text-sm mb-4">
+          <p className="text-success">
             Solo necesitas verificar tu número y crear una contraseña.
             Te enviaremos un código por WhatsApp.
           </p>

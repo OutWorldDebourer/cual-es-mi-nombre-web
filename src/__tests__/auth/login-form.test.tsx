@@ -156,7 +156,7 @@ describe("LoginForm — Successful login", () => {
     await typePassword(user, "password123");
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 
-    expect(screen.getByRole("button", { name: "Ingresando..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Ingresando/ })).toBeDisabled();
   });
 });
 

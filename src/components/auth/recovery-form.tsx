@@ -315,7 +315,7 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
 
         <FormError message={error} />
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading} loading={loading}>
           {loading ? "Enviando..." : copy.phoneButton}
         </Button>
       </form>
@@ -411,7 +411,7 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
 
       <FormError message={error} />
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading} loading={loading}>
         {loading ? "Guardando..." : copy.passwordButton}
       </Button>
     </form>
