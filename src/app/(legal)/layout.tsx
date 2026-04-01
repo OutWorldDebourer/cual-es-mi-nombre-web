@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
 export default function LegalLayout({
   children,
@@ -9,7 +10,7 @@ export default function LegalLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
+      <nav className="sticky top-0 z-50 border-b border-black/[0.06] bg-background/80 backdrop-blur-xl dark:border-white/[0.08]">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             <Sparkles className="size-5 text-primary" />
@@ -23,8 +24,9 @@ export default function LegalLayout({
           </Button>
         </div>
       </nav>
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-        {children}
+      <main className="relative mx-auto max-w-3xl overflow-hidden px-4 py-12 sm:px-6 sm:py-16">
+        <FloatingOrbs count={2} />
+        <div className="relative z-10">{children}</div>
       </main>
     </div>
   );
