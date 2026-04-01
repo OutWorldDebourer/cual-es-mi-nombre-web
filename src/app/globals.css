@@ -310,6 +310,12 @@
   50% { transform: scale(1.1) rotate(5deg); }
 }
 
+/* Skeleton shimmer — GPU-accelerated gradient sweep */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 /* Shimmer border for highlighted pricing card */
 @keyframes shimmer-border {
   0% { background-position: -200% center; }
