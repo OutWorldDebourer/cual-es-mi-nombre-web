@@ -1,9 +1,13 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import type { ChatMessage as ChatMessageType } from "@/types/chat";
 
 interface ChatMessageProps {
   message: ChatMessageType;
+  shouldAnimate?: boolean;
 }
 
 /** Agent label mapping for display */
@@ -36,11 +40,16 @@ function formatTime(iso: string): string {
   }
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, shouldAnimate = false }: ChatMessageProps) {
   const isUser = message.role === "user";
+  const prefersReducedMotion = useReducedMotion();
+  const animate = shouldAnimate && !prefersReducedMotion;
 
   return (
-    <div
+    <motion.div
+      initial={animate ? { opacity: 0, x: isUser ? 20 : -20 } : false}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
       className={cn(
         "flex w-full px-4 py-1",
         isUser ? "justify-end" : "justify-start",
@@ -84,6 +93,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {formatTime(message.created_at)}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
