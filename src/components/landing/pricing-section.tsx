@@ -74,7 +74,7 @@ export function PricingSection({ isAuthenticated = false }: PricingSectionProps)
     >
       {plans.map((plan, index) => (
         <StaggerItem key={plan.name}>
-          <TiltCard>
+          <TiltCard className={plan.highlighted ? "overflow-visible" : undefined}>
             {plan.highlighted ? (
               <div className="relative">
                 {/* Badge OUTSIDE overflow-hidden — not clipped */}
