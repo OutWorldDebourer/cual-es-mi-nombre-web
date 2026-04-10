@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, useScroll } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,7 @@ export function LandingNavbar() {
             <span className="text-lg font-bold">Cual es mi nombre</span>
           </Link>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Button asChild variant="ghost" size="sm">
               <Link href="/login">Iniciar Sesion</Link>
             </Button>
