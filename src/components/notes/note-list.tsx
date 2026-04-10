@@ -15,7 +15,7 @@
 
 import { useState, useCallback, useRef, useMemo } from "react";
 import { toast } from "sonner";
-import { DndContext, closestCenter, DragOverlay, type Announcements } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragOverlay, MeasuringStrategy, type Announcements } from "@dnd-kit/core";
 import {
   SortableContext,
   rectSortingStrategy,
@@ -680,6 +680,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
           accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
         >
           <NoteBoardView
@@ -710,10 +711,11 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
           accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
         >
           <SortableContext
-            items={filteredNotes.map((n) => n.id)}
+            items={[...pinnedNotes, ...unpinnedNotes].map((n) => n.id)}
             strategy={viewMode === "grid" ? rectSortingStrategy : verticalListSortingStrategy}
           >
             <div className="space-y-3" role="list" aria-label="Lista de notas ordenable">
@@ -799,6 +801,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
           accessibility={{ announcements: dndAnnouncements, screenReaderInstructions: dndScreenReaderInstructions }}
         >
           <div className="space-y-6">

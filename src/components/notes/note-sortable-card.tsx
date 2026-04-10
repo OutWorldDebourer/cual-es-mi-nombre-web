@@ -59,10 +59,10 @@ export function NoteSortableCard({
   } = useSortable({ id: sortableId ?? note.id, disabled });
 
   // When dragging: hide original in place (overlay follows cursor).
-  // Otherwise: apply full sortable transform (translate + scale for grid compatibility).
+  // Otherwise: apply sortable translate (scale omitted to prevent variable-height distortion).
   const style: React.CSSProperties = isDragging
     ? { opacity: 0, pointerEvents: "none" }
-    : { transform: CSS.Transform.toString(transform), transition };
+    : { transform: CSS.Translate.toString(transform), transition };
 
   return (
     <div
