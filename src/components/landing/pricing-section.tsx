@@ -84,7 +84,7 @@ export function PricingSection({ isAuthenticated = false }: PricingSectionProps)
                   </div>
                 )}
                 {/* Gradient wrapper with overflow-hidden */}
-                <div className="overflow-hidden rounded-lg p-[2px] animate-[pulse-glow_3s_ease-in-out_infinite] active:scale-[0.98]">
+                <div className="relative overflow-hidden rounded-lg p-[2px] animate-[pulse-glow_3s_ease-in-out_infinite] active:scale-[0.98]">
                   {/* Rotating gradient — the visible animated border */}
                   <div
                     className="absolute inset-[-50%] z-0"
