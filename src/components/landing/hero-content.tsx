@@ -50,7 +50,7 @@ export function HeroContent({ isAuthenticated = false }: HeroContentProps) {
           trigger="mount"
           highlightWord="inteligente"
           highlightClassName="text-accent"
-          delay={0.3}
+          delay={0.5}
         />
       </motion.div>
 

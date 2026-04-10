@@ -69,19 +69,19 @@ export default async function HomePage() {
       {/* ── Features — M2.2 ── */}
       <section className="border-t bg-background py-20 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <MotionReveal>
-            <div className="mx-auto max-w-2xl text-center">
-              <TextReveal
-                text="Todo lo que necesitas, en un chat"
-                as="h2"
-                className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
-              />
+          <div className="mx-auto max-w-2xl text-center">
+            <TextReveal
+              text="Todo lo que necesitas, en un chat"
+              as="h2"
+              className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
+            />
+            <MotionReveal delay={0.3}>
               <p className="mt-4 font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground">
                 Un solo asistente que entiende lenguaje natural y se conecta
                 con tus herramientas favoritas.
               </p>
-            </div>
-          </MotionReveal>
+            </MotionReveal>
+          </div>
 
           <FeatureGrid />
         </div>
@@ -90,15 +90,13 @@ export default async function HomePage() {
       {/* ── How it works — M2.4 ── */}
       <section className="py-20 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <MotionReveal>
-            <div className="mx-auto max-w-2xl text-center">
-              <TextReveal
-                text="Empieza en 3 simples pasos"
-                as="h2"
-                className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
-              />
-            </div>
-          </MotionReveal>
+          <div className="mx-auto max-w-2xl text-center">
+            <TextReveal
+              text="Empieza en 3 simples pasos"
+              as="h2"
+              className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
+            />
+          </div>
 
           <AnimatedSteps />
 
@@ -129,18 +127,18 @@ export default async function HomePage() {
         className="scroll-mt-20 border-t bg-background py-20 sm:py-24"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <MotionReveal>
-            <div className="mx-auto max-w-2xl text-center">
-              <TextReveal
-                text="Planes simples, sin sorpresas"
-                as="h2"
-                className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
-              />
+          <div className="mx-auto max-w-2xl text-center">
+            <TextReveal
+              text="Planes simples, sin sorpresas"
+              as="h2"
+              className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
+            />
+            <MotionReveal delay={0.3}>
               <p className="mt-4 font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground">
                 Empieza gratis. Escala cuando estes listo.
               </p>
-            </div>
-          </MotionReveal>
+            </MotionReveal>
+          </div>
 
           <PricingSection isAuthenticated={!!user} />
         </div>

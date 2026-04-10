@@ -71,7 +71,8 @@ export function TextReveal({
             key={`${word}-${i}`}
             variants={wordVariants}
             className={cn(
-              "inline-block mr-[0.25em]",
+              "inline-block",
+              i < words.length - 1 && "mr-[0.25em]",
               highlightWord &&
                 word.toLowerCase().includes(highlightWord.toLowerCase()) &&
                 highlightClassName,
