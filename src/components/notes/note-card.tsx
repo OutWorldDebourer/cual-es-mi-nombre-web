@@ -218,7 +218,7 @@ export function NoteCard({
         <Card
           variant="interactive"
           className={`group cursor-pointer ${
-            note.is_pinned ? "border-primary/40 bg-primary/5" : ""
+            note.is_pinned ? "border-accent/40 bg-accent/5" : ""
           } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
           onClick={() => onView(note)}
         >
@@ -300,7 +300,7 @@ export function NoteCard({
         <Card
           variant="interactive"
           className={`group cursor-pointer ${
-            note.is_pinned ? "border-primary/40 bg-primary/5" : ""
+            note.is_pinned ? "border-accent/40 bg-accent/5" : ""
           } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
           onClick={() => onView(note)}
         >
@@ -399,7 +399,7 @@ export function NoteCard({
       <Card
         variant="interactive"
         className={`group cursor-pointer ${
-          note.is_pinned ? "border-primary/40 bg-primary/5" : ""
+          note.is_pinned ? "border-accent/40 bg-accent/5" : ""
         } ${NOTE_STATUS_CONFIG[note.status].cardBorderClass}`}
         onClick={() => onView(note)}
       >

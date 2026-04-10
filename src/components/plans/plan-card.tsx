@@ -60,8 +60,8 @@ export function PlanCard({
         "relative",
         "animate-[fade-in-up_0.5s_ease-out_both]",
         plan.is_highlighted
-          ? "border-primary shadow-xl ring-2 ring-primary/20 pb-2"
-          : "hover:border-primary/30",
+          ? "border-accent shadow-xl ring-2 ring-accent/20 pb-2"
+          : "hover:border-accent/30",
         isCurrent && "ring-2 ring-success/30 border-success/50",
       )}
       style={{ animationDelay: `${index * 100}ms` }}

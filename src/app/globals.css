@@ -377,7 +377,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CUSTOM SCROLLBAR — subtle teal tint, nearly invisible until hover
+   CUSTOM SCROLLBAR — subtle warm neutral, nearly invisible until hover
    ═══════════════════════════════════════════════════════════════ */
 
 /* Webkit (Chrome, Edge, Safari) */
@@ -391,28 +391,28 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.52 0.02 195 / 0.25);
+  background: rgba(17, 17, 17, 0.15);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.52 0.02 195 / 0.5);
+  background: rgba(17, 17, 17, 0.3);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: oklch(0.68 0.02 195 / 0.2);
+  background: rgba(245, 244, 241, 0.15);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.68 0.02 195 / 0.45);
+  background: rgba(245, 244, 241, 0.3);
 }
 
 /* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: oklch(0.52 0.02 195 / 0.25) transparent;
+  scrollbar-color: rgba(17, 17, 17, 0.15) transparent;
 }
 
 .dark {
-  scrollbar-color: oklch(0.68 0.02 195 / 0.2) transparent;
+  scrollbar-color: rgba(245, 244, 241, 0.15) transparent;
 }

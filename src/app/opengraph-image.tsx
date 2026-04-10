@@ -18,7 +18,7 @@ export default function OGImage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #007382 0%, #0d9488 50%, #005f6b 100%)",
+          background: "linear-gradient(135deg, #111111 0%, #1a1918 50%, #ff5600 100%)",
           fontFamily: "sans-serif",
           position: "relative",
           overflow: "hidden",
@@ -86,11 +86,11 @@ export default function OGImage() {
           <div
             style={{
               fontSize: "56px",
-              fontWeight: 800,
+              fontWeight: 400,
               color: "white",
               lineHeight: 1.1,
               textAlign: "center",
-              letterSpacing: "-1px",
+              letterSpacing: "-2px",
             }}
           >
             Cuál es mi nombre

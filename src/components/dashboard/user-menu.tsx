@@ -34,7 +34,7 @@ export function UserMenu({ email }: UserMenuProps) {
           className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           aria-label="Menu de usuario"
         >
-          <Avatar className="size-10 border border-border bg-muted transition-colors group-hover:border-primary/40 group-hover:bg-primary/10">
+          <Avatar className="size-10 border border-border bg-muted transition-colors group-hover:border-accent/40 group-hover:bg-accent/10">
             <AvatarFallback className="bg-transparent text-xs font-medium text-foreground">
               {email ? email.charAt(0).toUpperCase() : <User className="size-4 text-muted-foreground" />}
             </AvatarFallback>

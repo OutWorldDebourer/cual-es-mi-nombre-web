@@ -139,15 +139,15 @@ export function OnboardingStepper({
               href={step.href}
               className={`group flex items-center gap-3 rounded-lg p-3 border transition-all hover:shadow-sm hover:-translate-y-0.5 ${
                 isNext
-                  ? "border-primary/30 bg-primary/5 ring-1 ring-primary/20"
-                  : "border-border hover:border-primary/20"
+                  ? "border-accent/30 bg-accent/5 ring-1 ring-accent/20"
+                  : "border-border hover:border-accent/20"
               }`}
             >
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
                   isNext
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                    : "bg-muted text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent"
                 }`}
               >
                 <Icon className="h-4 w-4" />

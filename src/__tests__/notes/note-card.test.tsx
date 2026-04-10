@@ -67,7 +67,7 @@ describe("NoteCard", () => {
 
     // Pinned notes get a primary border styling
     const card = screen.getByText("Test Note").closest("[data-slot='card']");
-    expect(card).toHaveClass("border-primary/40");
+    expect(card).toHaveClass("border-accent/40");
   });
 
   it("renders tags as badges", () => {

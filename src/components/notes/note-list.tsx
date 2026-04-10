@@ -636,7 +636,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
       {/* Empty state */}
       {!isLoading && filteredNotes.length === 0 && (
         <div className="text-center py-16 space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
             <StickyNote className="h-8 w-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold">

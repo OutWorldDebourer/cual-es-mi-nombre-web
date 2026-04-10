@@ -15,13 +15,13 @@ export default function NotFound() {
         <div className="relative z-10 text-center space-y-6 max-w-md">
           {/* Brand mark */}
           <div className="flex justify-center">
-            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <div className="size-16 rounded-2xl bg-accent/10 flex items-center justify-center">
               <Sparkles className="size-8 text-primary" />
             </div>
           </div>
 
           {/* 404 number */}
-          <h1 className="text-8xl font-extrabold tracking-tighter text-primary/20">
+          <h1 className="text-8xl font-extrabold tracking-tighter text-foreground/10">
             <motion.span
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

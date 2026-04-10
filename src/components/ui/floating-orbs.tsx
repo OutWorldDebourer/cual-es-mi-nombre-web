@@ -11,7 +11,7 @@ const ORB_PRESETS = [
   {
     // Top-left — primary accent, large
     className:
-      "-top-24 left-1/4 w-[400px] h-[400px] bg-primary/10 blur-[60px] md:blur-[100px]",
+      "-top-24 left-1/4 w-[400px] h-[400px] bg-accent/10 blur-[60px] md:blur-[100px]",
     animation: "float-orb-1 18s ease-in-out infinite",
   },
   {
@@ -23,7 +23,7 @@ const ORB_PRESETS = [
   {
     // Center-left — subtle primary, staggered start
     className:
-      "top-1/3 -left-16 w-[300px] h-[300px] bg-primary/[0.07] blur-[60px] md:blur-[90px]",
+      "top-1/3 -left-16 w-[300px] h-[300px] bg-accent/[0.05] blur-[60px] md:blur-[90px]",
     animation: "float-orb-1 18s ease-in-out 4s infinite",
   },
   {

@@ -7,7 +7,7 @@
  */
 
 export const TAG_COLORS = [
-  "bg-primary/15 text-primary hover:bg-primary/25",
+  "bg-accent/15 text-accent hover:bg-accent/25",
   "bg-chart-4/15 text-chart-4 hover:bg-chart-4/25",
   "bg-success/15 text-success hover:bg-success/25",
   "bg-info/15 text-info hover:bg-info/25",

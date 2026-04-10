@@ -68,7 +68,7 @@ export function NoteBoardColumn({
     <div
       ref={setNodeRef}
       className={`flex flex-col rounded-lg bg-muted/30 border ${
-        isOver ? "border-primary/50 bg-primary/5" : "border-border/50"
+        isOver ? "border-accent/50 bg-accent/5" : "border-border/50"
       } transition-colors`}
       role="region"
       aria-label={`Columna: ${config.label} (${notes.length} notas)`}

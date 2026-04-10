@@ -68,7 +68,7 @@ const routeLabels = Object.fromEntries(
 const PLAN_STYLES: Record<SubscriptionPlan, string> = {
   free: "bg-muted text-muted-foreground",
   basic: "bg-info/15 text-info dark:bg-info/25",
-  pro: "bg-primary/15 text-primary dark:bg-primary/25",
+  pro: "bg-accent/15 text-accent dark:bg-accent/25",
   premium: "bg-accent/20 text-accent-foreground dark:bg-accent/30",
 };
 
