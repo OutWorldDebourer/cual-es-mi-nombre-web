@@ -78,9 +78,9 @@ export function PricingSection({ isAuthenticated = false }: PricingSectionProps)
           <TiltCard>
             <div
               className={cn(
-                "relative rounded-lg border bg-card p-6 text-center transition-colors duration-300 hover:border-foreground/20",
+                "relative rounded-lg border bg-card p-6 text-center transition-all duration-300 hover:border-foreground/20 active:scale-[0.98]",
                 plan.highlighted &&
-                  "border-accent shadow-lg ring-2 ring-accent/20",
+                  "border-accent ring-2 ring-accent/20 animate-[pulse-glow_3s_ease-in-out_infinite]",
               )}
             >
               {/* Shimmer glow overlay for highlighted plan */}
@@ -90,7 +90,7 @@ export function PricingSection({ isAuthenticated = false }: PricingSectionProps)
                   aria-hidden="true"
                 >
                   <div
-                    className="absolute inset-0 opacity-30"
+                    className="absolute inset-0 opacity-50"
                     style={{
                       background:
                         "linear-gradient(90deg, transparent 30%, rgba(255, 86, 0, 0.08) 50%, transparent 70%)",
