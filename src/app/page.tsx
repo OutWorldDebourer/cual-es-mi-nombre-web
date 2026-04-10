@@ -18,6 +18,7 @@ import { HeroContent } from "@/components/landing/hero-content";
 import { AnimatedChatDemo } from "@/components/landing/animated-chat-demo";
 import { LandingNavbar } from "@/components/landing/navbar";
 import { MotionReveal, StaggerContainer, StaggerItem } from "@/components/landing/motion-reveal";
+import { TextReveal } from "@/components/landing/text-reveal";
 import { FeatureGrid } from "@/components/landing/feature-card";
 import { AnimatedSteps } from "@/components/landing/animated-steps";
 import { PricingSection } from "@/components/landing/pricing-section";
@@ -70,9 +71,11 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl">
-                Todo lo que necesitas, en un chat
-              </h2>
+              <TextReveal
+                text="Todo lo que necesitas, en un chat"
+                as="h2"
+                className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
+              />
               <p className="mt-4 font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground">
                 Un solo asistente que entiende lenguaje natural y se conecta
                 con tus herramientas favoritas.
@@ -89,9 +92,11 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl">
-                Empieza en 3 simples pasos
-              </h2>
+              <TextReveal
+                text="Empieza en 3 simples pasos"
+                as="h2"
+                className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
+              />
             </div>
           </MotionReveal>
 
@@ -126,9 +131,11 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl">
-                Planes simples, sin sorpresas
-              </h2>
+              <TextReveal
+                text="Planes simples, sin sorpresas"
+                as="h2"
+                className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl"
+              />
               <p className="mt-4 font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground">
                 Empieza gratis. Escala cuando estes listo.
               </p>

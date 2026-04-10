@@ -76,72 +76,120 @@ export function PricingSection({ isAuthenticated = false }: PricingSectionProps)
       {plans.map((plan, index) => (
         <StaggerItem key={plan.name}>
           <TiltCard>
-            <div
-              className={cn(
-                "relative rounded-lg border bg-card p-6 text-center transition-all duration-300 hover:border-foreground/20 active:scale-[0.98]",
-                plan.highlighted &&
-                  "border-accent ring-2 ring-accent/20 animate-[pulse-glow_3s_ease-in-out_infinite]",
-              )}
-            >
-              {/* Shimmer glow overlay for highlighted plan */}
-              {plan.highlighted && (
-                <div
-                  className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-lg"
-                  aria-hidden="true"
-                >
-                  <div
-                    className="absolute inset-0 opacity-50"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, transparent 30%, rgba(255, 86, 0, 0.08) 50%, transparent 70%)",
-                      backgroundSize: "200% 100%",
-                      animation: "shimmer-border 3s linear infinite",
-                    }}
-                  />
-                </div>
-              )}
-
-              <div className="relative z-10">
+            {plan.highlighted ? (
+              <div className="relative overflow-hidden rounded-lg p-[2px] animate-[pulse-glow_3s_ease-in-out_infinite] active:scale-[0.98]">
+                {/* Badge — on top of everything */}
                 {plan.badge && (
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                  <div className="absolute -top-3 left-1/2 z-20 -translate-x-1/2">
                     <Badge>{plan.badge}</Badge>
                   </div>
                 )}
+                {/* Rotating gradient — the visible animated border */}
+                <div
+                  className="absolute inset-[-50%] z-0"
+                  style={{
+                    background: "conic-gradient(from 0deg, #ff5600, #65b5ff, #ff2067, #ff5600)",
+                    animation: "gradient-rotate 4s linear infinite",
+                  }}
+                  aria-hidden="true"
+                />
+                {/* Card content — covers the gradient, leaving 2px border visible */}
+                <div className="relative z-10 rounded-[calc(0.5rem-2px)] bg-card p-6 text-center">
+                  {/* Shimmer overlay for extra premium feel */}
+                  <div
+                    className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[calc(0.5rem-2px)]"
+                    aria-hidden="true"
+                  >
+                    <div
+                      className="absolute inset-0 opacity-40"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, transparent 30%, rgba(255, 86, 0, 0.08) 50%, transparent 70%)",
+                        backgroundSize: "200% 100%",
+                        animation: "shimmer-border 3s linear infinite",
+                      }}
+                    />
+                  </div>
+                  <div className="relative z-10">
+                    <h3 className="pt-2 text-lg font-normal leading-none tracking-tight">{plan.name}</h3>
 
-                <h3 className="pt-2 text-lg font-normal leading-none tracking-tight">{plan.name}</h3>
+                    <div className="mt-4 flex items-baseline justify-center gap-1">
+                      <span className="text-sm text-muted-foreground">S/</span>
+                      <span className="text-4xl font-bold tabular-nums">
+                        <CountUp end={parseFloat(plan.price)} decimals={2} delay={index * 200} />
+                      </span>
+                      <span className="text-sm text-muted-foreground">/mes</span>
+                    </div>
 
-                <div className="mt-4 flex items-baseline justify-center gap-1">
-                  <span className="text-sm text-muted-foreground">S/</span>
-                  <span className="text-4xl font-bold tabular-nums">
-                    <CountUp end={parseFloat(plan.price)} decimals={2} delay={index * 200} />
-                  </span>
-                  <span className="text-sm text-muted-foreground">/mes</span>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {plan.credits}
+                    </p>
+
+                    <ul className="mt-6 space-y-2.5 text-left text-sm">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2">
+                          <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Button
+                      asChild
+                      className="mt-6 w-full"
+                      variant="default"
+                    >
+                      <Link href={isAuthenticated ? "/dashboard/plans" : "/signup"}>
+                        {isAuthenticated ? "Ver planes" : plan.cta}
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {plan.credits}
-                </p>
-
-                <ul className="mt-6 space-y-2.5 text-left text-sm">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  asChild
-                  className="mt-6 w-full"
-                  variant={plan.highlighted ? "default" : "outline"}
-                >
-                  <Link href={isAuthenticated ? "/dashboard/plans" : "/signup"}>
-                    {isAuthenticated ? "Ver planes" : plan.cta}
-                  </Link>
-                </Button>
               </div>
-            </div>
+            ) : (
+              <div className="relative rounded-lg border bg-card p-6 text-center transition-all duration-300 hover:border-foreground/20 active:scale-[0.98]">
+                <div className="relative z-10">
+                  {plan.badge && (
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                      <Badge>{plan.badge}</Badge>
+                    </div>
+                  )}
+
+                  <h3 className="pt-2 text-lg font-normal leading-none tracking-tight">{plan.name}</h3>
+
+                  <div className="mt-4 flex items-baseline justify-center gap-1">
+                    <span className="text-sm text-muted-foreground">S/</span>
+                    <span className="text-4xl font-bold tabular-nums">
+                      <CountUp end={parseFloat(plan.price)} decimals={2} delay={index * 200} />
+                    </span>
+                    <span className="text-sm text-muted-foreground">/mes</span>
+                  </div>
+
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {plan.credits}
+                  </p>
+
+                  <ul className="mt-6 space-y-2.5 text-left text-sm">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    asChild
+                    className="mt-6 w-full"
+                    variant="outline"
+                  >
+                    <Link href={isAuthenticated ? "/dashboard/plans" : "/signup"}>
+                      {isAuthenticated ? "Ver planes" : plan.cta}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
           </TiltCard>
         </StaggerItem>
       ))}

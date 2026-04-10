@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TextReveal } from "./text-reveal";
 import { Sparkles, ArrowRight, Check } from "lucide-react";
 
 const containerVariants = {
@@ -41,13 +42,17 @@ export function HeroContent({ isAuthenticated = false }: HeroContentProps) {
         </Badge>
       </motion.div>
 
-      <motion.h1
-        className="text-5xl font-normal leading-none tracking-[-0.03em] sm:text-6xl lg:text-7xl"
-        variants={itemVariants}
-      >
-        Tu asistente{" "}
-        <span className="text-accent">inteligente</span> en WhatsApp
-      </motion.h1>
+      <motion.div variants={itemVariants}>
+        <TextReveal
+          text="Tu asistente inteligente en WhatsApp"
+          as="h1"
+          className="text-5xl font-normal leading-none tracking-[-0.03em] sm:text-6xl lg:text-7xl"
+          trigger="mount"
+          highlightWord="inteligente"
+          highlightClassName="text-accent"
+          delay={0.3}
+        />
+      </motion.div>
 
       <motion.p
         className="max-w-lg font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground"

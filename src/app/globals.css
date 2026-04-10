@@ -376,6 +376,12 @@
   100% { background-color: transparent; }
 }
 
+/* Rotating gradient border for premium pricing card */
+@keyframes gradient-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ═══════════════════════════════════════════════════════════════
    CUSTOM SCROLLBAR — subtle warm neutral, nearly invisible until hover
    ═══════════════════════════════════════════════════════════════ */
