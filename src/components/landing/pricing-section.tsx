@@ -63,7 +63,11 @@ const plans: Plan[] = [
   },
 ];
 
-export function PricingSection() {
+interface PricingSectionProps {
+  isAuthenticated?: boolean;
+}
+
+export function PricingSection({ isAuthenticated = false }: PricingSectionProps) {
   return (
     <StaggerContainer
       className="mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3"
@@ -132,7 +136,9 @@ export function PricingSection() {
                   className="mt-6 w-full"
                   variant={plan.highlighted ? "default" : "outline"}
                 >
-                  <Link href="/signup">{plan.cta}</Link>
+                  <Link href={isAuthenticated ? "/dashboard/plans" : "/signup"}>
+                    {isAuthenticated ? "Ver planes" : plan.cta}
+                  </Link>
                 </Button>
               </div>
             </div>

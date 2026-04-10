@@ -2,8 +2,8 @@
 /**
  * Landing Page — "Cual es mi nombre" Web
  *
- * Conversion-oriented landing page for unauthenticated visitors.
- * Authenticated users are redirected to /dashboard.
+ * Conversion-oriented landing page. Auth-aware: authenticated users
+ * see personalized CTAs ("Ir al Dashboard") instead of signup prompts.
  *
  * Sections: Hero (M2.1), Features (M2.2), Pricing (M2.3),
  * How it works (M2.4), Footer (M2.5)
@@ -12,7 +12,6 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { HeroContent } from "@/components/landing/hero-content";
@@ -32,14 +31,10 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    redirect("/dashboard");
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* ── Navigation ── */}
-      <LandingNavbar />
+      <LandingNavbar isAuthenticated={!!user} />
 
       {/* ── Hero — M2.1 ── */}
       <section className="relative overflow-hidden">
@@ -62,7 +57,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             {/* Left: Animated Content */}
-            <HeroContent />
+            <HeroContent isAuthenticated={!!user} />
 
             {/* Right: Animated WhatsApp Chat Demo */}
             <AnimatedChatDemo />
@@ -140,7 +135,7 @@ export default async function HomePage() {
             </div>
           </MotionReveal>
 
-          <PricingSection />
+          <PricingSection isAuthenticated={!!user} />
         </div>
       </section>
 

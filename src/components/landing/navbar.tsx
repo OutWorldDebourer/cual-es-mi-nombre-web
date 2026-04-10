@@ -5,10 +5,14 @@ import Link from "next/link";
 import { motion, useScroll } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/dashboard/theme-toggle";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function LandingNavbar() {
+interface LandingNavbarProps {
+  isAuthenticated?: boolean;
+}
+
+export function LandingNavbar({ isAuthenticated = false }: LandingNavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const { scrollYProgress } = useScroll();
 
@@ -57,12 +61,23 @@ export function LandingNavbar() {
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Iniciar Sesion</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/signup">Crear Cuenta</Link>
-            </Button>
+            {isAuthenticated ? (
+              <Button asChild size="sm">
+                <Link href="/dashboard">
+                  Ir al Dashboard
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/login">Iniciar Sesion</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href="/signup">Crear Cuenta</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </nav>

@@ -22,7 +22,11 @@ const itemVariants = {
   },
 };
 
-export function HeroContent() {
+interface HeroContentProps {
+  isAuthenticated?: boolean;
+}
+
+export function HeroContent({ isAuthenticated = false }: HeroContentProps) {
   return (
     <motion.div
       className="space-y-8"
@@ -54,38 +58,53 @@ export function HeroContent() {
       </motion.p>
 
       <motion.div className="flex flex-wrap gap-4" variants={itemVariants}>
-        <Button
-          asChild
-          size="lg"
-          className="group gap-2 animate-[pulse-glow_2s_ease-in-out_infinite]"
-        >
-          <a
-            href="https://wa.me/51901258245?text=Hola%2C%20quiero%20comenzar%20%F0%9F%91%8B"
-            target="_blank"
-            rel="noopener noreferrer"
+        {isAuthenticated ? (
+          <Button
+            asChild
+            size="lg"
+            className="group gap-2"
           >
-            Comenzar gratis
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </a>
-        </Button>
+            <Link href="/dashboard">
+              Ir al Dashboard
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            asChild
+            size="lg"
+            className="group gap-2 animate-[pulse-glow_2s_ease-in-out_infinite]"
+          >
+            <a
+              href="https://wa.me/51901258245?text=Hola%2C%20quiero%20comenzar%20%F0%9F%91%8B"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Comenzar gratis
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </a>
+          </Button>
+        )}
         <Button asChild size="lg" variant="outline">
           <Link href="#planes">Ver planes</Link>
         </Button>
       </motion.div>
 
-      <motion.div
-        className="flex items-center gap-6 text-sm text-muted-foreground"
-        variants={itemVariants}
-      >
-        <span className="flex items-center gap-1.5">
-          <Check className="size-4 text-success" />
-          Sin tarjeta requerida
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Check className="size-4 text-success" />
-          Configura en 2 min
-        </span>
-      </motion.div>
+      {!isAuthenticated && (
+        <motion.div
+          className="flex items-center gap-6 text-sm text-muted-foreground"
+          variants={itemVariants}
+        >
+          <span className="flex items-center gap-1.5">
+            <Check className="size-4 text-success" />
+            Sin tarjeta requerida
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Check className="size-4 text-success" />
+            Configura en 2 min
+          </span>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

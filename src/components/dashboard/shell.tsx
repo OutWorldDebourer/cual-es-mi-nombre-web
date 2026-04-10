@@ -99,7 +99,7 @@ function SidebarContent({
         collapsed ? "justify-center px-2" : "justify-between px-4"
       )}>
         <Link
-          href="/dashboard"
+          href="/"
           className={cn(
             "flex items-center font-display font-bold text-base tracking-tight",
             collapsed ? "justify-center" : "gap-2"
