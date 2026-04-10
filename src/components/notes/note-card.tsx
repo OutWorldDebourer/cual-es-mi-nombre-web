@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import type { Note, NoteStatus, NotePriority } from "@/types/database";
 import { formatRelativeTime } from "@/lib/dates";
 import { NOTE_STATUS_CONFIG } from "@/components/notes/note-status-config";
@@ -487,3 +487,9 @@ export function NoteCard({
     </>
   );
 }
+
+/**
+ * Memoized NoteCard — skips re-render when props are referentially equal.
+ * Primary consumer: NoteSortableCard (re-renders every drag frame via dnd-kit context).
+ */
+export const NoteCardMemo = memo(NoteCard);

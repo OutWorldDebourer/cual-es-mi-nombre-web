@@ -12,7 +12,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { NoteCard } from "@/components/notes/note-card";
+import { NoteCardMemo } from "@/components/notes/note-card";
 import type { Note, NoteStatus, NotePriority } from "@/types/database";
 
 interface NoteSortableCardProps {
@@ -72,7 +72,7 @@ export function NoteSortableCard({
       aria-roledescription="elemento ordenable"
       className={recentlyMovedIds?.has(note.id) ? "animate-[highlight_0.7s_ease-out] rounded-xl" : undefined}
     >
-      <NoteCard
+      <NoteCardMemo
         note={note}
         index={index}
         layout={layout}

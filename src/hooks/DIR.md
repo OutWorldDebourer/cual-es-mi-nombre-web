@@ -9,4 +9,4 @@ Custom React hooks for client-side state and behavior.
 | `use-is-mobile.ts` | Returns a boolean indicating whether the viewport is below 768px, using `matchMedia` listener | initial · 2026-03-31 |
 | `use-note-drag.ts` | Manages dnd-kit drag-and-drop for note reordering: sensors (mouse/touch/keyboard), fractional-index position calculation, cross-section pin toggling, optimistic Supabase updates | initial · 2026-03-31 |
 | `use-note-sort.ts` | Sorts notes by pinned status DESC, fractional position ASC, then updated_at DESC as fallback | initial · 2026-03-31 |
-| `use-realtime-table.ts` | Subscribes to Supabase Realtime postgres_changes on a given table, invoking a debounced callback on INSERT/UPDATE/DELETE events | initial · 2026-03-31 |
+| `use-realtime-table.ts` | Subscribes to Supabase Realtime postgres_changes on a given table, forwarding typed `RealtimePayload<T>` (eventType + new/old row) to a debounced callback for incremental merge. Exports: `useRealtimeTable()`, `RealtimePayload` | FA22 · 2026-04-10 |

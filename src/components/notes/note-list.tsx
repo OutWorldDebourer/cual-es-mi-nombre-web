@@ -24,7 +24,8 @@ import {
 import type { Note, NoteStatus, NotePriority } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 import { generateKeyBetween } from "@/lib/fractional-index";
-import { useRealtimeTable } from "@/hooks/use-realtime-table";
+import { useRealtimeTable, type RealtimePayload } from "@/hooks/use-realtime-table";
+import { compareNotes } from "@/hooks/use-note-sort";
 import { useNoteDrag, parseCompositeId, kanbanCollisionDetection } from "@/hooks/use-note-drag";
 import { NoteSortableCard } from "@/components/notes/note-sortable-card";
 import { NoteDragOverlay } from "@/components/notes/note-drag-overlay";
@@ -73,6 +74,8 @@ function readStorage<T extends string>(key: string, fallback: T, validValues: re
 
 export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
   const [notes, setNotes] = useState<Note[]>(initialNotes);
+  const notesRef = useRef(notes);
+  notesRef.current = notes;
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<NoteTab>("active");
@@ -169,10 +172,10 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
     void fetchNotes(newTab);
   }
 
-  function handleTagClick(tag: string | null) {
+  const handleTagClick = useCallback((tag: string | null) => {
     setSelectedTag(tag);
     if (tag) setGroupMode("none");
-  }
+  }, [setGroupMode]);
 
   // ── Fetch notes from Supabase ──────────────────────────────────────────
 
@@ -199,15 +202,55 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
     if (!silent) setIsLoading(false);
   }
 
-  // Silent refetch on Realtime events (no skeleton, dedup with manual fetches)
+  // Incremental merge on Realtime events — avoids full refetch for single-row changes.
   // Skip during drag to prevent stale positions from reverting optimistic updates.
-  function realtimeFetch() {
+  function handleRealtimeChange(payload: RealtimePayload<Note>) {
     if (isDraggingRef.current) return;
     if (Date.now() - lastFetchRef.current < 500) return;
+
+    const { eventType } = payload;
+    const isArchivedTab = tab === "archived";
+
+    if (eventType === "UPDATE" && payload.new) {
+      const incoming = payload.new;
+      // Note moved to the other tab → remove from current view
+      if (incoming.is_archived !== isArchivedTab) {
+        setNotes((prev) => prev.filter((n) => n.id !== incoming.id));
+        return;
+      }
+      // Merge single note and re-sort (position/pin may have changed from another client)
+      setNotes((prev) =>
+        prev.map((n) => (n.id === incoming.id ? incoming : n)).sort(compareNotes),
+      );
+      return;
+    }
+
+    if (eventType === "INSERT" && payload.new) {
+      const incoming = payload.new;
+      // Only add if it belongs to the current tab
+      if (incoming.is_archived !== isArchivedTab) return;
+      // Dedup: Realtime INSERT can race with fetchNotes after handleCreate
+      setNotes((prev) => {
+        if (prev.some((n) => n.id === incoming.id)) return prev;
+        return [...prev, incoming].sort(compareNotes);
+      });
+      return;
+    }
+
+    if (eventType === "DELETE" && payload.old) {
+      const oldId = payload.old.id;
+      if (!oldId) { void fetchNotes(tab, true); return; }
+      // Skip if already handled optimistically
+      if (pendingDeleteRef.current.has(oldId)) return;
+      setNotes((prev) => prev.filter((n) => n.id !== oldId));
+      return;
+    }
+
+    // Fallback: unknown event type, do full refetch
     void fetchNotes(tab, true);
   }
 
-  useRealtimeTable("notes", realtimeFetch);
+  useRealtimeTable<Note>("notes", handleRealtimeChange);
 
   // ── CRUD handlers ──────────────────────────────────────────────────────
 
@@ -257,9 +300,9 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
     await fetchNotes(tab);
   }
 
-  function handleDelete(noteId: string) {
+  const handleDelete = useCallback((noteId: string) => {
     // Capture note for potential undo
-    const deletedNote = notes.find((n) => n.id === noteId);
+    const deletedNote = notesRef.current.find((n) => n.id === noteId);
     if (!deletedNote) return;
 
     // Optimistic removal from UI
@@ -288,9 +331,9 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
         },
       },
     });
-  }
+  }, [supabase]);
 
-  async function handleTogglePin(noteId: string, isPinned: boolean) {
+  const handleTogglePin = useCallback(async (noteId: string, isPinned: boolean) => {
     // Optimistic update
     setNotes((prev) =>
       prev.map((n) => (n.id === noteId ? { ...n, is_pinned: isPinned } : n)),
@@ -308,10 +351,10 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
       );
       toast.error("Error al fijar la nota");
     }
-  }
+  }, [supabase]);
 
-  async function handleArchive(noteId: string) {
-    const archivedNote = notes.find((n) => n.id === noteId);
+  const handleArchive = useCallback(async (noteId: string) => {
+    const archivedNote = notesRef.current.find((n) => n.id === noteId);
     if (!archivedNote) return;
 
     // Optimistic removal from current view
@@ -337,10 +380,10 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
         },
       },
     });
-  }
+  }, [supabase]);
 
-  async function handleStatusChange(noteId: string, status: NoteStatus) {
-    const oldNote = notes.find((n) => n.id === noteId);
+  const handleStatusChange = useCallback(async (noteId: string, status: NoteStatus) => {
+    const oldNote = notesRef.current.find((n) => n.id === noteId);
     if (!oldNote) return;
 
     // Optimistic update
@@ -360,10 +403,10 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
       );
       toast.error("Error al cambiar el estado");
     }
-  }
+  }, [supabase]);
 
-  async function handlePriorityChange(noteId: string, priority: NotePriority) {
-    const oldNote = notes.find((n) => n.id === noteId);
+  const handlePriorityChange = useCallback(async (noteId: string, priority: NotePriority) => {
+    const oldNote = notesRef.current.find((n) => n.id === noteId);
     if (!oldNote) return;
 
     // Optimistic update
@@ -382,7 +425,12 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
       );
       toast.error("Error al cambiar la prioridad");
     }
-  }
+  }, [supabase]);
+
+  const handleEdit = useCallback((n: Note) => {
+    setEditingNote(n);
+    setFormOpen(true);
+  }, []);
 
   // ── Debounced search ─────────────────────────────────────────────────
 
@@ -688,7 +736,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
             dragDisabled={dragDisabled}
             recentlyMovedIds={recentlyMovedIds}
             onView={setViewingNote}
-            onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+            onEdit={handleEdit}
             onDelete={handleDelete}
             onTogglePin={handleTogglePin}
             onArchive={handleArchive}
@@ -737,7 +785,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                       disabled={dragDisabled}
                       recentlyMovedIds={recentlyMovedIds}
                       onView={setViewingNote}
-                      onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+                      onEdit={handleEdit}
                       onDelete={handleDelete}
                       onTogglePin={handleTogglePin}
                       onArchive={handleArchive}
@@ -772,7 +820,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                       disabled={dragDisabled}
                       recentlyMovedIds={recentlyMovedIds}
                       onView={setViewingNote}
-                      onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+                      onEdit={handleEdit}
                       onDelete={handleDelete}
                       onTogglePin={handleTogglePin}
                       onArchive={handleArchive}
@@ -822,7 +870,7 @@ export function NoteList({ initialNotes, autoCreate }: NoteListProps) {
                         disabled={dragDisabled}
                       recentlyMovedIds={recentlyMovedIds}
                         onView={setViewingNote}
-                        onEdit={(n) => { setEditingNote(n); setFormOpen(true); }}
+                        onEdit={handleEdit}
                         onDelete={handleDelete}
                         onTogglePin={handleTogglePin}
                         onArchive={handleArchive}

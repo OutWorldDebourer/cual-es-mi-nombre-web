@@ -9,15 +9,16 @@
  * - Optimistic update + Supabase PATCH
  * - isDraggingRef for pausing Realtime during drag
  *
- * CRITICAL: isDraggingRef is released AFTER the DB write completes.
- * This prevents Realtime from fetching stale positions mid-update.
+ * CRITICAL: isDraggingRef stays true for ~1s AFTER the DB write completes
+ * (post-drag cooldown). This prevents Realtime events that arrive shortly
+ * after the write from triggering a full fetchNotes() and re-rendering all cards.
  *
  * @module hooks/use-note-drag
  */
 
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import {
   type DragStartEvent,
   type DragEndEvent,
@@ -229,10 +230,18 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const isDraggingRef = useRef(false);
   const dragCountRef = useRef(0);
+  const dragCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const notesRef = useRef(notes);
   notesRef.current = notes;
   const [recentlyMovedIds, setRecentlyMovedIds] = useState<Set<string>>(new Set());
   const highlightTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Clean up cooldown timer on unmount
+  useEffect(() => {
+    return () => {
+      if (dragCooldownRef.current) clearTimeout(dragCooldownRef.current);
+    };
+  }, []);
 
   // ── Board mode: track cross-column moves from onDragOver ──
   const activeIdRef = useRef<string | null>(null);
@@ -289,6 +298,12 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
       const noteId = toNoteId(event.active.id as string);
       const note = notesRef.current.find((n) => n.id === noteId);
       if (note) {
+        // Clear any pending cooldown from a previous drag so the guard is
+        // immediately and reliably set to true for the new drag.
+        if (dragCooldownRef.current) {
+          clearTimeout(dragCooldownRef.current);
+          dragCooldownRef.current = null;
+        }
         setActiveNote(note);
         activeIdRef.current = noteId;
         dragCountRef.current++;
@@ -333,7 +348,19 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
 
       const releaseDrag = () => {
         dragCountRef.current = Math.max(0, dragCountRef.current - 1);
-        isDraggingRef.current = dragCountRef.current > 0;
+        if (dragCountRef.current > 0) {
+          // Another drag is still active — keep the guard up immediately.
+          isDraggingRef.current = true;
+          return;
+        }
+        // Delay lowering the guard so Realtime events that arrive shortly
+        // after the DB write are still blocked by isDraggingRef === true.
+        // Typical Realtime latency is 200-500ms; 1000ms provides a safe margin.
+        if (dragCooldownRef.current) clearTimeout(dragCooldownRef.current);
+        dragCooldownRef.current = setTimeout(() => {
+          isDraggingRef.current = false;
+          dragCooldownRef.current = null;
+        }, 1000);
       };
 
       // No valid drop target → revert any onDragOver status change
@@ -524,7 +551,15 @@ export function useNoteDrag({ notes, setNotes, boardMode = false, groupMode = fa
     cleanupRefs();
     setActiveNote(null);
     dragCountRef.current = Math.max(0, dragCountRef.current - 1);
-    isDraggingRef.current = dragCountRef.current > 0;
+    if (dragCountRef.current > 0) {
+      isDraggingRef.current = true;
+    } else {
+      if (dragCooldownRef.current) clearTimeout(dragCooldownRef.current);
+      dragCooldownRef.current = setTimeout(() => {
+        isDraggingRef.current = false;
+        dragCooldownRef.current = null;
+      }, 1000);
+    }
   }, [revertDragOverStatus, cleanupRefs]);
 
   return {

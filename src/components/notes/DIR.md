@@ -11,7 +11,7 @@ Notes CRUD interface with Kanban board, drag-and-drop, grouping, and filtering.
 | `note-drag-overlay.tsx` | Elevated card overlay (static shadow-xl, transform-only animation) that follows the cursor during drag-and-drop operations | T17 · 2026-04-01 |
 | `note-form.tsx` | Dialog form for creating and editing notes with title, content, status, priority, and tags fields | initial · 2026-03-30 |
 | `note-group-section.tsx` | Collapsible section header for tag-based note grouping with color-coded badge and count | initial · 2026-03-30 |
-| `note-list.tsx` | Main notes orchestrator: CRUD, search, filters, drag-and-drop reordering, realtime sync, and layout modes | initial · 2026-03-30 |
+| `note-list.tsx` | Main notes orchestrator: CRUD, search, filters, drag-and-drop reordering, incremental realtime merge (INSERT/UPDATE/DELETE without full refetch), and layout modes | FA22 · 2026-04-10 |
 | `note-priority-config.ts` | Priority level definitions (urgent/high/normal/low) with labels, badge classes, and icons | initial · 2026-03-30 |
 | `note-priority-filter.tsx` | Filter pill bar for selecting notes by priority level | initial · 2026-03-30 |
 | `note-sortable-card.tsx` | dnd-kit sortable wrapper around NoteCard enabling drag handle and smooth reorder transitions | initial · 2026-03-30 |
