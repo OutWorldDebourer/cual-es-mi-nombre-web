@@ -31,22 +31,22 @@ export function HeroContent() {
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <Badge variant="secondary">
+        <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/15">
           <Sparkles className="size-3" />
           Potenciado por IA
         </Badge>
       </motion.div>
 
       <motion.h1
-        className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl"
+        className="text-5xl font-normal leading-none tracking-[-0.03em] sm:text-6xl lg:text-7xl"
         variants={itemVariants}
       >
         Tu asistente{" "}
-        <span className="text-primary">inteligente</span> en WhatsApp
+        <span className="text-accent">inteligente</span> en WhatsApp
       </motion.h1>
 
       <motion.p
-        className="max-w-lg text-lg leading-relaxed text-muted-foreground"
+        className="max-w-lg font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground"
         variants={itemVariants}
       >
         Gestiona tu calendario, toma notas, configura recordatorios y mas —

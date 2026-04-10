@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -22,40 +21,16 @@ function FeatureCardInner({
   iconBg,
   iconColor,
 }: FeatureCardProps) {
-  const glowRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!glowRef.current) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    glowRef.current.style.background = `radial-gradient(250px circle at ${x}px ${y}px, var(--glow-color), transparent 70%)`;
-    glowRef.current.style.opacity = "0.6";
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (!glowRef.current) return;
-    glowRef.current.style.opacity = "0";
-  }, []);
-
   return (
     <motion.div
-      className="relative overflow-hidden rounded-2xl border bg-card p-6 transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/5"
-      whileHover={{ y: -4 }}
+      className="relative overflow-hidden rounded-lg border bg-background p-6 transition-colors duration-300 hover:border-foreground/20"
+      whileHover={{ y: -2 }}
       transition={{ type: "spring" as const, stiffness: 300, damping: 20 }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
     >
-      {/* Cursor-following radial glow — manipulated via ref, no re-renders */}
-      <div
-        ref={glowRef}
-        className="pointer-events-none absolute -inset-px z-0 opacity-0 transition-opacity duration-200"
-      />
-
       <div className="relative z-10">
         <motion.div
           className={cn(
-            "mb-4 inline-flex size-12 items-center justify-center rounded-xl",
+            "mb-4 inline-flex size-12 items-center justify-center rounded-lg",
             iconBg,
           )}
           whileHover={{ scale: 1.15, rotate: 5 }}
@@ -63,8 +38,8 @@ function FeatureCardInner({
         >
           <Icon className={cn("size-6", iconColor)} />
         </motion.div>
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        <h3 className="text-2xl font-normal leading-none tracking-tight">{title}</h3>
+        <p className="mt-2 text-sm leading-normal text-muted-foreground">
           {description}
         </p>
       </div>
@@ -78,32 +53,32 @@ const features: FeatureCardProps[] = [
     title: "Calendario",
     description:
       "Crea, edita y consulta eventos en Google Calendar con lenguaje natural.",
-    iconBg: "bg-primary/10",
-    iconColor: "text-primary",
+    iconBg: "bg-accent/10",
+    iconColor: "text-accent",
   },
   {
     icon: StickyNote,
     title: "Notas",
     description:
       "Toma notas rapidas, organizalas con tags y buscalas cuando las necesites.",
-    iconBg: "bg-chart-4/10",
-    iconColor: "text-chart-4",
+    iconBg: "bg-[#65b5ff]/10",
+    iconColor: "text-[#65b5ff]",
   },
   {
     icon: Bell,
     title: "Recordatorios",
     description:
       "Programa recordatorios con fecha y hora. Te avisamos por WhatsApp.",
-    iconBg: "bg-success/10",
-    iconColor: "text-success",
+    iconBg: "bg-[#0bdf50]/10",
+    iconColor: "text-[#0bdf50]",
   },
   {
     icon: MessageCircle,
     title: "IA Conversacional",
     description:
       "Habla de forma natural. Entiende contexto, fechas relativas y espanol coloquial.",
-    iconBg: "bg-info/10",
-    iconColor: "text-info",
+    iconBg: "bg-[#ff2067]/10",
+    iconColor: "text-[#ff2067]",
   },
 ];
 

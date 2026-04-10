@@ -62,13 +62,13 @@ export function AnimatedSteps() {
           <StaggerItem key={title}>
             <div className="relative text-center">
               <motion.div
-                className="relative mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                className="relative mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-foreground text-background shadow-lg shadow-foreground/15"
                 variants={circleVariants}
                 aria-hidden="true"
               >
                 <Icon className="size-7" />
               </motion.div>
-              <h3 className="text-lg font-semibold">{title}</h3>
+              <h3 className="text-lg font-normal leading-none tracking-tight">{title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {description}
               </p>

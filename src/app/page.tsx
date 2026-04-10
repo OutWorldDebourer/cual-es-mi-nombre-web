@@ -22,7 +22,6 @@ import { MotionReveal, StaggerContainer, StaggerItem } from "@/components/landin
 import { FeatureGrid } from "@/components/landing/feature-card";
 import { AnimatedSteps } from "@/components/landing/animated-steps";
 import { PricingSection } from "@/components/landing/pricing-section";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Sparkles, Instagram, Twitter } from "lucide-react";
 
 /* ── Page Component ──────────────────────────────────────────── */
@@ -49,13 +48,13 @@ export default async function HomePage() {
           className="pointer-events-none absolute inset-0 -z-10"
           aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-[#65b5ff]/5" />
           <div
-            className="absolute -top-24 left-1/4 size-96 rounded-full bg-primary/10 blur-3xl will-change-transform"
+            className="absolute -top-24 left-1/4 size-96 rounded-full bg-accent/8 blur-3xl will-change-transform"
             style={{ animation: "float-orb-1 18s ease-in-out infinite" }}
           />
           <div
-            className="absolute -bottom-24 right-1/4 size-96 rounded-full bg-accent/10 blur-3xl will-change-transform"
+            className="absolute -bottom-24 right-1/4 size-96 rounded-full bg-[#65b5ff]/8 blur-3xl will-change-transform"
             style={{ animation: "float-orb-2 22s ease-in-out infinite" }}
           />
         </div>
@@ -72,15 +71,14 @@ export default async function HomePage() {
       </section>
 
       {/* ── Features — M2.2 ── */}
-      <section className="relative overflow-hidden border-t bg-card/50 py-20 sm:py-24">
-        <FloatingOrbs count={2} />
-        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+      <section className="border-t bg-background py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl">
                 Todo lo que necesitas, en un chat
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
+              <p className="mt-4 font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground">
                 Un solo asistente que entiende lenguaje natural y se conecta
                 con tus herramientas favoritas.
               </p>
@@ -92,12 +90,11 @@ export default async function HomePage() {
       </section>
 
       {/* ── How it works — M2.4 ── */}
-      <section className="relative overflow-hidden py-20 sm:py-24">
-        <FloatingOrbs count={2} />
-        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+      <section className="py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl">
                 Empieza en 3 simples pasos
               </h2>
             </div>
@@ -129,16 +126,15 @@ export default async function HomePage() {
       {/* ── Pricing Preview — M2.3 ── */}
       <section
         id="planes"
-        className="relative overflow-hidden scroll-mt-20 border-t bg-card/50 py-20 sm:py-24"
+        className="scroll-mt-20 border-t bg-background py-20 sm:py-24"
       >
-        <FloatingOrbs count={2} />
-        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <MotionReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="text-4xl font-normal leading-none tracking-[-0.03em] sm:text-5xl">
                 Planes simples, sin sorpresas
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
+              <p className="mt-4 font-serif italic text-base leading-[1.4] tracking-[-0.01em] text-muted-foreground">
                 Empieza gratis. Escala cuando estes listo.
               </p>
             </div>
@@ -156,7 +152,7 @@ export default async function HomePage() {
               {/* Brand */}
               <div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="size-5 text-primary" />
+                  <Sparkles className="size-5 text-accent" />
                   <span className="font-bold">Cual es mi nombre</span>
                 </div>
                 <p className="mt-3 max-w-xs text-sm text-muted-foreground">
@@ -167,7 +163,7 @@ export default async function HomePage() {
 
               {/* Producto */}
               <div>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-3 text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                   Producto
                 </h3>
                 <ul className="space-y-2">
@@ -208,7 +204,7 @@ export default async function HomePage() {
 
               {/* Legal */}
               <div>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-3 text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                   Legal
                 </h3>
                 <ul className="space-y-2">

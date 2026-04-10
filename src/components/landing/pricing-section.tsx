@@ -74,22 +74,22 @@ export function PricingSection() {
           <TiltCard>
             <div
               className={cn(
-                "relative rounded-2xl border bg-card p-6 text-center transition-shadow duration-300 hover:shadow-lg",
+                "relative rounded-lg border bg-card p-6 text-center transition-colors duration-300 hover:border-foreground/20",
                 plan.highlighted &&
-                  "border-primary shadow-lg ring-2 ring-primary/20",
+                  "border-accent shadow-lg ring-2 ring-accent/20",
               )}
             >
               {/* Shimmer glow overlay for highlighted plan */}
               {plan.highlighted && (
                 <div
-                  className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl"
+                  className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-lg"
                   aria-hidden="true"
                 >
                   <div
                     className="absolute inset-0 opacity-30"
                     style={{
                       background:
-                        "linear-gradient(90deg, transparent 30%, var(--glow-color) 50%, transparent 70%)",
+                        "linear-gradient(90deg, transparent 30%, rgba(255, 86, 0, 0.08) 50%, transparent 70%)",
                       backgroundSize: "200% 100%",
                       animation: "shimmer-border 3s linear infinite",
                     }}
@@ -104,7 +104,7 @@ export function PricingSection() {
                   </div>
                 )}
 
-                <h3 className="pt-2 text-lg font-semibold">{plan.name}</h3>
+                <h3 className="pt-2 text-lg font-normal leading-none tracking-tight">{plan.name}</h3>
 
                 <div className="mt-4 flex items-baseline justify-center gap-1">
                   <span className="text-sm text-muted-foreground">S/</span>

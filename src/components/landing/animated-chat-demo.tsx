@@ -118,17 +118,17 @@ export function AnimatedChatDemo() {
         transition={{ type: "spring", stiffness: 80, damping: 16, delay: 0.4 }}
       >
         {/* Phone frame */}
-        <div className="overflow-hidden rounded-3xl border-2 border-border/50 bg-card shadow-2xl shadow-primary/10">
+        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-accent/10">
           {/* Chat header */}
-          <div className="flex items-center gap-3 bg-primary px-4 py-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary-foreground/20">
-              <Sparkles className="size-5 text-primary-foreground" />
+          <div className="flex items-center gap-3 bg-accent px-4 py-3">
+            <div className="flex size-10 items-center justify-center rounded-full bg-accent-foreground/20">
+              <Sparkles className="size-5 text-accent-foreground" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-primary-foreground">
+              <p className="text-sm font-semibold text-accent-foreground">
                 Luna
               </p>
-              <p className="text-xs text-primary-foreground/70">en linea</p>
+              <p className="text-xs text-accent-foreground/70">en linea</p>
             </div>
           </div>
 
@@ -145,7 +145,7 @@ export function AnimatedChatDemo() {
                     animate="visible"
                     exit="exit"
                   >
-                    <div className="rounded-2xl rounded-tr-sm bg-primary/10 px-4 py-2.5">
+                    <div className="rounded-2xl rounded-tr-sm bg-accent/10 px-4 py-2.5">
                       <p className="text-sm">{msg.text}</p>
                     </div>
                   </motion.div>

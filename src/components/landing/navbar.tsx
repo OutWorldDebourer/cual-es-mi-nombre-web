@@ -20,9 +20,9 @@ export function LandingNavbar() {
 
   return (
     <>
-      {/* Scroll progress bar */}
+      {/* Scroll progress bar — Fin Orange */}
       <motion.div
-        className="fixed top-0 left-0 right-0 z-[60] h-[3px] origin-left bg-gradient-to-r from-primary via-primary/80 to-primary"
+        className="fixed top-0 left-0 right-0 z-[60] h-[3px] origin-left bg-accent"
         style={{ scaleX: scrollYProgress }}
       />
 
@@ -30,9 +30,9 @@ export function LandingNavbar() {
       <nav
         className={cn(
           "sticky top-0 z-50 transition-all duration-500 ease-out",
-          "border-b bg-background/80 backdrop-blur-lg",
+          "border-b bg-background",
           scrolled &&
-            "lg:border-b-0 lg:bg-transparent lg:backdrop-blur-none lg:pt-2"
+            "lg:border-b-0 lg:bg-transparent lg:pt-2"
         )}
       >
         <div
@@ -41,15 +41,15 @@ export function LandingNavbar() {
             "transition-all duration-500 ease-out",
             scrolled && [
               "lg:max-w-[820px] lg:rounded-full",
-              "lg:border lg:border-black/[0.06] lg:bg-white/60 lg:backdrop-blur-xl",
-              "lg:shadow-lg lg:shadow-black/5",
-              "dark:lg:bg-white/[0.04] dark:lg:border-white/[0.08]",
+              "lg:border lg:border-border lg:bg-background/95 lg:backdrop-blur-sm",
+              "lg:shadow-sm lg:shadow-black/5",
+              "dark:lg:border-border",
             ]
           )}
         >
           <Link href="/" className="flex items-center gap-2">
             <Sparkles
-              className="size-6 text-primary"
+              className="size-6 text-accent"
               style={{ animation: "sparkle-pulse 3s ease-in-out infinite" }}
             />
             <span className="text-lg font-bold">Cual es mi nombre</span>
