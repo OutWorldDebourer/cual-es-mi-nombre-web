@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { TiltCard } from "./tilt-card";
 import { StaggerContainer, StaggerItem } from "./motion-reveal";
 import { CountUp } from "@/components/dashboard/count-up";
