@@ -197,7 +197,12 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
       if (err instanceof ApiError) {
         setError(mapRequestOtpError(err.status, err.detail));
       } else {
-        setError("Error inesperado. Intenta de nuevo.");
+        console.error("[recovery] requestOtp unexpected error:", err);
+        setError(
+          err instanceof Error
+            ? err.message || "Error inesperado. Intenta de nuevo."
+            : "Error inesperado. Intenta de nuevo.",
+        );
       }
     } finally {
       setLoading(false);
@@ -244,7 +249,12 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
           setOtp("");
         }
       } else {
-        setError("Error inesperado. Intenta de nuevo.");
+        console.error("[recovery] setPassword unexpected error:", err);
+        setError(
+          err instanceof Error
+            ? err.message || "Error inesperado. Intenta de nuevo."
+            : "Error inesperado. Intenta de nuevo.",
+        );
       }
     } finally {
       setLoading(false);
@@ -264,7 +274,12 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
       if (err instanceof ApiError) {
         setError(mapRequestOtpError(err.status, err.detail));
       } else {
-        setError("Error inesperado. Intenta de nuevo.");
+        console.error("[recovery] resendOtp unexpected error:", err);
+        setError(
+          err instanceof Error
+            ? err.message || "Error inesperado. Intenta de nuevo."
+            : "Error inesperado. Intenta de nuevo.",
+        );
       }
     } finally {
       setLoading(false);
