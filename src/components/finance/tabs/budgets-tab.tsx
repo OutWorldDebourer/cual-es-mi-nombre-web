@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import {
   Plus,
   Percent,
@@ -21,6 +21,7 @@ import type {
   FinanceBudget,
   FinanceCategory,
   FinanceProfile,
+  FinanceTransaction,
   BudgetMode,
 } from "@/types/database";
 import { cn } from "@/lib/utils";
@@ -219,6 +220,7 @@ interface BudgetsTabProps {
   budgets: FinanceBudget[];
   categories: FinanceCategory[];
   profile: FinanceProfile;
+  transactions: FinanceTransaction[];
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -227,6 +229,7 @@ export function BudgetsTab({
   budgets,
   categories,
   profile,
+  transactions,
 }: BudgetsTabProps) {
   const mode = profile.budget_mode;
   const config = MODE_CONFIGS[mode];
@@ -247,9 +250,19 @@ export function BudgetsTab({
   // ── Income reference for percentage mode ────────────────────────────
   const incomeRef = profile.fixed_income_amount ?? 0;
 
-  // ── Placeholder spent map (real data comes from transactions prop later)
-  // For now each budget has 0 spent — wired when TransactionsTab passes data
-  const [spentMap] = useState<Map<string, number>>(() => new Map());
+  // ── Spent map: sum expenses per category from current period transactions ──
+  const spentMap = useMemo(() => {
+    const map = new Map<string, number>();
+    const now = new Date();
+    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    for (const t of transactions) {
+      if (t.deleted_at || t.type !== "expense" || !t.category_id) continue;
+      if (new Date(t.transaction_date) < periodStart) continue;
+      map.set(t.category_id, (map.get(t.category_id) ?? 0) + t.amount);
+    }
+    return map;
+  }, [transactions]);
 
   const getSpent = useCallback(
     (categoryId: string | null) =>

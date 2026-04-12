@@ -86,10 +86,21 @@ export function AccountsTab({ accounts, onRefresh, onAddAccount, onTransfer }: A
     [accounts],
   );
 
+  // Note: Uses initial_balance as placeholder. Real-time balance requires
+  // server-side transaction summation (RPC call). Will be replaced when
+  // finance_account_balances RPC is available.
   const totalBalance = useMemo(
     () => activeAccounts.reduce((sum, a) => sum + a.initial_balance, 0),
     [activeAccounts],
   );
+
+  // Determine display currency from accounts. If all same currency, use it. Otherwise "mixed".
+  const displayCurrency = useMemo(() => {
+    if (activeAccounts.length === 0) return "PEN";
+    const currencies = new Set(activeAccounts.map((a) => a.currency));
+    if (currencies.size === 1) return activeAccounts[0].currency;
+    return "mixed";
+  }, [activeAccounts]);
 
   if (accounts.length === 0) {
     return (
@@ -125,7 +136,7 @@ export function AccountsTab({ accounts, onRefresh, onAddAccount, onTransfer }: A
       </div>
 
       {/* Total balance hero card */}
-      <TotalBalanceCard balance={totalBalance} accountCount={activeAccounts.length} />
+      <TotalBalanceCard balance={totalBalance} accountCount={activeAccounts.length} currency={displayCurrency} />
 
       {/* Active accounts */}
       {activeAccounts.length > 0 && (
@@ -163,10 +174,15 @@ export function AccountsTab({ accounts, onRefresh, onAddAccount, onTransfer }: A
 function TotalBalanceCard({
   balance,
   accountCount,
+  currency,
 }: {
   balance: number;
   accountCount: number;
+  currency: string;
 }) {
+  const symbol = currency === "USD" ? "$" : currency === "EUR" ? "\u20AC" : currency === "mixed" ? "" : "S/";
+  const suffix = currency === "mixed" ? " (mixto)" : "";
+
   return (
     <Card>
       <CardHeader>
@@ -183,7 +199,7 @@ function TotalBalanceCard({
               : "text-red-600 dark:text-red-400",
           )}
         >
-          S/ {balance.toFixed(2)}
+          {symbol}{symbol ? " " : ""}{balance.toFixed(2)}{suffix}
         </p>
         <p className="text-xs text-muted-foreground">
           {accountCount} cuenta{accountCount !== 1 ? "s" : ""} activa

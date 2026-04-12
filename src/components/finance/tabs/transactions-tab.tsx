@@ -369,7 +369,7 @@ export function TransactionsTab({
       )}
 
       {/* 5. Floating action button */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-20 right-6 z-40 md:bottom-6">
         <Button
           size="lg"
           className="size-14 rounded-full shadow-lg"

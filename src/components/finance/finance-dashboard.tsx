@@ -18,6 +18,7 @@ import { AddTransactionModal } from "@/components/finance/modals/add-transaction
 import { EditCategoryModal } from "@/components/finance/modals/edit-category-modal";
 import { CreateAccountModal } from "@/components/finance/modals/create-account-modal";
 import { TransferModal } from "@/components/finance/modals/transfer-modal";
+import { SplitTransactionModal } from "@/components/finance/modals/split-transaction-modal";
 import type {
   FinanceProfile,
   FinanceTransaction,
@@ -81,8 +82,10 @@ export function FinanceDashboard({
 
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [showEditCategory, setShowEditCategory] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<FinanceCategory | null>(null);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [showSplit, setShowSplit] = useState(false);
 
   // ── Realtime subscription ──────────────────────────────────────────────
 
@@ -111,12 +114,56 @@ export function FinanceDashboard({
   );
 
   const handleOnboardingComplete = useCallback(
-    (_result: OnboardingResult) => {
-      // TODO: POST onboarding result to API, then refresh
+    async (result: OnboardingResult) => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const profileId = profile?.profile_id;
+
+      if (!profileId) {
+        // Fetch user id from auth if no profile exists yet
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        await supabase.from("finance_profiles").upsert({
+          profile_id: user.id,
+          income_type: result.incomeType,
+          income_period: "monthly",
+          onboarding_completed: true,
+        });
+
+        // Create initial accounts if provided
+        for (const account of result.accounts) {
+          await supabase.from("finance_accounts").insert({
+            profile_id: user.id,
+            name: account.name,
+            type: account.type,
+            currency: "PEN",
+            initial_balance: 0,
+          });
+        }
+      } else {
+        await supabase.from("finance_profiles").upsert({
+          profile_id: profileId,
+          income_type: result.incomeType,
+          income_period: "monthly",
+          onboarding_completed: true,
+        });
+
+        for (const account of result.accounts) {
+          await supabase.from("finance_accounts").insert({
+            profile_id: profileId,
+            name: account.name,
+            type: account.type,
+            currency: "PEN",
+            initial_balance: 0,
+          });
+        }
+      }
+
       setShowOnboarding(false);
       router.refresh();
     },
-    [router]
+    [router, profile?.profile_id]
   );
 
   // ── Onboarding gate ────────────────────────────────────────────────────
@@ -154,6 +201,17 @@ export function FinanceDashboard({
               profile={profile}
               timezone={timezone}
               onAddTransaction={() => setShowAddTransaction(true)}
+              onQuickEntry={(data) =>
+                mutations.createTransaction({
+                  type: data.type as "income" | "expense",
+                  amount: data.amount,
+                  categoryId: data.categoryId,
+                  accountId: accounts[0]?.id ?? "",
+                  description: data.description ?? null,
+                  transactionDate: new Date().toISOString().slice(0, 10),
+                  tags: [],
+                })
+              }
             />
           )}
         </TabsContent>
@@ -174,6 +232,7 @@ export function FinanceDashboard({
               budgets={budgets}
               categories={categories}
               profile={profile}
+              transactions={transactions}
             />
           )}
         </TabsContent>
@@ -193,7 +252,23 @@ export function FinanceDashboard({
           <CategoriesTab
             categories={categories}
             onRefresh={() => router.refresh()}
-            onAddCategory={() => setShowEditCategory(true)}
+            onAddCategory={() => {
+              setEditingCategory(null);
+              setShowEditCategory(true);
+            }}
+            onEditCategory={(cat) => {
+              setEditingCategory(cat);
+              setShowEditCategory(true);
+            }}
+            onDeleteCategory={async (categoryId) => {
+              const { createClient } = await import("@/lib/supabase/client");
+              const supabase = createClient();
+              await supabase
+                .from("finance_categories")
+                .delete()
+                .eq("id", categoryId);
+              router.refresh();
+            }}
           />
         </TabsContent>
 
@@ -240,7 +315,7 @@ export function FinanceDashboard({
       <EditCategoryModal
         open={showEditCategory}
         onOpenChange={setShowEditCategory}
-        category={null}
+        category={editingCategory}
         onSubmit={(data) =>
           mutations.createCategory({
             name: data.name,
@@ -276,6 +351,25 @@ export function FinanceDashboard({
             description: data.description,
           })
         }
+      />
+
+      <SplitTransactionModal
+        open={showSplit}
+        onOpenChange={setShowSplit}
+        categories={categories}
+        onSubmit={(data) => {
+          for (const item of data.items) {
+            mutations.createTransaction({
+              type: "expense",
+              amount: item.amount,
+              categoryId: item.categoryId,
+              accountId: accounts[0]?.id ?? "",
+              description: item.description,
+              transactionDate: new Date().toISOString().slice(0, 10),
+              tags: ["split"],
+            });
+          }
+        }}
       />
     </>
   );

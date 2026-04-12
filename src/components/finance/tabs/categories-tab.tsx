@@ -15,6 +15,8 @@ interface CategoriesTabProps {
   categories: FinanceCategory[];
   onRefresh: () => void;
   onAddCategory?: () => void;
+  onEditCategory?: (category: FinanceCategory) => void;
+  onDeleteCategory?: (categoryId: string) => void;
 }
 
 // ── Type labels ────────────────────────────────────────────────────────────
@@ -43,7 +45,7 @@ const TYPE_CONFIG: Record<
 // ── Component ──────────────────────────────────────────────────────────────
 
 /** Category management tab: view, add, edit, and delete finance categories. */
-export function CategoriesTab({ categories, onRefresh, onAddCategory }: CategoriesTabProps) {
+export function CategoriesTab({ categories, onRefresh, onAddCategory, onEditCategory, onDeleteCategory }: CategoriesTabProps) {
   const grouped = useMemo(() => {
     const map: Record<CategoryType, FinanceCategory[]> = {
       expense: [],
@@ -90,6 +92,8 @@ export function CategoriesTab({ categories, onRefresh, onAddCategory }: Categori
         type="expense"
         categories={grouped.expense}
         onRefresh={onRefresh}
+        onEditCategory={onEditCategory}
+        onDeleteCategory={onDeleteCategory}
       />
 
       {/* Income categories */}
@@ -97,6 +101,8 @@ export function CategoriesTab({ categories, onRefresh, onAddCategory }: Categori
         type="income"
         categories={grouped.income}
         onRefresh={onRefresh}
+        onEditCategory={onEditCategory}
+        onDeleteCategory={onDeleteCategory}
       />
 
       {/* Transfer categories */}
@@ -104,6 +110,8 @@ export function CategoriesTab({ categories, onRefresh, onAddCategory }: Categori
         type="transfer"
         categories={grouped.transfer}
         onRefresh={onRefresh}
+        onEditCategory={onEditCategory}
+        onDeleteCategory={onDeleteCategory}
       />
     </div>
   );
@@ -115,10 +123,14 @@ function CategorySection({
   type,
   categories,
   onRefresh,
+  onEditCategory,
+  onDeleteCategory,
 }: {
   type: CategoryType;
   categories: FinanceCategory[];
   onRefresh: () => void;
+  onEditCategory?: (category: FinanceCategory) => void;
+  onDeleteCategory?: (categoryId: string) => void;
 }) {
   const config = TYPE_CONFIG[type];
 
@@ -139,6 +151,8 @@ function CategorySection({
             key={cat.id}
             category={cat}
             onRefresh={onRefresh}
+            onEditCategory={onEditCategory}
+            onDeleteCategory={onDeleteCategory}
           />
         ))}
       </div>
@@ -150,19 +164,21 @@ function CategorySection({
 
 function CategoryCard({
   category,
-  onRefresh,
+  onRefresh: _onRefresh,
+  onEditCategory,
+  onDeleteCategory,
 }: {
   category: FinanceCategory;
   onRefresh: () => void;
+  onEditCategory?: (category: FinanceCategory) => void;
+  onDeleteCategory?: (categoryId: string) => void;
 }) {
   const handleEdit = () => {
-    // TODO: open edit category modal (Phase 3)
-    void onRefresh;
+    onEditCategory?.(category);
   };
 
   const handleDelete = () => {
-    // TODO: open delete confirmation modal (Phase 3)
-    void onRefresh;
+    onDeleteCategory?.(category.id);
   };
 
   return (

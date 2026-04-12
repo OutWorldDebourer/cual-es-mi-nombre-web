@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -122,6 +123,7 @@ export function SettingsTab({
   categories,
   onProfileUpdate,
 }: SettingsTabProps) {
+  const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -180,10 +182,22 @@ export function SettingsTab({
     [onProfileUpdate, profile.profile_id],
   );
 
-  const handleDeleteAllData = useCallback(() => {
+  const handleDeleteAllData = useCallback(async () => {
     setShowDeleteConfirm(false);
-    // TODO: call API to delete all financial data
-  }, []);
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const pid = profile.profile_id;
+
+    // Delete in correct order (foreign key dependencies)
+    await supabase.from("finance_category_rules").delete().eq("profile_id", pid);
+    await supabase.from("finance_budgets").delete().eq("profile_id", pid);
+    await supabase.from("finance_transactions").delete().eq("profile_id", pid);
+    await supabase.from("finance_accounts").delete().eq("profile_id", pid);
+    await supabase.from("finance_categories").delete().eq("profile_id", pid).eq("is_system", false);
+    await supabase.from("finance_profiles").delete().eq("profile_id", pid);
+
+    router.refresh();
+  }, [profile.profile_id, router]);
 
   // Suppress unused variable warning
   void categories;

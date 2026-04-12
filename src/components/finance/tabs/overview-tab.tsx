@@ -100,6 +100,7 @@ interface OverviewTabProps {
   profile: FinanceProfile;
   timezone: string;
   onAddTransaction?: () => void;
+  onQuickEntry?: (data: { type: string; amount: number; categoryId: string; description?: string }) => void;
 }
 
 // ── Metric card ───────────────────────────────────────────────────────────
@@ -170,6 +171,7 @@ export function OverviewTab({
   profile,
   timezone,
   onAddTransaction,
+  onQuickEntry,
 }: OverviewTabProps) {
   const [period, setPeriod] = useState<PeriodValue>("month");
 
@@ -271,10 +273,15 @@ export function OverviewTab({
 
   // ── Quick entry submit handler ──────────────────────────────────────
   const handleQuickEntry = useCallback(
-    (_entry: { type: string; categoryId: string; amount: number; description: string }) => {
-      // TODO: POST to API then refresh
+    (entry: { type: string; categoryId: string; amount: number; description: string }) => {
+      onQuickEntry?.({
+        type: entry.type,
+        amount: entry.amount,
+        categoryId: entry.categoryId,
+        description: entry.description || undefined,
+      });
     },
-    []
+    [onQuickEntry]
   );
 
   // ── Render ──────────────────────────────────────────────────────────
@@ -458,7 +465,7 @@ export function OverviewTab({
 
       {/* 8. Floating action button */}
       {onAddTransaction && (
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-20 right-6 z-40 md:bottom-6">
           <Button
             size="lg"
             className="size-14 rounded-full shadow-lg"

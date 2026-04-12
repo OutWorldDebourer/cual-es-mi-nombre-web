@@ -44,12 +44,14 @@ export default async function FinancePage({
         .select("*")
         .eq("profile_id", user.id)
         .maybeSingle(),
+      // Fetch enough transactions for reports and budget calculations.
+      // Pagination for the transactions list is handled client-side.
       supabase
         .from("finance_transactions")
         .select("*")
         .is("deleted_at", null)
         .order("transaction_date", { ascending: false })
-        .limit(15),
+        .limit(500),
       supabase.from("finance_categories").select("*").order("sort_order", { ascending: true }),
       supabase.from("finance_accounts").select("*").order("created_at", { ascending: true }),
       supabase
