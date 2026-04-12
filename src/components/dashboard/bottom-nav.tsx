@@ -53,7 +53,7 @@ export function BottomNav() {
                   isActive && "scale-110"
                 )}
               />
-              <span>{item.label}</span>
+              <span className="truncate max-w-[60px]">{item.label}</span>
             </Link>
           );
         })}

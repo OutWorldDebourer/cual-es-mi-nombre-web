@@ -183,13 +183,20 @@ export function FinanceDashboard({
   return (
     <>
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="w-full overflow-x-auto justify-start">
-          {TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="relative">
+          <TabsList className="w-full overflow-x-auto justify-start scrollbar-hide flex-nowrap">
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="whitespace-nowrap text-xs sm:text-sm shrink-0"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none sm:hidden" />
+        </div>
 
         <TabsContent value="overview">
           {profile && (

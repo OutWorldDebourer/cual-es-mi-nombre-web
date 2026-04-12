@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Plus, Search, ListFilter, Receipt } from "lucide-react";
+import { Plus, Search, ListFilter, Filter, Receipt } from "lucide-react";
 import type {
   FinanceTransaction,
   FinanceCategory,
@@ -137,6 +137,7 @@ export function TransactionsTab({
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   // ── Timezone (client) ───────────────────────────────────────────────
   const timezone = useMemo(
@@ -250,61 +251,86 @@ export function TransactionsTab({
       {/* 1. Filter bar */}
       <Card>
         <CardContent className="space-y-3 px-4 py-3">
-          {/* Status filters */}
-          <div className="flex items-center gap-2">
-            <ListFilter className="size-4 shrink-0 text-muted-foreground" />
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-              {STATUS_OPTIONS.map((opt) => (
-                <FilterPill
-                  key={opt.value}
-                  value={opt.value}
-                  label={opt.label}
-                  selected={statusFilter === opt.value}
-                  onClick={handleStatusFilter}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Type filters */}
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pl-6">
-            {TYPE_OPTIONS.map((opt) => (
-              <FilterPill
-                key={opt.value}
-                value={opt.value}
-                label={opt.label}
-                selected={typeFilter === opt.value}
-                onClick={handleTypeFilter}
-              />
-            ))}
-          </div>
-
-          {/* Category filter */}
-          <div className="pl-6">
-            <CategoryPills
-              categories={expenseCategories}
-              selected={categoryFilter}
-              onSelect={handleCategoryFilter}
-              maxVisible={5}
-            />
-          </div>
-
-          {/* Active filter indicator */}
-          {activeFilterCount > 0 && (
-            <div className="flex items-center justify-between pl-6">
-              <span className="text-xs text-muted-foreground">
-                {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
-              </span>
+          {/* Mobile: toggle button */}
+          <div className="flex items-center justify-between md:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4 mr-1" />
+              Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+            </Button>
+            {activeFilterCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-7 text-xs"
                 onClick={resetFilters}
               >
-                Limpiar filtros
+                Limpiar
               </Button>
+            )}
+          </div>
+
+          {/* Desktop: always visible | Mobile: collapsible */}
+          <div className={cn("space-y-3", "md:block", !showFilters && "hidden md:block")}>
+            {/* Status filters */}
+            <div className="flex items-center gap-2">
+              <ListFilter className="size-4 shrink-0 text-muted-foreground" />
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+                {STATUS_OPTIONS.map((opt) => (
+                  <FilterPill
+                    key={opt.value}
+                    value={opt.value}
+                    label={opt.label}
+                    selected={statusFilter === opt.value}
+                    onClick={handleStatusFilter}
+                  />
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Type filters */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pl-6">
+              {TYPE_OPTIONS.map((opt) => (
+                <FilterPill
+                  key={opt.value}
+                  value={opt.value}
+                  label={opt.label}
+                  selected={typeFilter === opt.value}
+                  onClick={handleTypeFilter}
+                />
+              ))}
+            </div>
+
+            {/* Category filter */}
+            <div className="pl-6">
+              <CategoryPills
+                categories={expenseCategories}
+                selected={categoryFilter}
+                onSelect={handleCategoryFilter}
+                maxVisible={5}
+              />
+            </div>
+
+            {/* Active filter indicator */}
+            {activeFilterCount > 0 && (
+              <div className="flex items-center justify-between pl-6">
+                <span className="text-xs text-muted-foreground">
+                  {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={resetFilters}
+                >
+                  Limpiar filtros
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
