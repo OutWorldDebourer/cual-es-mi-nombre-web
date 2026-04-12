@@ -8,6 +8,7 @@ import {
   PiggyBank,
   AlertCircle,
   ArrowRight,
+  Plus,
 } from "lucide-react";
 import {
   PieChart,
@@ -33,12 +34,9 @@ import { PeriodSelector } from "@/components/finance/shared/period-selector";
 import type { PeriodValue } from "@/components/finance/shared/period-selector";
 import { BudgetProgressBar } from "@/components/finance/shared/budget-progress-bar";
 import { EmptyState } from "@/components/finance/shared/empty-state";
+import { formatAmount } from "@/components/finance/shared/format-utils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
-
-function formatAmount(n: number): string {
-  return `S/ ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 function startOfPeriod(period: PeriodValue, tz: string): Date {
   const now = new Date(
@@ -101,6 +99,7 @@ interface OverviewTabProps {
   budgets: FinanceBudget[];
   profile: FinanceProfile;
   timezone: string;
+  onAddTransaction?: () => void;
 }
 
 // ── Metric card ───────────────────────────────────────────────────────────
@@ -170,6 +169,7 @@ export function OverviewTab({
   budgets,
   profile,
   timezone,
+  onAddTransaction,
 }: OverviewTabProps) {
   const [period, setPeriod] = useState<PeriodValue>("month");
 
@@ -455,6 +455,20 @@ export function OverviewTab({
           )}
         </CardContent>
       </Card>
+
+      {/* 8. Floating action button */}
+      {onAddTransaction && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <Button
+            size="lg"
+            className="size-14 rounded-full shadow-lg"
+            aria-label="Agregar transaccion"
+            onClick={onAddTransaction}
+          >
+            <Plus className="size-6" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

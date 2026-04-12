@@ -29,12 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BudgetProgressBar } from "@/components/finance/shared/budget-progress-bar";
 import { EmptyState } from "@/components/finance/shared/empty-state";
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-
-function formatAmount(n: number): string {
-  return `S/ ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+import { formatAmount } from "@/components/finance/shared/format-utils";
 
 // ── Allocation chart colors ───────────────────────────────────────────────
 

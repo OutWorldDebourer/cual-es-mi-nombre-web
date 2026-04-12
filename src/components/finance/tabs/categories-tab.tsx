@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/finance/shared/empty-state";
 interface CategoriesTabProps {
   categories: FinanceCategory[];
   onRefresh: () => void;
+  onAddCategory?: () => void;
 }
 
 // ── Type labels ────────────────────────────────────────────────────────────
@@ -42,7 +43,7 @@ const TYPE_CONFIG: Record<
 // ── Component ──────────────────────────────────────────────────────────────
 
 /** Category management tab: view, add, edit, and delete finance categories. */
-export function CategoriesTab({ categories, onRefresh }: CategoriesTabProps) {
+export function CategoriesTab({ categories, onRefresh, onAddCategory }: CategoriesTabProps) {
   const grouped = useMemo(() => {
     const map: Record<CategoryType, FinanceCategory[]> = {
       expense: [],
@@ -66,9 +67,7 @@ export function CategoriesTab({ categories, onRefresh }: CategoriesTabProps) {
         title="Sin categorias"
         description="Crea categorias para organizar tus movimientos financieros."
         actionLabel="Crear categoria"
-        onAction={() => {
-          // TODO: open create category modal
-        }}
+        onAction={onAddCategory}
       />
     );
   }
@@ -79,9 +78,7 @@ export function CategoriesTab({ categories, onRefresh }: CategoriesTabProps) {
       <div className="flex justify-end">
         <Button
           size="sm"
-          onClick={() => {
-            // TODO: open create category modal (Phase 3)
-          }}
+          onClick={onAddCategory}
         >
           <Plus className="size-4" />
           Nueva categoria

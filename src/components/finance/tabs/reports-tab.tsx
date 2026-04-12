@@ -21,6 +21,7 @@ import type { FinanceTransaction, FinanceCategory, FinanceProfile } from "@/type
 import type { PeriodValue } from "@/components/finance/shared/period-selector";
 import { PeriodSelector } from "@/components/finance/shared/period-selector";
 import { EmptyState } from "@/components/finance/shared/empty-state";
+import { formatAmount } from "@/components/finance/shared/format-utils";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -38,10 +39,6 @@ const MONTH_LABELS = [
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function formatAmount(value: number): string {
-  return `S/ ${value.toFixed(2)}`;
-}
 
 function getPeriodRange(period: PeriodValue, timezone: string): { start: Date; end: Date } {
   const now = new Date(

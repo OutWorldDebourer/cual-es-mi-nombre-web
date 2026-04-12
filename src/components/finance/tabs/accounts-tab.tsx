@@ -68,12 +68,14 @@ function formatBalance(amount: number, currency: string): string {
 interface AccountsTabProps {
   accounts: FinanceAccount[];
   onRefresh: () => void;
+  onAddAccount?: () => void;
+  onTransfer?: () => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
 
 /** Account management tab: total balance, account cards, add/transfer actions. */
-export function AccountsTab({ accounts, onRefresh }: AccountsTabProps) {
+export function AccountsTab({ accounts, onRefresh, onAddAccount, onTransfer }: AccountsTabProps) {
   const activeAccounts = useMemo(
     () => accounts.filter((a) => a.is_active),
     [accounts],
@@ -96,9 +98,7 @@ export function AccountsTab({ accounts, onRefresh }: AccountsTabProps) {
         title="Sin cuentas"
         description="Agrega tus cuentas para llevar control de tus saldos."
         actionLabel="Agregar cuenta"
-        onAction={() => {
-          // TODO: open add account modal
-        }}
+        onAction={onAddAccount}
       />
     );
   }
@@ -109,10 +109,7 @@ export function AccountsTab({ accounts, onRefresh }: AccountsTabProps) {
       <div className="flex gap-2">
         <Button
           size="sm"
-          onClick={() => {
-            // TODO: open add account modal (Phase 3)
-            void onRefresh;
-          }}
+          onClick={onAddAccount}
         >
           <Plus className="size-4" />
           Nueva cuenta
@@ -120,9 +117,7 @@ export function AccountsTab({ accounts, onRefresh }: AccountsTabProps) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => {
-            // TODO: open transfer modal (Phase 3)
-          }}
+          onClick={onTransfer}
         >
           <ArrowLeftRight className="size-4" />
           Transferir

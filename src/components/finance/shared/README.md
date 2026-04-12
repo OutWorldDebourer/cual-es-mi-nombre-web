@@ -12,6 +12,7 @@ Shared presentational components for the Finance dashboard. Pure UI + callbacks,
 - `empty-state.tsx` -- Centered placeholder with icon, title, description, and optional CTA button. Exports: `EmptyState`.
 - `quick-entry.tsx` -- Two collapsible widgets (income green / expense red) with CategoryPills + AmountInput + description + submit. Shows daily running total. Exports: `QuickEntry`, `QuickEntrySubmit`, `TodayTotals`.
 - `onboarding-wizard.tsx` -- 3-step responsive wizard dialog: income type, accounts setup, favorite categories. react-hook-form + zod validation. Exports: `OnboardingWizard`, `OnboardingResult`.
+- `format-utils.ts` -- Shared formatting utilities. Exports: `formatAmount()`.
 
 ## Related
 

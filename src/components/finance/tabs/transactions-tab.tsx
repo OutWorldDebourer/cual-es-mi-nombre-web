@@ -121,6 +121,7 @@ interface TransactionsTabProps {
   categories: FinanceCategory[];
   accounts: FinanceAccount[];
   onRefresh: () => void;
+  onAddTransaction?: () => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -130,6 +131,7 @@ export function TransactionsTab({
   categories,
   accounts: _accounts,
   onRefresh: _onRefresh,
+  onAddTransaction,
 }: TransactionsTabProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -372,6 +374,7 @@ export function TransactionsTab({
           size="lg"
           className="size-14 rounded-full shadow-lg"
           aria-label="Agregar transaccion"
+          onClick={onAddTransaction}
         >
           <Plus className="size-6" />
         </Button>
