@@ -77,19 +77,19 @@ interface ModeConfig {
 const MODE_CONFIGS: Record<BudgetMode, ModeConfig> = {
   fixed: {
     title: "Presupuestos por Monto Fijo",
-    description: "Define un limite maximo de gasto por categoria.",
+    description: "Define un límite máximo de gasto por categoría.",
     icon: Wallet,
     color: "text-blue-600 dark:text-blue-400",
   },
   percentage: {
     title: "Presupuestos por Porcentaje",
-    description: "Asigna un porcentaje de tus ingresos a cada categoria.",
+    description: "Asigna un porcentaje de tus ingresos a cada categoría.",
     icon: Percent,
     color: "text-purple-600 dark:text-purple-400",
   },
   envelope: {
     title: "Sobres (YNAB)",
-    description: "Asigna dinero a sobres y gasta solo lo asignado.",
+    description: "Asigna dinero a sobres y gasta sólo lo asignado.",
     icon: Mail,
     color: "text-emerald-600 dark:text-emerald-400",
   },
@@ -131,7 +131,7 @@ function EnvelopeCard({
               <span className="text-lg shrink-0">{category.icon}</span>
             )}
             <span className="truncate text-sm font-semibold text-foreground">
-              {category?.name ?? "Sin categoria"}
+              {category?.name ?? "Sin categoría"}
             </span>
           </div>
           {isOverspent && (
@@ -324,7 +324,7 @@ export function BudgetsTab({
         <EmptyState
           icon={PiggyBank}
           title="Sin presupuestos"
-          description="Crea tu primer presupuesto para controlar tus gastos por categoria."
+          description="Crea tu primer presupuesto para controlar tus gastos por categoría."
           actionLabel="Agregar presupuesto"
           onAction={handleAddBudget}
         />

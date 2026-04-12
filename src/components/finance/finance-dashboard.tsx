@@ -34,9 +34,9 @@ const TABS = [
   { value: "transactions", label: "Movimientos" },
   { value: "budgets", label: "Presupuestos" },
   { value: "reports", label: "Reportes" },
-  { value: "categories", label: "Categorias" },
+  { value: "categories", label: "Categorías" },
   { value: "accounts", label: "Cuentas" },
-  { value: "settings", label: "Configuracion" },
+  { value: "settings", label: "Configuración" },
 ] as const;
 
 type TabValue = (typeof TABS)[number]["value"];

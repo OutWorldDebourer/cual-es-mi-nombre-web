@@ -387,7 +387,7 @@ export function TransactionsTab({
           description={
             activeFilterCount > 0
               ? "No hay transacciones que coincidan con los filtros seleccionados."
-              : "Registra tu primer ingreso o gasto para verlo aqui."
+              : "Registra tu primer ingreso o gasto para verlo aquí."
           }
           actionLabel={activeFilterCount > 0 ? "Limpiar filtros" : undefined}
           onAction={activeFilterCount > 0 ? resetFilters : undefined}
@@ -399,7 +399,7 @@ export function TransactionsTab({
         <Button
           size="lg"
           className="size-14 rounded-full shadow-lg"
-          aria-label="Agregar transaccion"
+          aria-label="Agregar transacción"
           onClick={onAddTransaction}
         >
           <Plus className="size-6" />

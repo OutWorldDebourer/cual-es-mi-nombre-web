@@ -27,12 +27,12 @@ const TYPE_CONFIG: Record<
 > = {
   expense: {
     title: "Gastos",
-    subtitle: "Categorias para tus gastos diarios",
+    subtitle: "Categorías para tus gastos diarios",
     colorClass: "text-red-600 dark:text-red-400",
   },
   income: {
     title: "Ingresos",
-    subtitle: "Categorias para tus fuentes de ingreso",
+    subtitle: "Categorías para tus fuentes de ingreso",
     colorClass: "text-emerald-600 dark:text-emerald-400",
   },
   transfer: {
@@ -66,9 +66,9 @@ export function CategoriesTab({ categories, onRefresh, onAddCategory, onEditCate
     return (
       <EmptyState
         icon={Tag}
-        title="Sin categorias"
-        description="Crea categorias para organizar tus movimientos financieros."
-        actionLabel="Crear categoria"
+        title="Sin categorías"
+        description="Crea categorías para organizar tus movimientos financieros."
+        actionLabel="Crear categoría"
         onAction={onAddCategory}
       />
     );
@@ -83,7 +83,7 @@ export function CategoriesTab({ categories, onRefresh, onAddCategory, onEditCate
           onClick={onAddCategory}
         >
           <Plus className="size-4" />
-          Nueva categoria
+          Nueva categoría
         </Button>
       </div>
 

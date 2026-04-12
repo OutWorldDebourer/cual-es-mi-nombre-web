@@ -64,7 +64,7 @@ type SettingsForm = z.infer<typeof settingsSchema>;
 // ── Option definitions ─────────────────────────────────────────────────────
 
 const INCOME_TYPE_OPTIONS: Array<{ value: IncomeType; label: string; desc: string }> = [
-  { value: "fixed", label: "Fijo", desc: "Sueldo fijo cada periodo" },
+  { value: "fixed", label: "Fijo", desc: "Sueldo fijo cada período" },
   { value: "variable", label: "Variable", desc: "Freelance, comisiones" },
   { value: "mixed", label: "Mixto", desc: "Base fija + variable" },
 ];
@@ -87,12 +87,12 @@ const BUDGET_MODE_OPTIONS: Array<{ value: BudgetMode; label: string; desc: strin
   {
     value: "fixed",
     label: "Fijo",
-    desc: "Monto maximo fijo por categoria",
+    desc: "Monto máximo fijo por categoría",
   },
   {
     value: "percentage",
     label: "Porcentaje",
-    desc: "% del ingreso por categoria",
+    desc: "% del ingreso por categoría",
   },
   {
     value: "envelope",
@@ -212,7 +212,7 @@ export function SettingsTab({
             <DollarSign className="size-4 text-emerald-600 dark:text-emerald-400" />
             <CardTitle className="text-sm">Perfil de ingresos</CardTitle>
           </div>
-          <CardDescription>Como y cuando recibes tu dinero</CardDescription>
+          <CardDescription>Cómo y cuándo recibes tu dinero</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Income type */}
@@ -275,7 +275,7 @@ export function SettingsTab({
 
           {/* Pay day */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Dia de pago (1-31)</Label>
+            <Label className="text-xs font-medium">Día de pago (1-31)</Label>
             <Controller
               control={control}
               name="payDay"
@@ -301,7 +301,7 @@ export function SettingsTab({
             <PiggyBank className="size-4 text-amber-600 dark:text-amber-400" />
             <CardTitle className="text-sm">Meta de ahorro</CardTitle>
           </div>
-          <CardDescription>Cuanto quieres ahorrar cada periodo</CardDescription>
+          <CardDescription>Cuánto quieres ahorrar cada período</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2">
@@ -485,9 +485,9 @@ function DangerZone({ onConfirmDelete }: { onConfirmDelete: () => void }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminar datos financieros</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta accion eliminara permanentemente todos tus movimientos,
-                cuentas, presupuestos y categorias personalizadas. Las categorias
-                del sistema se mantendran. Esta accion no se puede deshacer.
+                Esta acción eliminará permanentemente todos tus movimientos,
+                cuentas, presupuestos y categorías personalizadas. Las categorías
+                del sistema se mantendrán. Esta acción no se puede deshacer.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

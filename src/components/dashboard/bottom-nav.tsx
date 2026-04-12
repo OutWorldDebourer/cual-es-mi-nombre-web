@@ -15,7 +15,7 @@ interface BottomNavItem {
 const bottomNavItems: BottomNavItem[] = [
   { href: "/dashboard", label: "Inicio", icon: Home },
   { href: "/dashboard/notes", label: "Notas", icon: StickyNote },
-  { href: "/dashboard/reminders", label: "Recordatorios", icon: Bell },
+  { href: "/dashboard/reminders", label: "Recordar", icon: Bell },
   { href: "/dashboard/finance", label: "Finanzas", icon: Wallet },
   { href: "/dashboard/settings", label: "Config", icon: Settings },
 ];

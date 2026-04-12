@@ -39,7 +39,7 @@ const transactionSchema = z.object({
   amount: z.string().min(1, "Monto requerido").refine((v) => parseFloat(v) > 0, {
     message: "Monto debe ser mayor a 0",
   }),
-  categoryId: z.string().min(1, "Categoria requerida"),
+  categoryId: z.string().min(1, "Categoría requerida"),
   description: z.string().optional(),
   accountId: z.string().min(1, "Cuenta requerida"),
   transactionDate: z.string().min(1, "Fecha requerida"),
@@ -205,7 +205,7 @@ export function AddTransactionModal({
 
           {/* Category */}
           <div className="space-y-1.5">
-            <Label>Categoria</Label>
+            <Label>Categoría</Label>
             <CategoryPills
               categories={filteredCategories}
               selected={selectedCategory || null}
@@ -218,7 +218,7 @@ export function AddTransactionModal({
 
           {/* Description */}
           <div className="space-y-1.5">
-            <Label htmlFor="tx-desc">Descripcion (opcional)</Label>
+            <Label htmlFor="tx-desc">Descripción (opcional)</Label>
             <Controller
               control={control}
               name="description"

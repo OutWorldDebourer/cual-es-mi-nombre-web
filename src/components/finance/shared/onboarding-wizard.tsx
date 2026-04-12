@@ -35,7 +35,7 @@ const step2Schema = z.object({
 });
 
 const step3Schema = z.object({
-  categoryIds: z.array(z.string()).min(1, "Selecciona al menos una categoria"),
+  categoryIds: z.array(z.string()).min(1, "Selecciona al menos una categoría"),
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -70,7 +70,7 @@ const ACCOUNT_OPTIONS: Array<{ value: AccountType; label: string; icon: typeof W
   { value: "savings", label: "Ahorros", icon: Wallet },
 ];
 
-const STEPS = ["Tipo de ingreso", "Cuentas", "Categorias"] as const;
+const STEPS = ["Tipo de ingreso", "Cuentas", "Categorías"] as const;
 
 /** 3-step finance onboarding wizard with responsive dialog/drawer. */
 export function OnboardingWizard({
@@ -174,7 +174,7 @@ function Step1({
     <form onSubmit={handleSubmit(onNext)} className="flex flex-col flex-1">
       <div className="space-y-4 overflow-y-auto flex-1 pb-4">
         <p className="text-sm text-muted-foreground">
-          Como recibes tus ingresos principales?
+          ¿Cómo recibes tus ingresos principales?
         </p>
         <div className="grid gap-2">
           {INCOME_OPTIONS.map((opt) => (
@@ -356,7 +356,7 @@ function Step3({
     <form onSubmit={handleSubmit(onFinish)} className="flex flex-col flex-1">
       <div className="space-y-4 overflow-y-auto flex-1 pb-4">
         <p className="text-sm text-muted-foreground">
-          Elige las categorias que mas usas para acceso rapido.
+          Elige las categorías que más usas para acceso rápido.
         </p>
 
         {incomeCategories.length > 0 && (

@@ -127,7 +127,7 @@ function MetricCard({ title, value, icon: Icon, colorClass, bgClass }: MetricCar
         </div>
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{title}</p>
-          <p className={cn("text-lg font-bold tabular-nums truncate", colorClass)}>
+          <p className={cn("text-base font-bold tabular-nums sm:text-lg", colorClass)}>
             {value}
           </p>
         </div>
@@ -356,7 +356,7 @@ export function OverviewTab({
       {chartData.length > 0 ? (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gastos por categoria</CardTitle>
+            <CardTitle className="text-sm font-medium">Gastos por categoría</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mx-auto h-56 w-full max-w-xs">
@@ -399,7 +399,7 @@ export function OverviewTab({
         <EmptyState
           icon={TrendingDown}
           title="Sin gastos en este periodo"
-          description="Registra tu primer gasto para ver el desglose por categoria."
+          description="Registra tu primer gasto para ver el desglose por categoría."
         />
       )}
 
@@ -438,7 +438,7 @@ export function OverviewTab({
       {/* 7. Recent transactions */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Ultimos movimientos</CardTitle>
+          <CardTitle className="text-sm font-medium">Últimos movimientos</CardTitle>
         </CardHeader>
         <CardContent className="px-1">
           {recent.length > 0 ? (
@@ -469,7 +469,7 @@ export function OverviewTab({
           <Button
             size="lg"
             className="size-14 rounded-full shadow-lg"
-            aria-label="Agregar transaccion"
+            aria-label="Agregar transacción"
             onClick={onAddTransaction}
           >
             <Plus className="size-6" />
