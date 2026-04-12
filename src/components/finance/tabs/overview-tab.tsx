@@ -1,0 +1,460 @@
+"use client";
+
+import { useState, useMemo, useCallback } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  PiggyBank,
+  AlertCircle,
+  ArrowRight,
+} from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+import type {
+  FinanceTransaction,
+  FinanceCategory,
+  FinanceAccount,
+  FinanceBudget,
+  FinanceProfile,
+} from "@/types/database";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { QuickEntry } from "@/components/finance/shared/quick-entry";
+import { TransactionRow } from "@/components/finance/shared/transaction-row";
+import { PeriodSelector } from "@/components/finance/shared/period-selector";
+import type { PeriodValue } from "@/components/finance/shared/period-selector";
+import { BudgetProgressBar } from "@/components/finance/shared/budget-progress-bar";
+import { EmptyState } from "@/components/finance/shared/empty-state";
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function formatAmount(n: number): string {
+  return `S/ ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function startOfPeriod(period: PeriodValue, tz: string): Date {
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: tz })
+  );
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+
+  switch (period) {
+    case "day":
+      break;
+    case "week":
+      start.setDate(start.getDate() - start.getDay() + 1); // Monday
+      break;
+    case "biweekly":
+      start.setDate(start.getDate() >= 16 ? 16 : 1);
+      break;
+    case "month":
+      start.setDate(1);
+      break;
+    case "year":
+      start.setMonth(0, 1);
+      break;
+  }
+  return start;
+}
+
+function isToday(dateStr: string, tz: string): boolean {
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: tz })
+  );
+  const d = new Date(dateStr);
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
+
+// ── Donut chart colors ────────────────────────────────────────────────────
+
+const CHART_COLORS = [
+  "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4",
+  "#3b82f6", "#8b5cf6", "#ec4899", "#f43f5e", "#14b8a6",
+  "#a855f7", "#64748b",
+];
+
+interface ChartDatum {
+  name: string;
+  value: number;
+  color: string;
+}
+
+// ── Props ─────────────────────────────────────────────────────────────────
+
+interface OverviewTabProps {
+  transactions: FinanceTransaction[];
+  categories: FinanceCategory[];
+  accounts: FinanceAccount[];
+  budgets: FinanceBudget[];
+  profile: FinanceProfile;
+  timezone: string;
+}
+
+// ── Metric card ───────────────────────────────────────────────────────────
+
+interface MetricCardProps {
+  title: string;
+  value: string;
+  icon: React.ElementType;
+  colorClass: string;
+  bgClass: string;
+}
+
+function MetricCard({ title, value, icon: Icon, colorClass, bgClass }: MetricCardProps) {
+  return (
+    <Card className="gap-2 py-4">
+      <CardContent className="flex items-center gap-3 px-4">
+        <div
+          className={cn(
+            "flex size-10 shrink-0 items-center justify-center rounded-lg",
+            bgClass
+          )}
+        >
+          <Icon className={cn("size-5", colorClass)} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">{title}</p>
+          <p className={cn("text-lg font-bold tabular-nums truncate", colorClass)}>
+            {value}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Custom tooltip ────────────────────────────────────────────────────────
+
+interface DonutPayload {
+  name: string;
+  value: number;
+  color: string;
+}
+
+function DonutTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: DonutPayload }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  return (
+    <div className="rounded-lg border bg-popover px-3 py-2 text-sm shadow-md">
+      <p className="font-medium">{d.name}</p>
+      <p className="tabular-nums text-muted-foreground">{formatAmount(d.value)}</p>
+    </div>
+  );
+}
+
+// ── Component ─────────────────────────────────────────────────────────────
+
+export function OverviewTab({
+  transactions,
+  categories,
+  accounts,
+  budgets,
+  profile,
+  timezone,
+}: OverviewTabProps) {
+  const [period, setPeriod] = useState<PeriodValue>("month");
+
+  // ── Category map for fast lookup ────────────────────────────────────
+  const categoryMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c])),
+    [categories]
+  );
+
+  // ── Filtered transactions by period ─────────────────────────────────
+  const filtered = useMemo(() => {
+    const cutoff = startOfPeriod(period, timezone);
+    return transactions.filter(
+      (t) => !t.deleted_at && new Date(t.transaction_date) >= cutoff
+    );
+  }, [transactions, period, timezone]);
+
+  // ── Hero metrics ────────────────────────────────────────────────────
+  const metrics = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    for (const t of filtered) {
+      if (t.type === "income") income += t.amount;
+      else if (t.type === "expense") expense += t.amount;
+    }
+    const balance = income - expense;
+    const savingsGoal = profile.savings_goal_value ?? 0;
+    const savings = savingsGoal > 0 ? Math.max(balance, 0) : 0;
+    return { income, expense, balance, savings };
+  }, [filtered, profile.savings_goal_value]);
+
+  // ── Today totals for QuickEntry ─────────────────────────────────────
+  const todayTotals = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    for (const t of transactions) {
+      if (t.deleted_at || !isToday(t.transaction_date, timezone)) continue;
+      if (t.type === "income") income += t.amount;
+      else if (t.type === "expense") expense += t.amount;
+    }
+    return { income, expense };
+  }, [transactions, timezone]);
+
+  // ── Pending review count ────────────────────────────────────────────
+  const pendingCount = useMemo(
+    () => transactions.filter((t) => !t.deleted_at && t.status === "pending_review").length,
+    [transactions]
+  );
+
+  // ── Donut chart data (expense by category) ─────────────────────────
+  const chartData = useMemo<ChartDatum[]>(() => {
+    const byCategory = new Map<string, number>();
+    for (const t of filtered) {
+      if (t.type !== "expense" || !t.category_id) continue;
+      byCategory.set(t.category_id, (byCategory.get(t.category_id) ?? 0) + t.amount);
+    }
+    const entries = Array.from(byCategory.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12);
+
+    return entries.map(([catId, value], i) => {
+      const cat = categoryMap.get(catId);
+      return {
+        name: cat?.name ?? "Otro",
+        value,
+        color: cat?.color ?? CHART_COLORS[i % CHART_COLORS.length],
+      };
+    });
+  }, [filtered, categoryMap]);
+
+  // ── Active budgets ──────────────────────────────────────────────────
+  const activeBudgets = useMemo(
+    () => budgets.filter((b) => b.is_active),
+    [budgets]
+  );
+
+  // ── Budget spent amounts (from filtered transactions) ───────────────
+  const budgetSpent = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const t of filtered) {
+      if (t.type !== "expense" || !t.category_id) continue;
+      map.set(t.category_id, (map.get(t.category_id) ?? 0) + t.amount);
+    }
+    return map;
+  }, [filtered]);
+
+  // ── Recent transactions (last 5) ───────────────────────────────────
+  const recent = useMemo(
+    () =>
+      [...transactions]
+        .filter((t) => !t.deleted_at)
+        .sort(
+          (a, b) =>
+            new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime()
+        )
+        .slice(0, 5),
+    [transactions]
+  );
+
+  // ── Quick entry submit handler ──────────────────────────────────────
+  const handleQuickEntry = useCallback(
+    (_entry: { type: string; categoryId: string; amount: number; description: string }) => {
+      // TODO: POST to API then refresh
+    },
+    []
+  );
+
+  // ── Render ──────────────────────────────────────────────────────────
+
+  return (
+    <div className="space-y-6 p-4">
+      {/* 1. Review banner */}
+      {pendingCount > 0 && (
+        <div className="flex items-center justify-between rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 dark:border-yellow-700 dark:bg-yellow-950/30">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="size-4 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-sm text-yellow-800 dark:text-yellow-200">
+              Tienes transacciones por revisar
+            </span>
+            <Badge
+              variant="secondary"
+              className="bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200"
+            >
+              {pendingCount}
+            </Badge>
+          </div>
+          <Button variant="ghost" size="sm" className="gap-1 text-yellow-700 dark:text-yellow-300">
+            Ver
+            <ArrowRight className="size-3.5" />
+          </Button>
+        </div>
+      )}
+
+      {/* 2. Quick Entry */}
+      <QuickEntry
+        categories={categories}
+        onSubmit={handleQuickEntry}
+        todayTotals={todayTotals}
+      />
+
+      {/* 3. Hero metrics — 2x2 grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <MetricCard
+          title="Ingresos"
+          value={formatAmount(metrics.income)}
+          icon={TrendingUp}
+          colorClass="text-emerald-600 dark:text-emerald-400"
+          bgClass="bg-emerald-100 dark:bg-emerald-900/40"
+        />
+        <MetricCard
+          title="Gastos"
+          value={formatAmount(metrics.expense)}
+          icon={TrendingDown}
+          colorClass="text-red-600 dark:text-red-400"
+          bgClass="bg-red-100 dark:bg-red-900/40"
+        />
+        <MetricCard
+          title="Balance"
+          value={formatAmount(metrics.balance)}
+          icon={Wallet}
+          colorClass="text-blue-600 dark:text-blue-400"
+          bgClass="bg-blue-100 dark:bg-blue-900/40"
+        />
+        <MetricCard
+          title="Ahorro"
+          value={formatAmount(metrics.savings)}
+          icon={PiggyBank}
+          colorClass="text-purple-600 dark:text-purple-400"
+          bgClass="bg-purple-100 dark:bg-purple-900/40"
+        />
+      </div>
+
+      {/* 4. Period selector */}
+      <PeriodSelector value={period} onChange={setPeriod} />
+
+      {/* 5. Donut chart — expense by category */}
+      {chartData.length > 0 ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Gastos por categoria</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mx-auto h-56 w-full max-w-xs">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    strokeWidth={0}
+                  >
+                    {chartData.map((d) => (
+                      <Cell key={d.name} fill={d.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<DonutTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Legend */}
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+              {chartData.map((d) => (
+                <div key={d.name} className="flex items-center gap-1.5 text-xs">
+                  <span
+                    className="inline-block size-2.5 rounded-full"
+                    style={{ backgroundColor: d.color }}
+                  />
+                  <span className="text-muted-foreground">{d.name}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <EmptyState
+          icon={TrendingDown}
+          title="Sin gastos en este periodo"
+          description="Registra tu primer gasto para ver el desglose por categoria."
+        />
+      )}
+
+      {/* 6. Budget progress bars */}
+      {activeBudgets.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Presupuestos</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {activeBudgets.map((b) => {
+              const cat = b.category_id ? categoryMap.get(b.category_id) : undefined;
+              const spent = b.category_id ? (budgetSpent.get(b.category_id) ?? 0) : 0;
+              const limit =
+                b.budget_mode === "percentage"
+                  ? ((b.percentage ?? 0) / 100) * metrics.income
+                  : b.budget_mode === "envelope"
+                    ? (b.envelope_assigned ?? 0)
+                    : (b.amount_limit ?? 0);
+
+              return (
+                <BudgetProgressBar
+                  key={b.id}
+                  spent={spent}
+                  limit={limit}
+                  mode={b.budget_mode}
+                  categoryName={cat?.name}
+                  categoryIcon={cat?.icon ?? undefined}
+                />
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 7. Recent transactions */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Ultimos movimientos</CardTitle>
+        </CardHeader>
+        <CardContent className="px-1">
+          {recent.length > 0 ? (
+            <div className="divide-y divide-border">
+              {recent.map((t) => (
+                <TransactionRow
+                  key={t.id}
+                  transaction={t}
+                  category={
+                    t.category_id ? categoryMap.get(t.category_id) : undefined
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Wallet}
+              title="Sin movimientos"
+              description="Registra tu primer ingreso o gasto arriba."
+            />
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

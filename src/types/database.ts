@@ -173,3 +173,106 @@ export interface SubscriptionStatusResponse {
   grace_ends_at: string | null;
   current_period_end: string | null;
 }
+
+// ── Finance Module Types ─────────────────────────────────────────────────
+
+export type IncomeType = "fixed" | "variable" | "mixed";
+export type IncomePeriod = "daily" | "weekly" | "biweekly" | "monthly" | "project";
+export type SavingsGoalType = "none" | "percentage" | "fixed_amount";
+export type BudgetMode = "fixed" | "percentage" | "envelope";
+export type AccountType = "cash" | "bank" | "credit_card" | "savings" | "investment";
+export type TransactionType = "income" | "expense" | "transfer";
+export type CategoryType = "expense" | "income" | "transfer";
+export type TransactionSource = "whatsapp" | "web" | "auto" | "recurring";
+export type TransactionStatus = "confirmed" | "pending_review";
+export type BudgetPeriod = "weekly" | "biweekly" | "monthly" | "yearly";
+
+export interface FinanceProfile {
+  profile_id: string;
+  income_type: IncomeType;
+  income_period: IncomePeriod;
+  fixed_income_amount: number | null;
+  pay_day: number | null;
+  savings_goal_type: SavingsGoalType;
+  savings_goal_value: number | null;
+  budget_mode: BudgetMode;
+  default_currency: string;
+  onboarding_completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinanceCategory {
+  id: string;
+  profile_id: string | null;
+  parent_id: string | null;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  type: CategoryType;
+  sort_order: number;
+  show_in_quick_entry: boolean;
+  usage_count: number;
+  is_system: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinanceAccount {
+  id: string;
+  profile_id: string;
+  name: string;
+  type: AccountType;
+  currency: string;
+  initial_balance: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinanceTransaction {
+  id: string;
+  profile_id: string;
+  account_id: string | null;
+  category_id: string | null;
+  parent_transaction_id: string | null;
+  type: TransactionType;
+  amount: number;
+  description: string | null;
+  transaction_date: string;
+  tags: string[];
+  is_recurring: boolean;
+  recurrence_rule: string | null;
+  source: TransactionSource;
+  status: TransactionStatus;
+  original_message: string | null;
+  confidence: number | null;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinanceBudget {
+  id: string;
+  profile_id: string;
+  category_id: string | null;
+  budget_mode: BudgetMode;
+  amount_limit: number | null;
+  percentage: number | null;
+  envelope_assigned: number | null;
+  period: BudgetPeriod;
+  rollover: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinanceCategoryRule {
+  id: string;
+  profile_id: string;
+  pattern: string;
+  original_category_id: string | null;
+  corrected_category_id: string | null;
+  correction_count: number;
+  created_at: string;
+}
