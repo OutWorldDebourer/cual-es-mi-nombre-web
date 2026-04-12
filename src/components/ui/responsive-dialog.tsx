@@ -53,7 +53,7 @@ function ResponsiveDialogContent({
   if (isMobile) {
     return (
       <DrawerContent>
-        <div className="mx-auto w-full max-w-lg max-h-[85vh] overflow-y-auto px-4 pb-8">
+        <div className="mx-auto flex w-full max-w-lg flex-col max-h-[85vh] overflow-hidden px-4 pb-8">
           {children}
         </div>
       </DrawerContent>

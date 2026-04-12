@@ -121,7 +121,7 @@ export function OnboardingWizard({
         </div>
 
         {/* Step content */}
-        <div className="min-h-[200px]">
+        <div className="min-h-[200px] max-h-[60vh] flex flex-col">
           {step === 0 && (
             <Step1
               defaultValue={step1Data}
@@ -171,31 +171,33 @@ function Step1({
   const selected = watch("incomeType");
 
   return (
-    <form onSubmit={handleSubmit(onNext)} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Como recibes tus ingresos principales?
-      </p>
-      <div className="grid gap-2">
-        {INCOME_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => setValue("incomeType", opt.value)}
-            className={cn(
-              "flex flex-col items-start gap-0.5 rounded-lg border px-4 py-3 text-left transition-all",
-              selected === opt.value
-                ? "border-primary bg-primary/5 ring-1 ring-primary/30 dark:bg-primary/10"
-                : "border-border hover:border-foreground/30 dark:border-input"
-            )}
-          >
-            <span className="text-sm font-medium text-foreground">
-              {opt.label}
-            </span>
-            <span className="text-xs text-muted-foreground">{opt.desc}</span>
-          </button>
-        ))}
+    <form onSubmit={handleSubmit(onNext)} className="flex flex-col flex-1">
+      <div className="space-y-4 overflow-y-auto flex-1 pb-4">
+        <p className="text-sm text-muted-foreground">
+          Como recibes tus ingresos principales?
+        </p>
+        <div className="grid gap-2">
+          {INCOME_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setValue("incomeType", opt.value)}
+              className={cn(
+                "flex flex-col items-start gap-0.5 rounded-lg border px-4 py-3 text-left transition-all",
+                selected === opt.value
+                  ? "border-primary bg-primary/5 ring-1 ring-primary/30 dark:bg-primary/10"
+                  : "border-border hover:border-foreground/30 dark:border-input"
+              )}
+            >
+              <span className="text-sm font-medium text-foreground">
+                {opt.label}
+              </span>
+              <span className="text-xs text-muted-foreground">{opt.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end shrink-0 mt-4">
         <Button type="submit" size="sm">
           Siguiente <ChevronRight className="size-4" />
         </Button>
@@ -240,70 +242,72 @@ function Step2({
   };
 
   return (
-    <form onSubmit={handleSubmit(onNext)} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Configura las cuentas donde manejas tu dinero.
-      </p>
+    <form onSubmit={handleSubmit(onNext)} className="flex flex-col flex-1">
+      <div className="space-y-4 overflow-y-auto flex-1 pb-4">
+        <p className="text-sm text-muted-foreground">
+          Configura las cuentas donde manejas tu dinero.
+        </p>
 
-      <div className="space-y-3 max-h-48 overflow-y-auto">
-        {accounts.map((acc, idx) => (
-          <div key={idx} className="flex items-end gap-2">
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs">Nombre</Label>
-              <Controller
-                control={control}
-                name={`accounts.${idx}.name`}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Mi cuenta" className="h-9 text-sm" />
-                )}
-              />
+        <div className="space-y-3 max-h-48 overflow-y-auto">
+          {accounts.map((acc, idx) => (
+            <div key={idx} className="flex items-end gap-2">
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Nombre</Label>
+                <Controller
+                  control={control}
+                  name={`accounts.${idx}.name`}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Mi cuenta" className="h-9 text-sm" />
+                  )}
+                />
+              </div>
+              <div className="flex gap-1">
+                {ACCOUNT_OPTIONS.map((opt) => {
+                  const OptIcon = opt.icon;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setValue(`accounts.${idx}.type`, opt.value)}
+                      className={cn(
+                        "flex size-9 items-center justify-center rounded-md border transition-all",
+                        acc.type === opt.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      )}
+                      title={opt.label}
+                    >
+                      <OptIcon className="size-4" />
+                    </button>
+                  );
+                })}
+              </div>
+              {accounts.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => removeAccount(idx)}
+                  aria-label="Eliminar cuenta"
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  &times;
+                </Button>
+              )}
             </div>
-            <div className="flex gap-1">
-              {ACCOUNT_OPTIONS.map((opt) => {
-                const OptIcon = opt.icon;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setValue(`accounts.${idx}.type`, opt.value)}
-                    className={cn(
-                      "flex size-9 items-center justify-center rounded-md border transition-all",
-                      acc.type === opt.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:text-foreground"
-                    )}
-                    title={opt.label}
-                  >
-                    <OptIcon className="size-4" />
-                  </button>
-                );
-              })}
-            </div>
-            {accounts.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => removeAccount(idx)}
-                aria-label="Eliminar cuenta"
-                className="text-muted-foreground hover:text-destructive"
-              >
-                &times;
-              </Button>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {errors.accounts?.message && (
+          <p className="text-xs text-destructive">{errors.accounts.message}</p>
+        )}
+
+        <Button type="button" variant="outline" size="xs" onClick={addAccount}>
+          + Agregar cuenta
+        </Button>
       </div>
 
-      {errors.accounts?.message && (
-        <p className="text-xs text-destructive">{errors.accounts.message}</p>
-      )}
-
-      <Button type="button" variant="outline" size="xs" onClick={addAccount}>
-        + Agregar cuenta
-      </Button>
-
-      <ResponsiveDialogFooter>
+      <ResponsiveDialogFooter className="shrink-0 mt-4">
         <Button type="button" variant="ghost" size="sm" onClick={onBack}>
           <ChevronLeft className="size-4" /> Atras
         </Button>
@@ -349,52 +353,54 @@ function Step3({
   const incomeCategories = categories.filter((c) => c.type === "income");
 
   return (
-    <form onSubmit={handleSubmit(onFinish)} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Elige las categorias que mas usas para acceso rapido.
-      </p>
+    <form onSubmit={handleSubmit(onFinish)} className="flex flex-col flex-1">
+      <div className="space-y-4 overflow-y-auto flex-1 pb-4">
+        <p className="text-sm text-muted-foreground">
+          Elige las categorias que mas usas para acceso rapido.
+        </p>
 
-      {incomeCategories.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-            Ingresos
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {incomeCategories.map((cat) => (
-              <CategoryToggle
-                key={cat.id}
-                category={cat}
-                isSelected={selectedIds.includes(cat.id)}
-                onToggle={() => toggleCategory(cat.id)}
-              />
-            ))}
+        {incomeCategories.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Ingresos
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {incomeCategories.map((cat) => (
+                <CategoryToggle
+                  key={cat.id}
+                  category={cat}
+                  isSelected={selectedIds.includes(cat.id)}
+                  onToggle={() => toggleCategory(cat.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {expenseCategories.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
-            Gastos
-          </p>
-          <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-            {expenseCategories.map((cat) => (
-              <CategoryToggle
-                key={cat.id}
-                category={cat}
-                isSelected={selectedIds.includes(cat.id)}
-                onToggle={() => toggleCategory(cat.id)}
-              />
-            ))}
+        {expenseCategories.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
+              Gastos
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {expenseCategories.map((cat) => (
+                <CategoryToggle
+                  key={cat.id}
+                  category={cat}
+                  isSelected={selectedIds.includes(cat.id)}
+                  onToggle={() => toggleCategory(cat.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {errors.categoryIds?.message && (
-        <p className="text-xs text-destructive">{errors.categoryIds.message}</p>
-      )}
+        {errors.categoryIds?.message && (
+          <p className="text-xs text-destructive">{errors.categoryIds.message}</p>
+        )}
+      </div>
 
-      <ResponsiveDialogFooter>
+      <ResponsiveDialogFooter className="shrink-0 mt-4">
         <Button type="button" variant="ghost" size="sm" onClick={onBack}>
           <ChevronLeft className="size-4" /> Atras
         </Button>
