@@ -10,16 +10,10 @@ import type {
   FinanceProfile,
   BudgetPeriod,
 } from "@/types/database";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -82,7 +76,7 @@ interface CreateBudgetModalProps {
   onSubmit: (data: BudgetSubmitData) => Promise<void>;
 }
 
-// ── Period options ──────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────
 
 const PERIOD_OPTIONS: Array<{ value: BudgetPeriod; label: string }> = [
   { value: "weekly", label: "Semanal" },
@@ -90,6 +84,12 @@ const PERIOD_OPTIONS: Array<{ value: BudgetPeriod; label: string }> = [
   { value: "monthly", label: "Mensual" },
   { value: "yearly", label: "Anual" },
 ];
+
+const MODE_LABELS: Record<string, string> = {
+  fixed: "Monto Fijo",
+  percentage: "Porcentaje",
+  envelope: "Sobre",
+};
 
 // ── Component ──────────────────────────────────────────────────────────────
 
@@ -114,6 +114,8 @@ export function CreateBudgetModal({
     handleSubmit,
     control,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
@@ -153,6 +155,9 @@ export function CreateBudgetModal({
     }
   }, [budget, reset, mode]);
 
+  const selectedCategoryId = watch("categoryId");
+  const currentPeriod = watch("period");
+
   const handleFormSubmit = useCallback(
     async (data: BudgetFormData) => {
       const amountLimit =
@@ -188,11 +193,16 @@ export function CreateBudgetModal({
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent>
+      <ResponsiveDialogContent className="sm:max-w-lg">
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>
-            {isEditing ? "Editar presupuesto" : "Crear presupuesto"}
-          </ResponsiveDialogTitle>
+          <div className="flex items-center gap-3">
+            <ResponsiveDialogTitle>
+              {isEditing ? "Editar presupuesto" : "Crear presupuesto"}
+            </ResponsiveDialogTitle>
+            <span className="inline-flex items-center rounded-full bg-[#ff5600]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#ff5600]">
+              {MODE_LABELS[mode] ?? mode}
+            </span>
+          </div>
           <ResponsiveDialogDescription>
             {isEditing
               ? "Modifica los datos del presupuesto."
@@ -202,32 +212,32 @@ export function CreateBudgetModal({
 
         <form
           onSubmit={handleSubmit(handleFormSubmit)}
-          className="space-y-4 py-2"
+          className="space-y-5 py-2"
         >
-          {/* Category */}
-          <div className="space-y-1.5">
-            <Label>Categoria</Label>
-            <Controller
-              control={control}
-              name="categoryId"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Seleccionar categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {expenseCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        <span className="flex items-center gap-2">
-                          {cat.icon && <span>{cat.icon}</span>}
-                          {cat.name}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
+          {/* ── Category pills grid ── */}
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              Categoria
+            </Label>
+            <div className="grid grid-cols-3 gap-2">
+              {expenseCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setValue("categoryId", cat.id)}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-all",
+                    "hover:border-muted-foreground/60",
+                    selectedCategoryId === cat.id
+                      ? "border-[#ff5600] bg-[#ff5600]/10 ring-1 ring-[#ff5600]/20"
+                      : "border-border bg-secondary/50"
+                  )}
+                >
+                  <span className="shrink-0 text-base">{cat.icon ?? "📁"}</span>
+                  <span className="truncate text-xs font-medium">{cat.name}</span>
+                </button>
+              ))}
+            </div>
             {errors.categoryId && (
               <p className="text-xs text-destructive">
                 {errors.categoryId.message}
@@ -235,23 +245,28 @@ export function CreateBudgetModal({
             )}
           </div>
 
-          {/* Amount Limit — fixed mode only */}
+          {/* ── Amount: fixed mode ── */}
           {mode === "fixed" && (
-            <div className="space-y-1.5">
-              <Label htmlFor="budget-amount">Limite de monto</Label>
-              <Controller
-                control={control}
-                name="amountLimit"
-                render={({ field }) => (
-                  <AmountInput
-                    id="budget-amount"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    currency="S/"
-                    size="sm"
-                  />
-                )}
-              />
+            <div className="space-y-2">
+              <div className="rounded-xl border border-border bg-card/50 p-4">
+                <Label className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
+                  Limite mensual
+                </Label>
+                <Controller
+                  control={control}
+                  name="amountLimit"
+                  render={({ field }) => (
+                    <AmountInput
+                      id="budget-amount"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      currency="S/"
+                      size="lg"
+                      className="!text-2xl !font-bold"
+                    />
+                  )}
+                />
+              </div>
               {errors.amountLimit && (
                 <p className="text-xs text-destructive">
                   {errors.amountLimit.message}
@@ -260,23 +275,28 @@ export function CreateBudgetModal({
             </div>
           )}
 
-          {/* Envelope assigned — envelope mode only */}
+          {/* ── Amount: envelope mode ── */}
           {mode === "envelope" && (
-            <div className="space-y-1.5">
-              <Label htmlFor="budget-envelope">Monto a asignar</Label>
-              <Controller
-                control={control}
-                name="envelopeAssigned"
-                render={({ field }) => (
-                  <AmountInput
-                    id="budget-envelope"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    currency="S/"
-                    size="sm"
-                  />
-                )}
-              />
+            <div className="space-y-2">
+              <div className="rounded-xl border border-border bg-card/50 p-4">
+                <Label className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
+                  Monto a asignar
+                </Label>
+                <Controller
+                  control={control}
+                  name="envelopeAssigned"
+                  render={({ field }) => (
+                    <AmountInput
+                      id="budget-envelope"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      currency="S/"
+                      size="lg"
+                      className="!text-2xl !font-bold"
+                    />
+                  )}
+                />
+              </div>
               {errors.envelopeAssigned && (
                 <p className="text-xs text-destructive">
                   {errors.envelopeAssigned.message}
@@ -285,29 +305,33 @@ export function CreateBudgetModal({
             </div>
           )}
 
-          {/* Percentage — percentage mode only */}
+          {/* ── Percentage mode ── */}
           {mode === "percentage" && (
-            <div className="space-y-1.5">
-              <Label htmlFor="budget-pct">Porcentaje del ingreso</Label>
-              <div className="flex items-center gap-2">
-                <Controller
-                  control={control}
-                  name="percentage"
-                  render={({ field }) => (
-                    <Input
-                      id="budget-pct"
-                      type="number"
-                      min={0}
-                      max={100}
-                      step={0.1}
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      placeholder="0"
-                      className="h-9 w-24 text-sm tabular-nums"
-                    />
-                  )}
-                />
-                <span className="text-sm text-muted-foreground">%</span>
+            <div className="space-y-2">
+              <div className="rounded-xl border border-border bg-card/50 p-4">
+                <Label className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
+                  Porcentaje del ingreso
+                </Label>
+                <div className="flex items-baseline gap-2">
+                  <Controller
+                    control={control}
+                    name="percentage"
+                    render={({ field }) => (
+                      <Input
+                        id="budget-pct"
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.1}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        placeholder="0"
+                        className="h-14 w-28 border-none bg-transparent text-2xl font-bold tabular-nums outline-none focus-visible:ring-0"
+                      />
+                    )}
+                  />
+                  <span className="text-2xl font-bold text-muted-foreground">%</span>
+                </div>
               </div>
               {errors.percentage && (
                 <p className="text-xs text-destructive">
@@ -317,67 +341,66 @@ export function CreateBudgetModal({
             </div>
           )}
 
-          {/* Period */}
-          <div className="space-y-1.5">
-            <Label>Periodo</Label>
-            <Controller
-              control={control}
-              name="period"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Seleccionar periodo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PERIOD_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
+          {/* ── Period pill toggle ── */}
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              Periodo
+            </Label>
+            <div className="flex gap-1 rounded-lg bg-secondary p-1">
+              {PERIOD_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setValue("period", value)}
+                  className={cn(
+                    "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                    currentPeriod === value
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Rollover toggle — checkbox since no Switch component available */}
-          <div className="flex items-center gap-3">
-            <Controller
-              control={control}
-              name="rollover"
-              render={({ field }) => (
+          {/* ── Rollover toggle ── */}
+          <Controller
+            control={control}
+            name="rollover"
+            render={({ field }) => (
+              <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Rollover</p>
+                  <p className="text-xs text-muted-foreground">
+                    Acumula saldo no gastado
+                  </p>
+                </div>
                 <button
                   type="button"
                   role="switch"
                   aria-checked={field.value}
                   onClick={() => field.onChange(!field.value)}
-                  className={
-                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent " +
-                    "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring " +
-                    (field.value
-                      ? "bg-primary"
-                      : "bg-muted")
-                  }
+                  className={cn(
+                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent",
+                    "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    field.value ? "bg-[#ff5600]" : "bg-muted"
+                  )}
                 >
                   <span
-                    className={
-                      "pointer-events-none block size-4 rounded-full bg-background shadow-lg ring-0 transition-transform " +
-                      (field.value ? "translate-x-4" : "translate-x-0")
-                    }
+                    className={cn(
+                      "pointer-events-none block size-5 rounded-full bg-white shadow-lg ring-0 transition-transform",
+                      field.value ? "translate-x-5" : "translate-x-0"
+                    )}
                   />
                 </button>
-              )}
-            />
-            <div>
-              <Label className="cursor-pointer">Rollover</Label>
-              <p className="text-xs text-muted-foreground">
-                Acumular saldo no gastado al siguiente periodo
-              </p>
-            </div>
-          </div>
+              </div>
+            )}
+          />
 
-          {/* Footer */}
-          <ResponsiveDialogFooter>
+          {/* ── Footer ── */}
+          <ResponsiveDialogFooter className="gap-2 pt-2">
             <Button
               type="button"
               variant="ghost"
@@ -386,7 +409,12 @@ export function CreateBudgetModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" size="sm" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              className="bg-[#ff5600] text-white hover:bg-[#e04d00]"
+            >
               {isEditing ? "Actualizar" : "Crear"}
             </Button>
           </ResponsiveDialogFooter>
