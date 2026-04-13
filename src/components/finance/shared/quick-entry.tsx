@@ -52,12 +52,12 @@ const FLASH_DURATION_MS = 1500;
 const palette = {
   income: {
     accent: "#00da00",
-    emoji: "\uD83D\uDCB0",
-    title: "Registro R\u00e1pido de Ingresos",
-    prompt: "\u00bfCu\u00e1nto ganaste hoy?",
+    emoji: "💰",
+    title: "Registro Rápido de Ingresos",
+    prompt: "¿Cuánto ganaste hoy?",
     btnLabel: "Registrar",
-    flashMsg: "\u2705 Ingreso registrado!",
-    waHint: "Tip: tambi\u00e9n puedes enviar por WhatsApp \u2018gan\u00e9 150 en ventas\u2019",
+    flashMsg: "✅ Ingreso registrado!",
+    waHint: "Tip: también puedes enviar por WhatsApp 'gané 150 en ventas'",
     borderClass: "border-l-[3px] border-l-[#00da00]",
     btnClass: "bg-[#00da00] hover:bg-[#00c200] text-black",
     totalClass: "text-[#00da00]",
@@ -66,12 +66,12 @@ const palette = {
   },
   expense: {
     accent: "#ff2067",
-    emoji: "\uD83D\uDCB8",
-    title: "Registro R\u00e1pido de Gastos",
-    prompt: "\u00bfCu\u00e1nto gastaste?",
+    emoji: "💸",
+    title: "Registro Rápido de Gastos",
+    prompt: "¿Cuánto gastaste?",
     btnLabel: "Registrar",
-    flashMsg: "\u2705 Gasto registrado!",
-    waHint: "Tip: tambi\u00e9n puedes enviar por WhatsApp \u2018gast\u00e9 30 en almuerzo\u2019",
+    flashMsg: "✅ Gasto registrado!",
+    waHint: "Tip: también puedes enviar por WhatsApp 'gasté 30 en almuerzo'",
     borderClass: "border-l-[3px] border-l-[#ff2067]",
     btnClass: "bg-[#ff2067] hover:bg-[#e61b5c] text-white",
     totalClass: "text-[#ff2067]",
@@ -222,7 +222,7 @@ function EntryWidget({ type, categories, todayTotal, onSubmit }: EntryWidgetProp
               />
             ) : (
               <p className="text-xs text-muted-foreground">
-                No hay categor\u00edas de {isIncome ? "ingreso" : "gasto"} configuradas.
+                No hay categorías de {isIncome ? "ingreso" : "gasto"} configuradas.
               </p>
             )}
 
@@ -240,7 +240,7 @@ function EntryWidget({ type, categories, todayTotal, onSubmit }: EntryWidgetProp
                   type="button"
                   onClick={() => setCategoryId(null)}
                   className="ml-auto rounded-full p-0.5 hover:bg-muted"
-                  aria-label="Quitar categor\u00eda"
+                  aria-label="Quitar categoría"
                 >
                   <X className="size-3" />
                 </button>
@@ -255,7 +255,7 @@ function EntryWidget({ type, categories, todayTotal, onSubmit }: EntryWidgetProp
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Plus className="size-3" />
-                Agregar descripci\u00f3n (opcional)
+                Agregar descripción (opcional)
               </button>
             ) : (
               <Input
