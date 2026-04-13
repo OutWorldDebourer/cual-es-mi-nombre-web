@@ -154,7 +154,7 @@ export function TransactionRow({
           <Button
             variant="ghost"
             size="icon-xs"
-            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="shrink-0 text-muted-foreground/50 hover:text-foreground transition-colors"
             aria-label="Acciones"
           >
             <MoreHorizontal className="size-4" />

@@ -81,6 +81,7 @@ export function FinanceDashboard({
   // ── Modal state ────────────────────────────────────────────────────────
 
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<FinanceTransaction | null>(null);
   const [showEditCategory, setShowEditCategory] = useState(false);
   const [editingCategory, setEditingCategory] = useState<FinanceCategory | null>(null);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
@@ -230,7 +231,18 @@ export function FinanceDashboard({
             categories={categories}
             accounts={accounts}
             onRefresh={() => router.refresh()}
-            onAddTransaction={() => setShowAddTransaction(true)}
+            onAddTransaction={() => {
+              setEditingTransaction(null);
+              setShowAddTransaction(true);
+            }}
+            onEditTransaction={(id) => {
+              const tx = transactions.find((t) => t.id === id) ?? null;
+              setEditingTransaction(tx);
+              setShowAddTransaction(true);
+            }}
+            onDeleteTransaction={(id) => {
+              mutations.deleteTransaction(id);
+            }}
           />
         </TabsContent>
 
@@ -298,20 +310,36 @@ export function FinanceDashboard({
 
       <AddTransactionModal
         open={showAddTransaction}
-        onOpenChange={setShowAddTransaction}
+        onOpenChange={(open) => {
+          setShowAddTransaction(open);
+          if (!open) setEditingTransaction(null);
+        }}
         categories={categories}
         accounts={accounts}
-        onSubmit={(data) =>
-          mutations.createTransaction({
-            type: data.type,
-            amount: data.amount,
-            categoryId: data.categoryId,
-            accountId: data.accountId,
-            description: data.description,
-            transactionDate: data.transactionDate,
-            tags: data.tags,
-          })
-        }
+        transaction={editingTransaction}
+        onSubmit={(data) => {
+          if (editingTransaction) {
+            mutations.updateTransaction(editingTransaction.id, {
+              type: data.type,
+              amount: data.amount,
+              category_id: data.categoryId,
+              account_id: data.accountId,
+              description: data.description,
+              transaction_date: data.transactionDate,
+              tags: data.tags,
+            });
+          } else {
+            mutations.createTransaction({
+              type: data.type,
+              amount: data.amount,
+              categoryId: data.categoryId,
+              accountId: data.accountId,
+              description: data.description,
+              transactionDate: data.transactionDate,
+              tags: data.tags,
+            });
+          }
+        }}
       />
 
       <EditCategoryModal

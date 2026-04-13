@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +8,7 @@ import { Plus, Minus } from "lucide-react";
 import type {
   FinanceCategory,
   FinanceAccount,
+  FinanceTransaction,
   TransactionType,
 } from "@/types/database";
 import { cn } from "@/lib/utils";
@@ -64,6 +65,8 @@ interface AddTransactionModalProps {
   categories: FinanceCategory[];
   accounts: FinanceAccount[];
   onSubmit: (data: AddTransactionData) => void;
+  /** When provided, modal enters edit mode with pre-filled values. */
+  transaction?: FinanceTransaction | null;
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -89,7 +92,14 @@ export function AddTransactionModal({
   categories,
   accounts,
   onSubmit,
+  transaction,
 }: AddTransactionModalProps) {
+  const isEditMode = !!transaction;
+
+  // TransactionType includes "transfer" but this form only handles income/expense
+  const resolveFormType = (t?: string | null): "income" | "expense" =>
+    t === "income" ? "income" : "expense";
+
   const {
     handleSubmit,
     control,
@@ -100,15 +110,30 @@ export function AddTransactionModal({
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      type: "expense",
-      amount: "",
-      categoryId: "",
-      description: "",
-      accountId: accounts[0]?.id ?? "",
-      transactionDate: todayISO(),
-      tags: "",
+      type: resolveFormType(transaction?.type),
+      amount: transaction ? String(transaction.amount) : "",
+      categoryId: transaction?.category_id ?? "",
+      description: transaction?.description ?? "",
+      accountId: transaction?.account_id ?? accounts[0]?.id ?? "",
+      transactionDate: transaction?.transaction_date?.slice(0, 10) ?? todayISO(),
+      tags: transaction?.tags?.join(", ") ?? "",
     },
   });
+
+  // Reset form values when modal opens or transaction changes
+  useEffect(() => {
+    if (open) {
+      reset({
+        type: resolveFormType(transaction?.type),
+        amount: transaction ? String(transaction.amount) : "",
+        categoryId: transaction?.category_id ?? "",
+        description: transaction?.description ?? "",
+        accountId: transaction?.account_id ?? accounts[0]?.id ?? "",
+        transactionDate: transaction?.transaction_date?.slice(0, 10) ?? todayISO(),
+        tags: transaction?.tags?.join(", ") ?? "",
+      });
+    }
+  }, [open, transaction, accounts, reset]);
 
   const txType = watch("type");
   const selectedCategory = watch("categoryId");
@@ -144,9 +169,13 @@ export function AddTransactionModal({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Nuevo movimiento</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>
+            {isEditMode ? "Editar movimiento" : "Nuevo movimiento"}
+          </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Registra un ingreso o gasto manualmente.
+            {isEditMode
+              ? "Modifica los datos del movimiento."
+              : "Registra un ingreso o gasto manualmente."}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -305,7 +334,7 @@ export function AddTransactionModal({
               Cancelar
             </Button>
             <Button type="submit" size="sm" disabled={isSubmitting}>
-              Guardar
+              {isEditMode ? "Actualizar" : "Guardar"}
             </Button>
           </ResponsiveDialogFooter>
         </form>

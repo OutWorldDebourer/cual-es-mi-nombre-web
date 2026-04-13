@@ -122,6 +122,8 @@ interface TransactionsTabProps {
   accounts: FinanceAccount[];
   onRefresh: () => void;
   onAddTransaction?: () => void;
+  onEditTransaction?: (id: string) => void;
+  onDeleteTransaction?: (id: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -132,6 +134,8 @@ export function TransactionsTab({
   accounts: _accounts,
   onRefresh: _onRefresh,
   onAddTransaction,
+  onEditTransaction,
+  onDeleteTransaction,
 }: TransactionsTabProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -354,6 +358,8 @@ export function TransactionsTab({
                           ? categoryMap.get(t.category_id)
                           : undefined
                       }
+                      onEdit={onEditTransaction}
+                      onDelete={onDeleteTransaction}
                     />
                   ))}
                 </CardContent>
