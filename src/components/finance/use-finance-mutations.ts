@@ -207,6 +207,40 @@ export function useFinanceMutations(onSuccess: () => void) {
     [onSuccess]
   );
 
+  const updateCategory = useCallback(
+    async (id: string, data: Partial<CreateCategoryInput>) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("finance_categories")
+        .update(data)
+        .eq("id", id);
+      if (error) {
+        toast.error("Error al actualizar categoria");
+        throw error;
+      }
+      toast.success("Categoria actualizada");
+      onSuccess();
+    },
+    [onSuccess]
+  );
+
+  const deleteCategory = useCallback(
+    async (id: string) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("finance_categories")
+        .delete()
+        .eq("id", id);
+      if (error) {
+        toast.error("Error al eliminar categoria");
+        throw error;
+      }
+      toast.success("Categoria eliminada");
+      onSuccess();
+    },
+    [onSuccess]
+  );
+
   const transferBetweenAccounts = useCallback(
     async (data: TransferInput) => {
       const supabase = createClient();
@@ -251,6 +285,8 @@ export function useFinanceMutations(onSuccess: () => void) {
     updateBudget,
     createAccount,
     createCategory,
+    updateCategory,
+    deleteCategory,
     transferBetweenAccounts,
   } as const;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Lock, Pencil, Trash2, Plus, Tag } from "lucide-react";
+import { Pencil, Trash2, Plus, Tag } from "lucide-react";
 import type { FinanceCategory, CategoryType } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,9 +195,6 @@ function CategoryCard({
             <span className="truncate text-sm font-medium text-foreground">
               {category.name}
             </span>
-            {category.is_system && (
-              <Lock className="size-3 shrink-0 text-muted-foreground" />
-            )}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             {/* Color dot */}
@@ -221,29 +218,27 @@ function CategoryCard({
           </div>
         </div>
 
-        {/* Actions (non-system only) */}
-        {!category.is_system && (
-          <div className="flex shrink-0 gap-1">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={handleEdit}
-              aria-label={`Editar ${category.name}`}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Pencil className="size-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={handleDelete}
-              aria-label={`Eliminar ${category.name}`}
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          </div>
-        )}
+        {/* Actions */}
+        <div className="flex shrink-0 gap-1">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={handleEdit}
+            aria-label={`Editar ${category.name}`}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={handleDelete}
+            aria-label={`Eliminar ${category.name}`}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

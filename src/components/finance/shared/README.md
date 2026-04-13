@@ -10,7 +10,7 @@ Shared presentational components for the Finance dashboard. Pure UI + callbacks,
 - `category-pills.tsx` -- Horizontal scrollable pill list with overflow dropdown. Shows icon + name + color dot per category. Exports: `CategoryPills`.
 - `transaction-row.tsx` -- Single transaction list item with category icon, amount color-coding, source badge (WA/Web/Auto/Rec), review badge, and 3-dot action menu. Exports: `TransactionRow`.
 - `empty-state.tsx` -- Centered placeholder with icon, title, description, and optional CTA button. Exports: `EmptyState`.
-- `quick-entry.tsx` -- Two collapsible widgets (income green / expense red) with CategoryPills + AmountInput + description + submit. Shows daily running total. Exports: `QuickEntry`, `QuickEntrySubmit`, `TodayTotals`.
+- `quick-entry.tsx` -- Two side-by-side card widgets with colored left border (#00da00 income / #ff2067 expense). Expandable trigger with emoji, title, today total. Body: prompt, amount+register button row, CategoryPills, selected indicator, description toggle, WhatsApp hint, success flash overlay. Exports: `QuickEntry`, `QuickEntrySubmit`, `TodayTotals`.
 - `onboarding-wizard.tsx` -- 3-step responsive wizard dialog: income type, accounts setup, favorite categories. react-hook-form + zod validation. Exports: `OnboardingWizard`, `OnboardingResult`.
 - `format-utils.ts` -- Shared formatting utilities. Exports: `formatAmount()`.
 

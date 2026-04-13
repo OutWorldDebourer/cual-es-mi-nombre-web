@@ -208,6 +208,7 @@ export function FinanceDashboard({
               profile={profile}
               timezone={timezone}
               onAddTransaction={() => setShowAddTransaction(true)}
+              onTabChange={handleTabChange}
               onQuickEntry={(data) =>
                 mutations.createTransaction({
                   type: data.type as "income" | "expense",
@@ -267,14 +268,8 @@ export function FinanceDashboard({
               setEditingCategory(cat);
               setShowEditCategory(true);
             }}
-            onDeleteCategory={async (categoryId) => {
-              const { createClient } = await import("@/lib/supabase/client");
-              const supabase = createClient();
-              await supabase
-                .from("finance_categories")
-                .delete()
-                .eq("id", categoryId);
-              router.refresh();
+            onDeleteCategory={(categoryId) => {
+              mutations.deleteCategory(categoryId);
             }}
           />
         </TabsContent>
@@ -323,14 +318,23 @@ export function FinanceDashboard({
         open={showEditCategory}
         onOpenChange={setShowEditCategory}
         category={editingCategory}
-        onSubmit={(data) =>
-          mutations.createCategory({
-            name: data.name,
-            icon: data.icon,
-            color: data.color,
-            type: data.type,
-          })
-        }
+        onSubmit={(data) => {
+          if (editingCategory) {
+            mutations.updateCategory(editingCategory.id, {
+              name: data.name,
+              icon: data.icon,
+              color: data.color,
+              type: data.type,
+            });
+          } else {
+            mutations.createCategory({
+              name: data.name,
+              icon: data.icon,
+              color: data.color,
+              type: data.type,
+            });
+          }
+        }}
       />
 
       <CreateAccountModal

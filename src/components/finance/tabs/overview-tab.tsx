@@ -5,7 +5,6 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-  PiggyBank,
   AlertCircle,
   ArrowRight,
   Plus,
@@ -100,38 +99,71 @@ interface OverviewTabProps {
   profile: FinanceProfile;
   timezone: string;
   onAddTransaction?: () => void;
-  onQuickEntry?: (data: { type: string; amount: number; categoryId: string; description?: string }) => void;
+  onQuickEntry?: (data: {
+    type: string;
+    amount: number;
+    categoryId: string;
+    description?: string;
+  }) => void;
+  onTabChange?: (tab: string) => void;
 }
 
-// ── Metric card ───────────────────────────────────────────────────────────
+// ── Metric card (mockup design) ──────────────────────────────────────────
 
 interface MetricCardProps {
   title: string;
   value: string;
   icon: React.ElementType;
-  colorClass: string;
-  bgClass: string;
+  iconColor?: string;
+  valueColor?: string;
+  subText?: string;
+  changeBadge?: { text: string; direction: "up" | "down" };
 }
 
-function MetricCard({ title, value, icon: Icon, colorClass, bgClass }: MetricCardProps) {
+function MetricCard({
+  title,
+  value,
+  icon: Icon,
+  iconColor,
+  valueColor,
+  subText,
+  changeBadge,
+}: MetricCardProps) {
   return (
-    <Card className="gap-2 py-4">
-      <CardContent className="flex items-center gap-3 px-4">
-        <div
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-lg",
-            bgClass
-          )}
-        >
-          <Icon className={cn("size-5", colorClass)} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{title}</p>
-          <p className={cn("text-base font-bold tabular-nums sm:text-lg", colorClass)}>
-            {value}
-          </p>
-        </div>
-      </CardContent>
+    <Card
+      className={cn(
+        "p-5 transition-all duration-200",
+        "hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.3)]"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] text-muted-foreground">{title}</span>
+        <Icon className="size-4" style={iconColor ? { color: iconColor } : undefined} />
+      </div>
+      <p
+        className="mt-2 text-[32px] font-bold leading-none tracking-tight tabular-nums"
+        style={valueColor ? { color: valueColor, letterSpacing: "-1px" } : { letterSpacing: "-1px" }}
+      >
+        {value}
+      </p>
+      <div className="mt-2 flex items-center gap-2">
+        {changeBadge && (
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+              changeBadge.direction === "up"
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-red-500/20 text-red-400"
+            )}
+          >
+            {changeBadge.direction === "up" ? "+" : ""}
+            {changeBadge.text}
+          </span>
+        )}
+        {subText && (
+          <span className="text-xs text-muted-foreground">{subText}</span>
+        )}
+      </div>
     </Card>
   );
 }
@@ -161,6 +193,26 @@ function DonutTooltip({
   );
 }
 
+// ── Stagger animation styles ─────────────────────────────────────────────
+
+const staggerStyle = `
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger > * {
+  animation: fadeInUp 0.3s ease-out both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(6) { animation-delay: 300ms; }
+.stagger > *:nth-child(7) { animation-delay: 360ms; }
+.stagger > *:nth-child(8) { animation-delay: 420ms; }
+`;
+
 // ── Component ─────────────────────────────────────────────────────────────
 
 export function OverviewTab({
@@ -172,6 +224,7 @@ export function OverviewTab({
   timezone,
   onAddTransaction,
   onQuickEntry,
+  onTabChange,
 }: OverviewTabProps) {
   const [period, setPeriod] = useState<PeriodValue>("month");
 
@@ -198,10 +251,10 @@ export function OverviewTab({
       else if (t.type === "expense") expense += t.amount;
     }
     const balance = income - expense;
-    const savingsGoal = profile.savings_goal_value ?? 0;
-    const savings = savingsGoal > 0 ? Math.max(balance, 0) : 0;
-    return { income, expense, balance, savings };
-  }, [filtered, profile.savings_goal_value]);
+    const available = income - expense;
+    const incomePercent = income > 0 ? ((available / income) * 100).toFixed(1) : "0.0";
+    return { income, expense, balance, available, incomePercent };
+  }, [filtered]);
 
   // ── Today totals for QuickEntry ─────────────────────────────────────
   const todayTotals = useMemo(() => {
@@ -287,195 +340,250 @@ export function OverviewTab({
   // ── Render ──────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 p-4">
-      {/* 1. Review banner */}
-      {pendingCount > 0 && (
-        <div className="flex items-center justify-between rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 dark:border-yellow-700 dark:bg-yellow-950/30">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="size-4 text-yellow-600 dark:text-yellow-400" />
-            <span className="text-sm text-yellow-800 dark:text-yellow-200">
-              Tienes transacciones por revisar
-            </span>
-            <Badge
-              variant="secondary"
-              className="bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200"
+    <>
+      <style>{staggerStyle}</style>
+      <div className="stagger space-y-6 p-4">
+        {/* 1. Review banner */}
+        {pendingCount > 0 && (
+          <div className="flex items-center justify-between rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 dark:border-yellow-700 dark:bg-yellow-950/30">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="size-4 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-sm text-yellow-800 dark:text-yellow-200">
+                Tienes transacciones por revisar
+              </span>
+              <Badge
+                variant="secondary"
+                className="bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200"
+              >
+                {pendingCount}
+              </Badge>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 text-yellow-700 dark:text-yellow-300"
             >
-              {pendingCount}
-            </Badge>
+              Ver
+              <ArrowRight className="size-3.5" />
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" className="gap-1 text-yellow-700 dark:text-yellow-300">
-            Ver
-            <ArrowRight className="size-3.5" />
-          </Button>
+        )}
+
+        {/* 2. Quick Entry */}
+        <QuickEntry
+          categories={categories}
+          onSubmit={handleQuickEntry}
+          todayTotals={todayTotals}
+        />
+
+        {/* 3. Hero metrics — 4-column grid (mockup) */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            title="Balance Total"
+            value={formatAmount(metrics.balance)}
+            icon={Wallet}
+            subText="Balance del periodo"
+          />
+          <MetricCard
+            title="Ingresos del Mes"
+            value={formatAmount(metrics.income)}
+            icon={TrendingUp}
+            iconColor="#00da00"
+            valueColor="#00da00"
+            subText="Total ingresos"
+          />
+          <MetricCard
+            title="Gastos del Mes"
+            value={formatAmount(metrics.expense)}
+            icon={TrendingDown}
+            iconColor="#ef4444"
+            valueColor="#ef4444"
+            subText="Total gastos"
+          />
+          <MetricCard
+            title="Disponible"
+            value={formatAmount(metrics.available)}
+            icon={Wallet}
+            valueColor="#ff5600"
+            subText={`${metrics.incomePercent}% de ingresos`}
+          />
         </div>
-      )}
 
-      {/* 2. Quick Entry */}
-      <QuickEntry
-        categories={categories}
-        onSubmit={handleQuickEntry}
-        todayTotals={todayTotals}
-      />
+        {/* 4. Period selector — between metrics and charts */}
+        <div className="flex items-center justify-between">
+          <PeriodSelector value={period} onChange={setPeriod} />
+        </div>
 
-      {/* 3. Hero metrics — 2x2 grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <MetricCard
-          title="Ingresos"
-          value={formatAmount(metrics.income)}
-          icon={TrendingUp}
-          colorClass="text-emerald-600 dark:text-emerald-400"
-          bgClass="bg-emerald-100 dark:bg-emerald-900/40"
-        />
-        <MetricCard
-          title="Gastos"
-          value={formatAmount(metrics.expense)}
-          icon={TrendingDown}
-          colorClass="text-red-600 dark:text-red-400"
-          bgClass="bg-red-100 dark:bg-red-900/40"
-        />
-        <MetricCard
-          title="Balance"
-          value={formatAmount(metrics.balance)}
-          icon={Wallet}
-          colorClass="text-blue-600 dark:text-blue-400"
-          bgClass="bg-blue-100 dark:bg-blue-900/40"
-        />
-        <MetricCard
-          title="Ahorro"
-          value={formatAmount(metrics.savings)}
-          icon={PiggyBank}
-          colorClass="text-purple-600 dark:text-purple-400"
-          bgClass="bg-purple-100 dark:bg-purple-900/40"
-        />
-      </div>
-
-      {/* 4. Period selector */}
-      <PeriodSelector value={period} onChange={setPeriod} />
-
-      {/* 5. Donut chart — expense by category */}
-      {chartData.length > 0 ? (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gastos por categoría</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mx-auto h-56 w-full max-w-xs">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    strokeWidth={0}
-                  >
-                    {chartData.map((d) => (
-                      <Cell key={d.name} fill={d.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<DonutTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Legend */}
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-              {chartData.map((d) => (
-                <div key={d.name} className="flex items-center gap-1.5 text-xs">
-                  <span
-                    className="inline-block size-2.5 rounded-full"
-                    style={{ backgroundColor: d.color }}
-                  />
-                  <span className="text-muted-foreground">{d.name}</span>
+        {/* 5. Charts row — side by side (mockup) */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* 5a. Donut chart — expense by category */}
+          {chartData.length > 0 ? (
+            <Card
+              className={cn(
+                "transition-all duration-200",
+                "hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.3)]"
+              )}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Gastos por categoría</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mx-auto h-56 w-full max-w-xs">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={2}
+                        strokeWidth={0}
+                      >
+                        {chartData.map((d) => (
+                          <Cell key={d.name} fill={d.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<DonutTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <EmptyState
-          icon={TrendingDown}
-          title="Sin gastos en este periodo"
-          description="Registra tu primer gasto para ver el desglose por categoría."
-        />
-      )}
-
-      {/* 6. Budget progress bars */}
-      {activeBudgets.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Presupuestos</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {activeBudgets.map((b) => {
-              const cat = b.category_id ? categoryMap.get(b.category_id) : undefined;
-              const spent = b.category_id ? (budgetSpent.get(b.category_id) ?? 0) : 0;
-              const limit =
-                b.budget_mode === "percentage"
-                  ? ((b.percentage ?? 0) / 100) * metrics.income
-                  : b.budget_mode === "envelope"
-                    ? (b.envelope_assigned ?? 0)
-                    : (b.amount_limit ?? 0);
-
-              return (
-                <BudgetProgressBar
-                  key={b.id}
-                  spent={spent}
-                  limit={limit}
-                  mode={b.budget_mode}
-                  categoryName={cat?.name}
-                  categoryIcon={cat?.icon ?? undefined}
-                />
-              );
-            })}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 7. Recent transactions */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Últimos movimientos</CardTitle>
-        </CardHeader>
-        <CardContent className="px-1">
-          {recent.length > 0 ? (
-            <div className="divide-y divide-border">
-              {recent.map((t) => (
-                <TransactionRow
-                  key={t.id}
-                  transaction={t}
-                  category={
-                    t.category_id ? categoryMap.get(t.category_id) : undefined
-                  }
-                />
-              ))}
-            </div>
+                {/* Legend */}
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                  {chartData.map((d) => (
+                    <div key={d.name} className="flex items-center gap-1.5 text-xs">
+                      <span
+                        className="inline-block size-2.5 rounded-full"
+                        style={{ backgroundColor: d.color }}
+                      />
+                      <span className="text-muted-foreground">{d.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <EmptyState
-              icon={Wallet}
-              title="Sin movimientos"
-              description="Registra tu primer ingreso o gasto arriba."
+              icon={TrendingDown}
+              title="Sin gastos en este periodo"
+              description="Registra tu primer gasto para ver el desglose por categoría."
             />
           )}
-        </CardContent>
-      </Card>
 
-      {/* 8. Floating action button */}
-      {onAddTransaction && (
-        <div className="fixed bottom-20 right-6 z-40 md:bottom-6">
-          <Button
-            size="lg"
-            className="size-14 rounded-full shadow-lg"
-            aria-label="Agregar transacción"
-            onClick={onAddTransaction}
-          >
-            <Plus className="size-6" />
-          </Button>
+          {/* 5b. Budget progress bars */}
+          {activeBudgets.length > 0 ? (
+            <Card
+              className={cn(
+                "transition-all duration-200",
+                "hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.3)]"
+              )}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Presupuestos</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {activeBudgets.map((b) => {
+                  const cat = b.category_id ? categoryMap.get(b.category_id) : undefined;
+                  const spent = b.category_id ? (budgetSpent.get(b.category_id) ?? 0) : 0;
+                  const limit =
+                    b.budget_mode === "percentage"
+                      ? ((b.percentage ?? 0) / 100) * metrics.income
+                      : b.budget_mode === "envelope"
+                        ? (b.envelope_assigned ?? 0)
+                        : (b.amount_limit ?? 0);
+
+                  return (
+                    <BudgetProgressBar
+                      key={b.id}
+                      spent={spent}
+                      limit={limit}
+                      mode={b.budget_mode}
+                      categoryName={cat?.name}
+                      categoryIcon={cat?.icon ?? undefined}
+                    />
+                  );
+                })}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card
+              className={cn(
+                "transition-all duration-200",
+                "hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.3)]"
+              )}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Presupuestos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EmptyState
+                  icon={Wallet}
+                  title="Sin presupuestos activos"
+                  description="Crea un presupuesto para controlar tus gastos."
+                />
+              </CardContent>
+            </Card>
+          )}
         </div>
-      )}
-    </div>
+
+        {/* 6. Recent transactions */}
+        <Card
+          className={cn(
+            "transition-all duration-200",
+            "hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.3)]"
+          )}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Últimos movimientos</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => onTabChange?.("transactions")}
+            >
+              Ver todas
+              <ArrowRight className="size-3" />
+            </Button>
+          </CardHeader>
+          <CardContent className="px-1">
+            {recent.length > 0 ? (
+              <div className="divide-y divide-border">
+                {recent.map((t) => (
+                  <TransactionRow
+                    key={t.id}
+                    transaction={t}
+                    category={
+                      t.category_id ? categoryMap.get(t.category_id) : undefined
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={Wallet}
+                title="Sin movimientos"
+                description="Registra tu primer ingreso o gasto arriba."
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 7. Floating action button */}
+        {onAddTransaction && (
+          <div className="fixed bottom-20 right-6 z-40 md:bottom-6">
+            <Button
+              size="lg"
+              className="size-14 rounded-full shadow-lg"
+              aria-label="Agregar transacción"
+              onClick={onAddTransaction}
+            >
+              <Plus className="size-6" />
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

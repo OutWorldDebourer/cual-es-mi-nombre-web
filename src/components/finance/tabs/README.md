@@ -4,7 +4,7 @@ Tab content panels for the Finance dashboard. Each file is a "use client" compon
 
 ## Files
 
-- `overview-tab.tsx` -- Main dashboard view: review banner, QuickEntry, 4 hero metric cards (income/expense/balance/savings), PeriodSelector, Recharts donut (expense by category), budget progress bars, last 5 transactions. Exports: `OverviewTab`.
+- `overview-tab.tsx` -- Main dashboard view: review banner, QuickEntry, 4 metric cards (balance/income/expense/available) in 4-col grid with hover effects and stagger animation, PeriodSelector, side-by-side charts row (Recharts donut + budget progress), last 5 transactions with "Ver todas" link. Exports: `OverviewTab`.
 - `transactions-tab.tsx` -- Full transaction list with filter bar (status/type/category pills), date-grouped TransactionRow items, "Cargar mas" pagination, empty state, floating "+" FAB. Exports: `TransactionsTab`.
 - `budgets-tab.tsx` -- Budget management with 3 mode UIs: fixed (progress bars), percentage (income reference + allocation pie chart + bars), envelope (Por Asignar hero + envelope cards with Asignar/Quitar). Exports: `BudgetsTab`.
 - `reports-tab.tsx` -- Financial reports: period selector, category donut chart, monthly bar comparison, daily net trend line, savings rate gauge. All data computed client-side from transactions prop. Exports: `ReportsTab`.
