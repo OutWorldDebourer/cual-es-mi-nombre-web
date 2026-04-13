@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Minus } from "lucide-react";
+import { Check } from "lucide-react";
 import type {
   FinanceCategory,
   FinanceAccount,
@@ -83,6 +83,25 @@ function parseTags(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+// ── Type pill config ────────────────────────────────────────────────────────
+
+const TYPE_PILLS: Array<{
+  value: "expense" | "income";
+  label: string;
+  activeClass: string;
+}> = [
+  {
+    value: "expense",
+    label: "Gasto",
+    activeClass: "bg-red-500/20 text-red-500",
+  },
+  {
+    value: "income",
+    label: "Ingreso",
+    activeClass: "bg-[#00da00]/15 text-[#00da00]",
+  },
+];
+
 // ── Component ───────────────────────────────────────────────────────────────
 
 /** Modal for adding a new income/expense transaction. */
@@ -95,6 +114,10 @@ export function AddTransactionModal({
   transaction,
 }: AddTransactionModalProps) {
   const isEditMode = !!transaction;
+
+  // Recurring toggle — UI-only for now (backend support comes later)
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceFreq, setRecurrenceFreq] = useState("monthly");
 
   // TransactionType includes "transfer" but this form only handles income/expense
   const resolveFormType = (t?: string | null): "income" | "expense" =>
@@ -115,12 +138,14 @@ export function AddTransactionModal({
       categoryId: transaction?.category_id ?? "",
       description: transaction?.description ?? "",
       accountId: transaction?.account_id ?? accounts[0]?.id ?? "",
-      transactionDate: transaction?.transaction_date?.slice(0, 10) ?? todayISO(),
+      // Fix hydration: initialize empty, set via useEffect on client
+      transactionDate: "",
       tags: transaction?.tags?.join(", ") ?? "",
     },
   });
 
   // Reset form values when modal opens or transaction changes
+  // Also sets transactionDate on client to avoid SSR/client mismatch (React #418)
   useEffect(() => {
     if (open) {
       reset({
@@ -132,6 +157,8 @@ export function AddTransactionModal({
         transactionDate: transaction?.transaction_date?.slice(0, 10) ?? todayISO(),
         tags: transaction?.tags?.join(", ") ?? "",
       });
+      setIsRecurring(false);
+      setRecurrenceFreq("monthly");
     }
   }, [open, transaction, accounts, reset]);
 
@@ -159,15 +186,19 @@ export function AddTransactionModal({
     [onSubmit, reset, onOpenChange]
   );
 
-  const toggleType = useCallback(() => {
-    const next = txType === "income" ? "expense" : "income";
-    setValue("type", next);
-    setValue("categoryId", "");
-  }, [txType, setValue]);
+  const selectType = useCallback(
+    (next: "income" | "expense") => {
+      if (next !== txType) {
+        setValue("type", next);
+        setValue("categoryId", "");
+      }
+    },
+    [txType, setValue]
+  );
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent>
+      <ResponsiveDialogContent className="sm:max-w-[520px]">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
             {isEditMode ? "Editar movimiento" : "Nuevo movimiento"}
@@ -181,60 +212,63 @@ export function AddTransactionModal({
 
         <form
           onSubmit={handleSubmit(handleFormSubmit)}
-          className="space-y-4 py-2"
+          className="space-y-5 py-2"
         >
-          {/* Type toggle */}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={toggleType}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all",
-                txType === "expense"
-                  ? "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-400"
-                  : "border-border text-muted-foreground hover:border-foreground/30"
-              )}
-            >
-              <Minus className="size-4" /> Gasto
-            </button>
-            <button
-              type="button"
-              onClick={toggleType}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all",
-                txType === "income"
-                  ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-                  : "border-border text-muted-foreground hover:border-foreground/30"
-              )}
-            >
-              <Plus className="size-4" /> Ingreso
-            </button>
+          {/* ── Type pills ── */}
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              Tipo
+            </Label>
+            <div className="flex gap-1 rounded-[10px] bg-secondary p-[3px]">
+              {TYPE_PILLS.map(({ value, label, activeClass }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => selectType(value)}
+                  className={cn(
+                    "flex-1 rounded-lg py-2 px-3 text-sm font-medium transition-all",
+                    txType === value
+                      ? activeClass
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Amount */}
-          <div className="space-y-1.5">
-            <Label htmlFor="tx-amount">Monto</Label>
-            <Controller
-              control={control}
-              name="amount"
-              render={({ field }) => (
-                <AmountInput
-                  id="tx-amount"
-                  value={field.value}
-                  onChange={field.onChange}
-                  variant={txType === "income" ? "income" : "expense"}
-                  size="lg"
-                />
-              )}
-            />
+          {/* ── Amount (large, in card) ── */}
+          <div className="space-y-2">
+            <div className="rounded-xl border border-border bg-card/50 p-4">
+              <Label className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
+                Monto
+              </Label>
+              <Controller
+                control={control}
+                name="amount"
+                render={({ field }) => (
+                  <AmountInput
+                    id="tx-amount"
+                    value={field.value}
+                    onChange={field.onChange}
+                    variant={txType === "income" ? "income" : "expense"}
+                    size="lg"
+                    className="!text-2xl !font-bold"
+                  />
+                )}
+              />
+            </div>
             {errors.amount && (
               <p className="text-xs text-destructive">{errors.amount.message}</p>
             )}
           </div>
 
-          {/* Category */}
-          <div className="space-y-1.5">
-            <Label>Categoría</Label>
+          {/* ── Category ── */}
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              Categoría
+            </Label>
             <CategoryPills
               categories={filteredCategories}
               selected={selectedCategory || null}
@@ -245,9 +279,14 @@ export function AddTransactionModal({
             )}
           </div>
 
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="tx-desc">Descripción (opcional)</Label>
+          {/* ── Description ── */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="tx-desc"
+              className="text-xs uppercase tracking-wider text-muted-foreground"
+            >
+              Descripción / Nota
+            </Label>
             <Controller
               control={control}
               name="description"
@@ -262,10 +301,30 @@ export function AddTransactionModal({
             />
           </div>
 
-          {/* Account + Date row */}
+          {/* ── Date + Account row ── */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Cuenta</Label>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                Fecha
+              </Label>
+              <Controller
+                control={control}
+                name="transactionDate"
+                render={({ field }) => (
+                  <Input
+                    id="tx-date"
+                    type="date"
+                    {...field}
+                    className="h-9 text-sm"
+                  />
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                Cuenta
+              </Label>
               <Controller
                 control={control}
                 name="accountId"
@@ -288,27 +347,51 @@ export function AddTransactionModal({
                 <p className="text-xs text-destructive">{errors.accountId.message}</p>
               )}
             </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="tx-date">Fecha</Label>
-              <Controller
-                control={control}
-                name="transactionDate"
-                render={({ field }) => (
-                  <Input
-                    id="tx-date"
-                    type="date"
-                    {...field}
-                    className="h-9 text-sm"
-                  />
-                )}
-              />
-            </div>
           </div>
 
-          {/* Tags */}
-          <div className="space-y-1.5">
-            <Label htmlFor="tx-tags">Tags (separados por coma)</Label>
+          {/* ── Recurring toggle ── */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isRecurring}
+              onClick={() => setIsRecurring(!isRecurring)}
+              className={cn(
+                "relative h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors",
+                isRecurring ? "bg-[#ff5600]" : "bg-secondary border border-border"
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-0.5 left-0.5 size-4 rounded-full bg-white transition-transform",
+                  isRecurring && "translate-x-5"
+                )}
+              />
+            </button>
+            <span className="text-sm font-medium">Recurrente</span>
+            {isRecurring && (
+              <Select value={recurrenceFreq} onValueChange={setRecurrenceFreq}>
+                <SelectTrigger className="h-8 w-32 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Diario</SelectItem>
+                  <SelectItem value="weekly">Semanal</SelectItem>
+                  <SelectItem value="monthly">Mensual</SelectItem>
+                  <SelectItem value="yearly">Anual</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          {/* ── Tags ── */}
+          <div className="space-y-1">
+            <Label
+              htmlFor="tx-tags"
+              className="text-xs uppercase tracking-wider text-muted-foreground"
+            >
+              Tags
+            </Label>
             <Controller
               control={control}
               name="tags"
@@ -321,10 +404,11 @@ export function AddTransactionModal({
                 />
               )}
             />
+            <p className="text-[11px] text-muted-foreground">Separa con comas</p>
           </div>
 
-          {/* Footer */}
-          <ResponsiveDialogFooter>
+          {/* ── Footer ── */}
+          <ResponsiveDialogFooter className="gap-2 pt-2">
             <Button
               type="button"
               variant="ghost"
@@ -333,7 +417,13 @@ export function AddTransactionModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" size="sm" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              className="bg-[#ff5600] text-white hover:bg-[#e04d00]"
+            >
+              <Check className="mr-1.5 size-4" />
               {isEditMode ? "Actualizar" : "Guardar"}
             </Button>
           </ResponsiveDialogFooter>
