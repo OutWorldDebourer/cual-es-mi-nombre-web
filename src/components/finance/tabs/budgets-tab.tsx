@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import {
   Plus,
+  Pencil,
+  Trash2,
   Percent,
   Wallet,
   Mail,
@@ -28,6 +30,16 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { BudgetProgressBar } from "@/components/finance/shared/budget-progress-bar";
 import { EmptyState } from "@/components/finance/shared/empty-state";
 import { formatAmount } from "@/components/finance/shared/format-utils";
@@ -103,6 +115,8 @@ interface EnvelopeCardProps {
   spent: number;
   onAssign?: (id: string) => void;
   onRemove?: (id: string) => void;
+  onEdit?: (budget: FinanceBudget) => void;
+  onDelete?: (id: string) => void;
 }
 
 function EnvelopeCard({
@@ -111,6 +125,8 @@ function EnvelopeCard({
   spent,
   onAssign,
   onRemove,
+  onEdit,
+  onDelete,
 }: EnvelopeCardProps) {
   const assigned = budget.envelope_assigned ?? 0;
   const remaining = assigned - spent;
@@ -134,14 +150,34 @@ function EnvelopeCard({
               {category?.name ?? "Sin categoría"}
             </span>
           </div>
-          {isOverspent && (
-            <Badge
-              variant="destructive"
-              className="shrink-0 text-[10px]"
+          <div className="flex shrink-0 items-center gap-1">
+            {isOverspent && (
+              <Badge
+                variant="destructive"
+                className="shrink-0 text-[10px]"
+              >
+                Excedido
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onEdit?.(budget)}
+              aria-label={`Editar presupuesto ${category?.name ?? ""}`}
+              className="text-muted-foreground hover:text-foreground"
             >
-              Excedido
-            </Badge>
-          )}
+              <Pencil className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onDelete?.(budget.id)}
+              aria-label={`Eliminar presupuesto ${category?.name ?? ""}`}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
         </div>
 
         {/* Amounts */}
@@ -221,6 +257,9 @@ interface BudgetsTabProps {
   categories: FinanceCategory[];
   profile: FinanceProfile;
   transactions: FinanceTransaction[];
+  onAddBudget?: () => void;
+  onEditBudget?: (budget: FinanceBudget) => void;
+  onDeleteBudget?: (id: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -230,7 +269,12 @@ export function BudgetsTab({
   categories,
   profile,
   transactions,
+  onAddBudget,
+  onEditBudget,
+  onDeleteBudget,
 }: BudgetsTabProps) {
+  const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null);
+
   const mode = profile.budget_mode;
   const config = MODE_CONFIGS[mode];
   const ModeIcon = config.icon;
@@ -306,8 +350,8 @@ export function BudgetsTab({
 
   // ── Handlers ────────────────────────────────────────────────────────
   const handleAddBudget = useCallback(() => {
-    // TODO: Open create budget dialog
-  }, []);
+    onAddBudget?.();
+  }, [onAddBudget]);
 
   const handleAssign = useCallback((_budgetId: string) => {
     // TODO: Open assign dialog
@@ -316,6 +360,17 @@ export function BudgetsTab({
   const handleRemove = useCallback((_budgetId: string) => {
     // TODO: Open remove dialog
   }, []);
+
+  const requestDeleteBudget = useCallback((id: string) => {
+    setDeletingBudgetId(id);
+  }, []);
+
+  const confirmDeleteBudget = useCallback(() => {
+    if (deletingBudgetId) {
+      onDeleteBudget?.(deletingBudgetId);
+      setDeletingBudgetId(null);
+    }
+  }, [deletingBudgetId, onDeleteBudget]);
 
   // ── Empty state ─────────────────────────────────────────────────────
   if (active.length === 0) {
@@ -368,14 +423,37 @@ export function BudgetsTab({
                   ? categoryMap.get(b.category_id)
                   : undefined;
                 return (
-                  <BudgetProgressBar
-                    key={b.id}
-                    spent={getSpent(b.category_id)}
-                    limit={b.amount_limit ?? 0}
-                    mode="fixed"
-                    categoryName={cat?.name}
-                    categoryIcon={cat?.icon ?? undefined}
-                  />
+                  <div key={b.id} className="flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <BudgetProgressBar
+                        spent={getSpent(b.category_id)}
+                        limit={b.amount_limit ?? 0}
+                        mode="fixed"
+                        categoryName={cat?.name}
+                        categoryIcon={cat?.icon ?? undefined}
+                      />
+                    </div>
+                    <div className="flex shrink-0 gap-1 pt-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => onEditBudget?.(b)}
+                        aria-label={`Editar presupuesto ${cat?.name ?? ""}`}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => requestDeleteBudget(b.id)}
+                        aria-label={`Eliminar presupuesto ${cat?.name ?? ""}`}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  </div>
                 );
               })}
             </CardContent>
@@ -480,14 +558,37 @@ export function BudgetsTab({
                   : undefined;
                 const limit = ((b.percentage ?? 0) / 100) * incomeRef;
                 return (
-                  <BudgetProgressBar
-                    key={b.id}
-                    spent={getSpent(b.category_id)}
-                    limit={limit}
-                    mode="percentage"
-                    categoryName={cat?.name}
-                    categoryIcon={cat?.icon ?? undefined}
-                  />
+                  <div key={b.id} className="flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <BudgetProgressBar
+                        spent={getSpent(b.category_id)}
+                        limit={limit}
+                        mode="percentage"
+                        categoryName={cat?.name}
+                        categoryIcon={cat?.icon ?? undefined}
+                      />
+                    </div>
+                    <div className="flex shrink-0 gap-1 pt-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => onEditBudget?.(b)}
+                        aria-label={`Editar presupuesto ${cat?.name ?? ""}`}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => requestDeleteBudget(b.id)}
+                        aria-label={`Eliminar presupuesto ${cat?.name ?? ""}`}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  </div>
                 );
               })}
             </CardContent>
@@ -541,6 +642,8 @@ export function BudgetsTab({
                   spent={getSpent(b.category_id)}
                   onAssign={handleAssign}
                   onRemove={handleRemove}
+                  onEdit={onEditBudget}
+                  onDelete={requestDeleteBudget}
                 />
               );
             })}
@@ -559,6 +662,31 @@ export function BudgetsTab({
           Agregar presupuesto
         </Button>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog
+        open={deletingBudgetId !== null}
+        onOpenChange={(open) => { if (!open) setDeletingBudgetId(null); }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar presupuesto</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta accion no se puede deshacer. El presupuesto sera eliminado permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel size="sm">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              size="sm"
+              onClick={confirmDeleteBudget}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

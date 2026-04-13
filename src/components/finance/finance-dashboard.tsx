@@ -17,6 +17,7 @@ import { useFinanceMutations } from "@/components/finance/use-finance-mutations"
 import { AddTransactionModal } from "@/components/finance/modals/add-transaction-modal";
 import { EditCategoryModal } from "@/components/finance/modals/edit-category-modal";
 import { CreateAccountModal } from "@/components/finance/modals/create-account-modal";
+import { CreateBudgetModal } from "@/components/finance/modals/create-budget-modal";
 import { TransferModal } from "@/components/finance/modals/transfer-modal";
 import { SplitTransactionModal } from "@/components/finance/modals/split-transaction-modal";
 import type {
@@ -85,6 +86,8 @@ export function FinanceDashboard({
   const [showEditCategory, setShowEditCategory] = useState(false);
   const [editingCategory, setEditingCategory] = useState<FinanceCategory | null>(null);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [showCreateBudget, setShowCreateBudget] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<FinanceBudget | null>(null);
   const [showTransfer, setShowTransfer] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
 
@@ -253,6 +256,15 @@ export function FinanceDashboard({
               categories={categories}
               profile={profile}
               transactions={transactions}
+              onAddBudget={() => {
+                setEditingBudget(null);
+                setShowCreateBudget(true);
+              }}
+              onEditBudget={(b) => {
+                setEditingBudget(b);
+                setShowCreateBudget(true);
+              }}
+              onDeleteBudget={(id) => mutations.deleteBudget(id)}
             />
           )}
         </TabsContent>
@@ -410,6 +422,33 @@ export function FinanceDashboard({
           }
         }}
       />
+
+      {profile && (
+        <CreateBudgetModal
+          open={showCreateBudget}
+          onOpenChange={(open) => {
+            setShowCreateBudget(open);
+            if (!open) setEditingBudget(null);
+          }}
+          budget={editingBudget}
+          categories={categories}
+          profile={profile}
+          onSubmit={async (data) => {
+            if (editingBudget) {
+              await mutations.updateBudget(editingBudget.id, {
+                category_id: data.categoryId,
+                amount_limit: data.amountLimit,
+                percentage: data.percentage,
+                envelope_assigned: data.envelopeAssigned,
+                period: data.period,
+                rollover: data.rollover,
+              });
+            } else {
+              await mutations.createBudget(data);
+            }
+          }}
+        />
+      )}
     </>
   );
 }

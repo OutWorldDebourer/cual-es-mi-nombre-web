@@ -35,13 +35,16 @@ interface CreateBudgetInput {
   categoryId: string | null;
   amountLimit: number | null;
   percentage: number | null;
+  envelopeAssigned: number | null;
   period: string;
   rollover?: boolean;
 }
 
 interface UpdateBudgetInput {
+  category_id?: string | null;
   amount_limit?: number | null;
   percentage?: number | null;
+  envelope_assigned?: number | null;
   period?: string;
   rollover?: boolean;
   is_active?: boolean;
@@ -139,6 +142,7 @@ export function useFinanceMutations(onSuccess: () => void) {
         category_id: data.categoryId,
         amount_limit: data.amountLimit,
         percentage: data.percentage,
+        envelope_assigned: data.envelopeAssigned,
         period: data.period,
         rollover: data.rollover ?? false,
       });
@@ -164,6 +168,23 @@ export function useFinanceMutations(onSuccess: () => void) {
         throw error;
       }
       toast.success("Presupuesto actualizado");
+      onSuccess();
+    },
+    [onSuccess]
+  );
+
+  const deleteBudget = useCallback(
+    async (id: string) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("finance_budgets")
+        .delete()
+        .eq("id", id);
+      if (error) {
+        toast.error("Error al eliminar presupuesto");
+        throw error;
+      }
+      toast.success("Presupuesto eliminado");
       onSuccess();
     },
     [onSuccess]
@@ -283,6 +304,7 @@ export function useFinanceMutations(onSuccess: () => void) {
     deleteTransaction,
     createBudget,
     updateBudget,
+    deleteBudget,
     createAccount,
     createCategory,
     updateCategory,

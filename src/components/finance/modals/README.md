@@ -8,6 +8,7 @@ Modal dialogs for finance CRUD operations. All use ResponsiveDialog (Sheet on mo
 - `split-transaction-modal.tsx` — Split a single expense into multiple category-assigned items using FieldArray. Validates sum equals total. Exports: `SplitTransactionModal`, `SplitTransactionData`, `SplitItem`.
 - `edit-category-modal.tsx` — Create or edit a finance category (name, emoji icon, hex color, type). Pre-populates when editing. Exports: `EditCategoryModal`, `CategorySubmitData`.
 - `create-account-modal.tsx` — Create a financial account (name, type, currency PEN/USD/EUR, initial balance). Exports: `CreateAccountModal`, `CreateAccountData`.
+- `create-budget-modal.tsx` — Create or edit a budget (category, amount/percentage by profile mode, period, rollover). Adapts fields to `profile.budget_mode`. Exports: `CreateBudgetModal`, `BudgetSubmitData`.
 - `transfer-modal.tsx` — Transfer money between two accounts with from/to validation. Exports: `TransferModal`, `TransferData`.
 
 ## Related
