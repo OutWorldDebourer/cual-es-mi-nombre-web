@@ -493,8 +493,8 @@ function DangerZone({ onConfirmDelete }: { onConfirmDelete: () => void }) {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
+                variant="destructive"
                 onClick={onConfirmDelete}
-                className="bg-destructive text-white hover:bg-destructive/90"
               >
                 Si, borrar todo
               </AlertDialogAction>

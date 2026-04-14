@@ -282,8 +282,8 @@ export function NoteCard({
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
+                variant="destructive"
                 onClick={() => onDelete(note.id)}
-                className="bg-destructive text-white hover:bg-destructive/90"
               >
                 Eliminar
               </AlertDialogAction>
@@ -382,8 +382,8 @@ export function NoteCard({
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
+                variant="destructive"
                 onClick={() => onDelete(note.id)}
-                className="bg-destructive text-white hover:bg-destructive/90"
               >
                 Eliminar
               </AlertDialogAction>
@@ -476,8 +476,8 @@ export function NoteCard({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={() => onDelete(note.id)}
-              className="bg-destructive text-white hover:bg-destructive/90"
             >
               Eliminar
             </AlertDialogAction>
