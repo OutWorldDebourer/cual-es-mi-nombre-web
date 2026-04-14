@@ -198,7 +198,17 @@ export function AddTransactionModal({
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="sm:max-w-[520px]">
+      <ResponsiveDialogContent
+        className="sm:max-w-[520px]"
+        onOpenAutoFocus={(e) => {
+          const amountInput = e.currentTarget.querySelector<HTMLInputElement>("#tx-amount");
+          if (amountInput) {
+            e.preventDefault();
+            amountInput.focus();
+            amountInput.select();
+          }
+        }}
+      >
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
             {isEditMode ? "Editar movimiento" : "Nuevo movimiento"}
@@ -227,6 +237,7 @@ export function AddTransactionModal({
                   onClick={() => selectType(value)}
                   className={cn(
                     "flex-1 rounded-lg py-2 px-3 text-sm font-medium transition-all",
+                    "focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                     txType === value
                       ? activeClass
                       : "text-muted-foreground hover:text-foreground"
@@ -238,27 +249,27 @@ export function AddTransactionModal({
             </div>
           </div>
 
-          {/* ── Amount (large, in card) ── */}
+          {/* ── Amount ── */}
           <div className="space-y-2">
-            <div className="rounded-xl border border-border bg-card/50 p-4">
-              <Label className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
-                Monto
-              </Label>
-              <Controller
-                control={control}
-                name="amount"
-                render={({ field }) => (
-                  <AmountInput
-                    id="tx-amount"
-                    value={field.value}
-                    onChange={field.onChange}
-                    variant={txType === "income" ? "income" : "expense"}
-                    size="lg"
-                    className="!text-2xl !font-bold"
-                  />
-                )}
-              />
-            </div>
+            <Label
+              htmlFor="tx-amount"
+              className="text-xs uppercase tracking-wider text-muted-foreground"
+            >
+              Monto
+            </Label>
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field }) => (
+                <AmountInput
+                  id="tx-amount"
+                  value={field.value}
+                  onChange={field.onChange}
+                  size="lg"
+                  className="!text-2xl !font-bold"
+                />
+              )}
+            />
             {errors.amount && (
               <p className="text-xs text-destructive">{errors.amount.message}</p>
             )}
