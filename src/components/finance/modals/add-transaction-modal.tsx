@@ -201,7 +201,8 @@ export function AddTransactionModal({
       <ResponsiveDialogContent
         className="sm:max-w-[520px]"
         onOpenAutoFocus={(e) => {
-          const amountInput = e.currentTarget?.querySelector<HTMLInputElement>("#tx-amount");
+          const target = e.currentTarget as HTMLElement | null;
+          const amountInput = target?.querySelector<HTMLInputElement>("#tx-amount");
           if (amountInput) {
             e.preventDefault();
             amountInput.focus();
