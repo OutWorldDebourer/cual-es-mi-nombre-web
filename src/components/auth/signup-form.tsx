@@ -77,9 +77,14 @@ function mapSignupError(message: string): SignupError {
   const lower = message.toLowerCase();
 
   // Sentinel forwarded from src/api/routes/sms_hook.py on window_closed.
-  // Supabase wraps our body inside ``unexpected_failure``/``sms_send_failed``
-  // but preserves the ``message`` string — match case-insensitively.
-  if (lower.includes("wa_window_closed")) {
+  // Supabase historically preserved our ``message`` string, but in current
+  // gotrue versions any 4xx from the hook is masked as "Invalid payload sent
+  // to hook". Our hook only returns 4xx for window_closed, so we treat both
+  // signals as equivalent.
+  if (
+    lower.includes("wa_window_closed") ||
+    lower.includes("invalid payload sent to hook")
+  ) {
     return { kind: "window_closed" };
   }
 
