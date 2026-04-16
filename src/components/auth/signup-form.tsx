@@ -51,7 +51,7 @@ const PASSWORD_MIN_LENGTH = 6;
  * Read from public env; fall back to a hardcoded constant if missing.
  * TODO: set ``NEXT_PUBLIC_WA_BOT_NUMBER`` in Vercel env to avoid this fallback.
  */
-const WHATSAPP_BOT_NUMBER = process.env.NEXT_PUBLIC_WA_BOT_NUMBER ?? "51942961598";
+const WHATSAPP_BOT_NUMBER = process.env.NEXT_PUBLIC_WA_BOT_NUMBER ?? "51901258245";
 
 // ---------------------------------------------------------------------------
 // Error mapping
