@@ -48,7 +48,7 @@ interface WhatsAppLinkingProps {
  * Format an E.164 phone number for display.
  * Groups digits after the country code in chunks of 3.
  *
- * @example formatPhoneDisplay("+51942961598") → "+51 942 961 598"
+ * @example formatPhoneDisplay("+51999888777") → "+51 942 961 598"
  */
 function formatPhoneDisplay(phone: string): string {
   // Find where the country code ends (1-4 digits after '+')

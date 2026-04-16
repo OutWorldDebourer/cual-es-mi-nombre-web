@@ -102,11 +102,11 @@ describe("getDefaultCountry", () => {
 
 describe("cleanDigits", () => {
   it("strips non-digit characters", () => {
-    expect(cleanDigits("942 961-598")).toBe("942961598");
+    expect(cleanDigits("942 961-598")).toBe("999888777");
   });
 
   it("handles already-clean input", () => {
-    expect(cleanDigits("942961598")).toBe("942961598");
+    expect(cleanDigits("999888777")).toBe("999888777");
   });
 
   it("handles empty string", () => {
@@ -114,17 +114,17 @@ describe("cleanDigits", () => {
   });
 
   it("strips parentheses and dots", () => {
-    expect(cleanDigits("(942) 961.598")).toBe("942961598");
+    expect(cleanDigits("(942) 961.598")).toBe("999888777");
   });
 });
 
 describe("formatE164", () => {
   it("combines dial code and national number", () => {
-    expect(formatE164("+51", "942961598")).toBe("+51942961598");
+    expect(formatE164("+51", "999888777")).toBe("+51999888777");
   });
 
   it("strips non-digits from national number", () => {
-    expect(formatE164("+51", "942 961-598")).toBe("+51942961598");
+    expect(formatE164("+51", "942 961-598")).toBe("+51999888777");
   });
 
   it("works with US dial code", () => {
@@ -138,7 +138,7 @@ describe("formatE164", () => {
 
 describe("isValidE164", () => {
   it("accepts valid Peru number", () => {
-    expect(isValidE164("+51942961598")).toBe(true);
+    expect(isValidE164("+51999888777")).toBe(true);
   });
 
   it("accepts valid US number", () => {
@@ -154,7 +154,7 @@ describe("isValidE164", () => {
   });
 
   it("rejects missing + prefix", () => {
-    expect(isValidE164("51942961598")).toBe(false);
+    expect(isValidE164("51999888777")).toBe(false);
   });
 
   it("rejects leading zero after +", () => {
@@ -184,7 +184,7 @@ describe("isValidE164", () => {
 
 describe("isValidNationalNumber", () => {
   it("accepts valid 9-digit Peru number", () => {
-    expect(isValidNationalNumber("942961598")).toBe(true);
+    expect(isValidNationalNumber("999888777")).toBe(true);
   });
 
   it("accepts minimum 6 digits", () => {
@@ -210,7 +210,7 @@ describe("isValidNationalNumber", () => {
 
 describe("maskPhone", () => {
   it("masks a Peru number correctly", () => {
-    expect(maskPhone("+51942961598")).toBe("+51***...98");
+    expect(maskPhone("+51999888777")).toBe("+51***...98");
   });
 
   it("masks a US number correctly", () => {
@@ -232,12 +232,12 @@ describe("maskPhone", () => {
 
 describe("phoneE164Schema", () => {
   it("accepts valid E.164 number", () => {
-    const result = phoneE164Schema.safeParse("+51942961598");
+    const result = phoneE164Schema.safeParse("+51999888777");
     expect(result.success).toBe(true);
   });
 
   it("trims whitespace before validating", () => {
-    const result = phoneE164Schema.safeParse("  +51942961598  ");
+    const result = phoneE164Schema.safeParse("  +51999888777  ");
     expect(result.success).toBe(true);
   });
 
@@ -247,17 +247,17 @@ describe("phoneE164Schema", () => {
   });
 
   it("rejects number without +", () => {
-    const result = phoneE164Schema.safeParse("51942961598");
+    const result = phoneE164Schema.safeParse("51999888777");
     expect(result.success).toBe(false);
   });
 });
 
 describe("nationalNumberSchema", () => {
   it("accepts valid digits", () => {
-    const result = nationalNumberSchema.safeParse("942961598");
+    const result = nationalNumberSchema.safeParse("999888777");
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data).toBe("942961598");
+      expect(result.data).toBe("999888777");
     }
   });
 
@@ -265,7 +265,7 @@ describe("nationalNumberSchema", () => {
     const result = nationalNumberSchema.safeParse("942 961-598");
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data).toBe("942961598");
+      expect(result.data).toBe("999888777");
     }
   });
 

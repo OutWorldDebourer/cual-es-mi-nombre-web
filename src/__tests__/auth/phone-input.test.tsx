@@ -60,14 +60,14 @@ describe("PhoneInput", () => {
     render(<PhoneInput onChange={handleChange} />);
 
     const input = screen.getByRole("textbox");
-    await user.type(input, "942961598");
+    await user.type(input, "999888777");
 
     // Should have been called for each character
     expect(handleChange).toHaveBeenCalled();
     // Last call should have full E.164
     const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1];
-    expect(lastCall[0]).toBe("+51942961598");
-    expect(lastCall[1]).toBe("942961598");
+    expect(lastCall[0]).toBe("+51999888777");
+    expect(lastCall[1]).toBe("999888777");
   });
 
   it("strips non-digit non-space characters from input", async () => {

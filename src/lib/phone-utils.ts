@@ -96,7 +96,7 @@ export function getDefaultCountry(): Country {
 /**
  * Strip everything except digits from a string.
  *
- * @example cleanDigits("942 961-598") → "942961598"
+ * @example cleanDigits("942 961-598") → "999888777"
  */
 export function cleanDigits(input: string): string {
   return input.replace(/\D/g, "");
@@ -105,7 +105,7 @@ export function cleanDigits(input: string): string {
 /**
  * Combine a dial code and national number into E.164 format.
  *
- * @example formatE164("+51", "942961598") → "+51942961598"
+ * @example formatE164("+51", "999888777") → "+51999888777"
  */
 export function formatE164(dialCode: string, nationalNumber: string): string {
   const digits = cleanDigits(nationalNumber);
@@ -125,8 +125,8 @@ const E164_REGEX = /^\+[1-9]\d{6,14}$/;
 /**
  * Validate a full E.164 phone number.
  *
- * @example isValidE164("+51942961598") → true
- * @example isValidE164("51942961598")  → false  (missing '+')
+ * @example isValidE164("+51999888777") → true
+ * @example isValidE164("51999888777")  → false  (missing '+')
  * @example isValidE164("+0123456789")  → false  (leading zero)
  */
 export function isValidE164(phone: string): boolean {
@@ -137,7 +137,7 @@ export function isValidE164(phone: string): boolean {
  * Validate a national number (digits only, 6-14 digits).
  * Intentionally permissive — final validation happens via E.164 on the full number.
  *
- * @example isValidNationalNumber("942961598") → true
+ * @example isValidNationalNumber("999888777") → true
  * @example isValidNationalNumber("12345")     → false  (too short)
  */
 export function isValidNationalNumber(nationalNumber: string): boolean {
@@ -153,7 +153,7 @@ export function isValidNationalNumber(nationalNumber: string): boolean {
  * Mask a phone number for safe logging/display.
  * Shows first 3 chars and last 2 digits, masks the rest.
  *
- * @example maskPhone("+51942961598") → "+51***...98"
+ * @example maskPhone("+51999888777") → "+51***...98"
  * @example maskPhone("+1234567890")  → "+12***...90"
  */
 export function maskPhone(phone: string): string {
@@ -172,13 +172,13 @@ export function maskPhone(phone: string): string {
  * Use in forms with React Hook Form or standalone.
  *
  * @example
- * const result = phoneE164Schema.safeParse("+51942961598");
+ * const result = phoneE164Schema.safeParse("+51999888777");
  * // result.success === true
  */
 export const phoneE164Schema = z
   .string()
   .trim()
-  .regex(E164_REGEX, "Número de teléfono inválido. Formato esperado: +51942961598");
+  .regex(E164_REGEX, "Número de teléfono inválido. Formato esperado: +51999888777");
 
 /**
  * Zod schema for the national number part (digits only, 6-14 length).

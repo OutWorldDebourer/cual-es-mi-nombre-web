@@ -38,7 +38,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export interface PhoneInputProps {
-  /** Full E.164 value (e.g. "+51942961598"). Controlled. */
+  /** Full E.164 value (e.g. "+51999888777"). Controlled. */
   value?: string;
   /**
    * Called with the full E.164 string whenever country or number changes.
