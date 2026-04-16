@@ -18,6 +18,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { OTPInput, useOTPTimer } from "@/components/auth/otp-input";
 import { Button } from "@/components/ui/button";
@@ -165,6 +166,8 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // Soft info state: phone lookup returned action="signup" (no account exists).
+  const [noAccount, setNoAccount] = useState(false);
 
   // --- OTP timer ---
   const timer = useOTPTimer({
@@ -175,12 +178,14 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
   // --- Phone change handler ---
   const handlePhoneChange = useCallback((e164: string) => {
     setPhone(e164);
+    setNoAccount(false);
   }, []);
 
   // --- Step 1: Request OTP ---
   async function handleRequestOtp(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setNoAccount(false);
 
     if (!isValidE164(phone)) {
       setError("Ingresa un número de teléfono válido.");
@@ -190,6 +195,25 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
     setLoading(true);
 
     try {
+      // Pre-check (recovery only): avoid dead-end when user has no password.
+      // Routes WA-first users to /set-password; unknown numbers to signup banner.
+      // On network/5xx: fall through to requestOtp (no regression).
+      if (purpose === "recovery") {
+        try {
+          const status = await phoneAuthApi.checkStatus(phone);
+          if (status.action === "set_password") {
+            router.push(`/set-password?phone=${encodeURIComponent(phone)}&from=recovery`);
+            return;
+          }
+          if (status.action === "signup") {
+            setNoAccount(true);
+            return;
+          }
+        } catch (preCheckErr) {
+          console.error("[recovery] checkStatus failed, falling back:", preCheckErr);
+        }
+      }
+
       await phoneAuthApi.requestOtp(phone, purpose);
       setStep("otp");
       timer.restart();
@@ -293,6 +317,7 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
     setPassword("");
     setConfirmPassword("");
     setError(null);
+    setNoAccount(false);
   }
 
   // --- Success view ---
@@ -309,6 +334,27 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
 
   // --- Step index for progress indicator ---
   const stepIndex = step === "phone" ? 0 : step === "otp" ? 1 : 2;
+
+  // --- Step: PHONE — "no account" informational state (recovery only) ---
+  if (step === "phone" && noAccount) {
+    return (
+      <div className="space-y-4">
+        <StepIndicator steps={RECOVERY_STEPS} currentStep={stepIndex} />
+        <div className="rounded-md bg-muted/40 border border-border p-4 text-sm space-y-2 animate-[fade-in-up_0.3s_ease-out_both]">
+          <p className="font-medium">No encontramos una cuenta con ese número</p>
+          <p className="text-muted-foreground">
+            Ese número aún no está registrado. Crea una cuenta para empezar a usar tu asistente.
+          </p>
+        </div>
+        <Button asChild className="w-full">
+          <Link href={`/signup?phone=${encodeURIComponent(phone)}`}>Registrarme</Link>
+        </Button>
+        <Button type="button" variant="ghost" className="w-full" onClick={() => setNoAccount(false)}>
+          Usar otro número
+        </Button>
+      </div>
+    );
+  }
 
   // --- Step: PHONE ---
   if (step === "phone") {
