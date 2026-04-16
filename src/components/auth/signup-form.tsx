@@ -46,34 +46,60 @@ const OTP_TIMER_SECONDS = 300;
 /** Minimum password length — matches backend PASSWORD_MIN_LENGTH */
 const PASSWORD_MIN_LENGTH = 6;
 
+/**
+ * WhatsApp bot phone number for the "message first" deeplink.
+ * Read from public env; fall back to a hardcoded constant if missing.
+ * TODO: set ``NEXT_PUBLIC_WA_BOT_NUMBER`` in Vercel env to avoid this fallback.
+ */
+const WHATSAPP_BOT_NUMBER = process.env.NEXT_PUBLIC_WA_BOT_NUMBER ?? "51942961598";
+
 // ---------------------------------------------------------------------------
 // Error mapping
 // ---------------------------------------------------------------------------
 
 /**
- * Map Supabase error messages to user-friendly Spanish strings.
- * Supabase Auth error messages are in English — we translate the most common.
+ * Structured signup error. The ``kind: "window_closed"`` variant is produced
+ * when the backend ``POST /hooks/sms`` returns the sentinel
+ * ``WA_WINDOW_CLOSED`` — it indicates the user has no open 24h WhatsApp
+ * conversation window with the bot and must message it first before we can
+ * deliver the OTP.
  */
-function mapSignupError(message: string): string {
+type SignupError =
+  | { kind: "window_closed" }
+  | { kind: "generic"; message: string };
+
+/**
+ * Map Supabase error messages to a structured SignupError.
+ * Supabase Auth error messages are in English — we translate the most common
+ * and detect the ``WA_WINDOW_CLOSED`` sentinel coming from our SMS Hook.
+ */
+function mapSignupError(message: string): SignupError {
   const lower = message.toLowerCase();
 
-  if (lower.includes("user already registered") || lower.includes("already been registered")) {
-    return "Este número de teléfono ya tiene una cuenta. Intenta iniciar sesión.";
-  }
-  if (lower.includes("phone") && lower.includes("invalid")) {
-    return "Número de teléfono inválido. Verifica el formato.";
-  }
-  if (lower.includes("password") && lower.includes("short")) {
-    return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`;
-  }
-  if (lower.includes("rate limit") || lower.includes("too many")) {
-    return "Demasiados intentos. Espera unos minutos antes de intentar de nuevo.";
-  }
-  if (lower.includes("sms") || lower.includes("hook")) {
-    return "No se pudo enviar el código de verificación. Intenta de nuevo.";
+  // Sentinel forwarded from src/api/routes/sms_hook.py on window_closed.
+  // Supabase wraps our body inside ``unexpected_failure``/``sms_send_failed``
+  // but preserves the ``message`` string — match case-insensitively.
+  if (lower.includes("wa_window_closed")) {
+    return { kind: "window_closed" };
   }
 
-  return message;
+  if (lower.includes("user already registered") || lower.includes("already been registered")) {
+    return { kind: "generic", message: "Este número de teléfono ya tiene una cuenta. Intenta iniciar sesión." };
+  }
+  if (lower.includes("phone") && lower.includes("invalid")) {
+    return { kind: "generic", message: "Número de teléfono inválido. Verifica el formato." };
+  }
+  if (lower.includes("password") && lower.includes("short")) {
+    return { kind: "generic", message: `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.` };
+  }
+  if (lower.includes("rate limit") || lower.includes("too many")) {
+    return { kind: "generic", message: "Demasiados intentos. Espera unos minutos antes de intentar de nuevo." };
+  }
+  if (lower.includes("sms") || lower.includes("hook")) {
+    return { kind: "generic", message: "No se pudo enviar el código de verificación. Intenta de nuevo." };
+  }
+
+  return { kind: "generic", message };
 }
 
 function mapVerifyError(message: string): string {
@@ -118,6 +144,7 @@ export function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [existingUser, setExistingUser] = useState(false);
+  const [windowClosed, setWindowClosed] = useState(false);
   const [existingAction, setExistingAction] = useState<CheckPhoneStatusResponse["action"] | null>(null);
   const [existingChannel, setExistingChannel] = useState<string | null>(null);
 
@@ -132,10 +159,26 @@ export function SignupForm() {
     setPhone(e164);
   }, []);
 
+  /**
+   * Apply a SignupError: toggle the ``windowClosed`` banner OR set the
+   * generic error message. Centralised so both signUp() and resend paths
+   * use the same mapping without duplicating logic.
+   */
+  const applySignupError = useCallback((message: string) => {
+    const mapped = mapSignupError(message);
+    if (mapped.kind === "window_closed") {
+      setWindowClosed(true);
+      setError(null);
+      return;
+    }
+    setError(mapped.message);
+  }, []);
+
   // --- Step 1: Submit phone + password ---
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setWindowClosed(false);
 
     // Client-side validation
     if (!isValidE164(phone)) {
@@ -179,7 +222,7 @@ export function SignupForm() {
       });
 
       if (authError) {
-        setError(mapSignupError(authError.message));
+        applySignupError(authError.message);
         return;
       }
 
@@ -249,7 +292,7 @@ export function SignupForm() {
       });
 
       if (resendError) {
-        setError(mapSignupError(resendError.message));
+        applySignupError(resendError.message);
         return;
       }
 
@@ -268,6 +311,65 @@ export function SignupForm() {
     setStep("phone_password");
     setOtp("");
     setError(null);
+  }
+
+  // =========================================================================
+  // Render — 24h WhatsApp window closed (new user has not messaged the bot)
+  // =========================================================================
+
+  if (windowClosed) {
+    const waHref = `https://wa.me/${WHATSAPP_BOT_NUMBER}?text=Hola`;
+
+    async function handleRetryAfterWhatsApp() {
+      setWindowClosed(false);
+      setError(null);
+      // Re-submit with current phone/password state. We synthesize a minimal
+      // event so handleSignup runs its full validation + signUp path.
+      await handleSignup({ preventDefault: () => {} } as React.FormEvent);
+    }
+
+    return (
+      <div className="space-y-4 animate-[fade-in-up_0.3s_ease-out_both]">
+        <div className="rounded-md bg-accent/10 border border-accent/20 p-4 text-sm space-y-2">
+          <p className="font-medium text-foreground">Un paso antes de registrarte</p>
+          <p className="text-muted-foreground">
+            Para enviarte el código por WhatsApp, primero necesitamos que nos escribas.
+            Envía la palabra <span className="font-semibold">Hola</span> a nuestro
+            asistente, espera unos segundos a que responda, y luego vuelve aquí para
+            continuar.
+          </p>
+        </div>
+
+        <Button asChild className="w-full">
+          <a href={waHref} target="_blank" rel="noopener noreferrer">
+            Abrir WhatsApp y escribir &ldquo;Hola&rdquo;
+          </a>
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleRetryAfterWhatsApp}
+          disabled={loading}
+          loading={loading}
+        >
+          Ya lo envié, intentar de nuevo
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full"
+          onClick={() => {
+            setWindowClosed(false);
+            setError(null);
+          }}
+        >
+          Usar otro número
+        </Button>
+      </div>
+    );
   }
 
   // =========================================================================
