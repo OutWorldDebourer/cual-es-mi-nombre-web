@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           Política de Privacidad
         </h1>
         <p className="text-sm text-muted-foreground">
-          Última actualización: 16 de marzo de 2026
+          Última actualización: 17 de abril de 2026
         </p>
       </header>
 
@@ -56,7 +56,57 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">4. Seguridad de los Datos</h2>
+        <h2 className="text-xl font-semibold">
+          4. Uso de Datos de Google
+        </h2>
+        <p className="leading-relaxed text-muted-foreground">
+          Cual es mi Nombre accede a los eventos de Google Calendar del usuario
+          exclusivamente para crear, leer, modificar y eliminar eventos que el
+          usuario solicita explícitamente mediante mensajes de texto a través
+          del asistente. Además consultamos la disponibilidad (FreeBusy) para
+          sugerir horarios libres cuando el usuario lo pide.
+        </p>
+        <p className="leading-relaxed text-muted-foreground">
+          No transferimos datos de Google a terceros fuera de los servicios de
+          infraestructura necesarios para operar la plataforma, no los usamos
+          para publicidad, no los vendemos, y no los utilizamos para entrenar
+          modelos de inteligencia artificial. No almacenamos el contenido de
+          los eventos más allá del tiempo estrictamente necesario para cumplir
+          la solicitud del usuario, y los tokens OAuth se conservan únicamente
+          mientras el usuario mantenga la conexión activa; puede revocarla en
+          cualquier momento desde{" "}
+          <a
+            className="underline underline-offset-2 hover:text-foreground"
+            href="https://myaccount.google.com/permissions"
+            target="_blank"
+            rel="noreferrer"
+          >
+            su cuenta de Google
+          </a>
+          .
+        </p>
+        <p className="leading-relaxed text-muted-foreground">
+          Esta práctica cumple con la{" "}
+          <a
+            className="underline underline-offset-2 hover:text-foreground"
+            href="https://developers.google.com/terms/api-services-user-data-policy"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Google API Services User Data Policy
+          </a>
+          , incluyendo los requisitos de Uso Limitado (Limited Use) para los
+          scopes <code className="rounded bg-muted px-1">calendar.events</code>{" "}
+          y{" "}
+          <code className="rounded bg-muted px-1">
+            calendar.events.freebusy
+          </code>
+          .
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">5. Seguridad de los Datos</h2>
         <p className="leading-relaxed text-muted-foreground">
           Implementamos medidas de seguridad estándar de la industria para
           proteger tu información. Esto incluye cifrado en tránsito, políticas de
@@ -66,7 +116,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">5. Tus Derechos</h2>
+        <h2 className="text-xl font-semibold">6. Tus Derechos</h2>
         <p className="leading-relaxed text-muted-foreground">
           Tienes derecho a acceder, corregir o eliminar tu información personal
           en cualquier momento. Puedes exportar tus notas y recordatorios o
@@ -76,7 +126,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">6. Cookies</h2>
+        <h2 className="text-xl font-semibold">7. Cookies</h2>
         <p className="leading-relaxed text-muted-foreground">
           Utilizamos cookies esenciales para mantener tu sesión activa y
           preferencias de tema (claro/oscuro). No utilizamos cookies de
@@ -86,7 +136,7 @@ export default function PrivacyPage() {
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">
-          7. Cambios a esta Política
+          8. Cambios a esta Política
         </h2>
         <p className="leading-relaxed text-muted-foreground">
           Podemos actualizar esta Política de Privacidad periódicamente. Te
@@ -97,7 +147,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">8. Contacto</h2>
+        <h2 className="text-xl font-semibold">9. Contacto</h2>
         <p className="leading-relaxed text-muted-foreground">
           Si tienes preguntas sobre esta Política de Privacidad o sobre cómo
           manejamos tus datos, puedes contactarnos a través de nuestro canal de
