@@ -19,7 +19,7 @@ import {
   ArrowRight,
   Plus,
 } from "lucide-react";
-import { CountUp } from "@/components/dashboard/count-up";
+import { CreditsCard } from "@/components/dashboard/credits-card";
 import { OnboardingStepper } from "@/components/dashboard/onboarding-stepper";
 import {
   RecentActivity,
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
               <Coins className="h-4 w-4 text-muted-foreground" />
             </div>
             <CardTitle className="text-4xl tabular-nums">
-              <CountUp end={credits} delay={0} />
+              <CreditsCard initial={credits} />
             </CardTitle>
           </CardHeader>
           <CardContent>

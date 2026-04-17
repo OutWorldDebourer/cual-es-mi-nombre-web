@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
-import { refreshDashboard } from "@/app/dashboard/actions";
+import { CREDITS_UPDATE_EVENT } from "@/components/dashboard/credits-card";
 import type { ChatMessage } from "@/types/chat";
 import { motion } from "motion/react";
 import { ChatHeader } from "./chat-header";
@@ -20,7 +19,6 @@ interface ChatViewProps {
 const PAGE_SIZE = 50;
 
 export function ChatView({ assistantName }: ChatViewProps) {
-  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -105,9 +103,8 @@ export function ChatView({ assistantName }: ChatViewProps) {
   }, [isLoadingMore, hasMore]);
 
   // ── Send message ──────────────────────────────────────────────────────
-  // Deps: none. Setters, refs, toast, and the imported Server Action
-  // (`refreshDashboard`) are all module-level / stable so nothing is
-  // tracked here.
+  // Deps: none. Setters, refs, toast and the CustomEvent dispatcher are
+  // all module-level / stable, so nothing is tracked here.
   const handleSend = useCallback(async (text: string) => {
     const optimisticId = `opt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const optimisticMsg: ChatMessage = {
@@ -144,25 +141,28 @@ export function ChatView({ assistantName }: ChatViewProps) {
         return [...confirmed, assistantMsg];
       });
 
-      // Invalidate Server Component cache so the dashboard card
-      // ("Créditos restantes") and the sidebar credits badge re-read
-      // `profile.credits_remaining` from the DB. Without this the numbers
-      // stay stale until a manual reload.
+      // Propagate the fresh balance to every <CreditsCard /> subscribed
+      // to the `credits:update` window event. The dashboard card and the
+      // sidebar badge update in place without any Server Component
+      // refetch. The backend already returns the authoritative
+      // `credits_remaining` in the send response, so no extra round-trip
+      // is needed.
       //
-      // Iter1 used `router.refresh()` but the Client Router Cache of
-      // Next.js 16 was not invalidated when the mutation targeted the
-      // external FastAPI backend. A Server Action running
-      // `revalidatePath("/dashboard", "layout")` invalidates both the
-      // Full Route Cache server-side. Follow with router.refresh()
-      // so the client discards its Router Cache for the current
-      // segment and re-fetches the revalidated payload. The Server
-      // Action alone is not enough in Next.js 16: revalidatePath
-      // invalidates the server, but the browser keeps serving the
-      // prior RSC payload until a navigation event flushes the
-      // Client Router Cache — router.refresh() is that event.
-      // See audit chat web 2026-04-17 Bug #1 (iter4).
-      await refreshDashboard();
-      router.refresh();
+      // Iterations 1–4 tried `router.refresh()`, `force-dynamic`,
+      // `revalidatePath` Server Actions, and combinations of all three,
+      // but the Client Router Cache of Next.js 16 did not flush for
+      // mutations that target the external FastAPI backend (not a
+      // Next.js API route). CustomEvent propagation sidesteps the
+      // cache layers entirely.
+      //
+      // See audit chat web 2026-04-17 Bug #1 (iter5).
+      if (typeof res.credits_remaining === "number") {
+        window.dispatchEvent(
+          new CustomEvent(CREDITS_UPDATE_EVENT, {
+            detail: res.credits_remaining,
+          }),
+        );
+      }
     } catch (err) {
       const detail =
         err instanceof ApiError
@@ -179,7 +179,7 @@ export function ChatView({ assistantName }: ChatViewProps) {
     } finally {
       setIsSending(false);
     }
-  }, [router]);
+  }, []);
 
   // ── Initial loading state ─────────────────────────────────────────────
   if (isInitialLoad) {

@@ -17,6 +17,7 @@ import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { ChatFab } from "@/components/chat/chat-fab";
 import { ChatOverlay } from "@/components/chat/chat-overlay";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { CreditsCard } from "@/components/dashboard/credits-card";
 import {
   Home,
   StickyNote,
@@ -235,7 +236,9 @@ function SidebarContent({
                 <Coins className="h-3.5 w-3.5" />
               </div>
             </TooltipTrigger>
-            <TooltipContent side="right">{credits} creditos</TooltipContent>
+            <TooltipContent side="right">
+              <CreditsCard initial={credits} compact /> creditos
+            </TooltipContent>
           </Tooltip>
         </div>
       ) : (
@@ -249,7 +252,12 @@ function SidebarContent({
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Coins className="h-3.5 w-3.5" />
             <span>
-              <strong className="text-foreground">{credits}</strong> creditos
+              <CreditsCard
+                initial={credits}
+                compact
+                className="font-bold text-foreground"
+              />{" "}
+              creditos
             </span>
           </div>
         </div>

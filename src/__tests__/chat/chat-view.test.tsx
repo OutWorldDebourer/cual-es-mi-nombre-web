@@ -1,16 +1,18 @@
 /**
  * ChatView Tests — "Cuál es mi nombre" Web
  *
- * Regression tests for the in-app chat view. Focus is the cache
- * invalidation after a successful `chat.send`, which guarantees that
- * the dashboard's "Créditos restantes" card and the sidebar credits
- * badge re-fetch `profile.credits_remaining` from the DB.
+ * Regression tests for the in-app chat view. Focus is the credits
+ * propagation path after a successful `chat.send`: the backend returns
+ * an updated `credits_remaining`, and `ChatView` must dispatch a
+ * `credits:update` CustomEvent so every `<CreditsCard />` instance
+ * (dashboard card + sidebar badge) re-renders with the new balance
+ * without any Server Component refetch.
  *
  * See audit chat web 2026-04-17, Bug #1 (dashboard card stale after
- * sending a message until manual F5). Iter3 replaced the client-side
- * `router.refresh()` with the `refreshDashboard` Server Action, so
- * this suite now asserts the Server Action is invoked instead of the
- * router.
+ * sending a message until manual F5). Iter5 removed the
+ * `refreshDashboard` Server Action and the client-side `router.refresh`
+ * in favor of a window CustomEvent because the backend send response
+ * already carries the fresh balance.
  *
  * @module __tests__/chat/chat-view.test
  */
@@ -18,19 +20,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-// ── Server Action mock ────────────────────────────────────────────────────
-
-// `vi.mock` is hoisted to the top of the file, so referenced identifiers
-// must also be hoisted via `vi.hoisted`. See
-// https://vitest.dev/api/vi.html#vi-mock
-const { mockRefreshDashboard } = vi.hoisted(() => ({
-  mockRefreshDashboard: vi.fn(),
-}));
-
-vi.mock("@/app/dashboard/actions", () => ({
-  refreshDashboard: mockRefreshDashboard,
-}));
 
 // ── motion/react mock — avoid IntersectionObserver / animation frames ────
 
@@ -92,6 +81,7 @@ vi.mock("@/lib/api", async () => {
 
 // Needs to be after mocks so the component picks them up.
 import { ChatView } from "@/components/chat/chat-view";
+import { CREDITS_UPDATE_EVENT } from "@/components/dashboard/credits-card";
 
 // React namespace for the motion mock above.
 import * as React from "react";
@@ -110,11 +100,10 @@ if (!("scrollIntoView" in Element.prototype)) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockHistory.mockResolvedValue({ messages: [], has_more: false });
-  mockRefreshDashboard.mockResolvedValue(undefined);
 });
 
-describe("ChatView — cache invalidation after send", () => {
-  it("calls refreshDashboard() Server Action after a successful chat.send to re-fetch Server Component data (credits card + sidebar)", async () => {
+describe("ChatView — credits propagation after send", () => {
+  it("dispatches a `credits:update` CustomEvent carrying the fresh balance after a successful chat.send", async () => {
     mockSend.mockResolvedValue({
       response: "Hola, ¿en qué te ayudo?",
       intent: "smalltalk",
@@ -122,6 +111,8 @@ describe("ChatView — cache invalidation after send", () => {
       credits_cost: 1,
       credits_remaining: 2808,
     });
+
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
     const user = userEvent.setup();
     render(<ChatView assistantName="Asistente" />);
@@ -141,17 +132,29 @@ describe("ChatView — cache invalidation after send", () => {
       expect(mockSend).toHaveBeenCalledWith("Hola");
     });
 
-    // The critical assertion: the Server Action must run so the Full
-    // Route Cache and Client Router Cache of /dashboard are invalidated
-    // and the credits card + sidebar badge re-render with the new
-    // balance instead of the stale prop.
+    // Critical assertion: a `credits:update` CustomEvent must fire with
+    // `detail === credits_remaining` so every subscribed CreditsCard
+    // (dashboard card + sidebar badge) re-renders with the new balance.
     await waitFor(() => {
-      expect(mockRefreshDashboard).toHaveBeenCalledTimes(1);
+      const creditsEvents = dispatchSpy.mock.calls
+        .map(([event]) => event)
+        .filter(
+          (event): event is CustomEvent<number> =>
+            event instanceof CustomEvent &&
+            event.type === CREDITS_UPDATE_EVENT,
+        );
+
+      expect(creditsEvents).toHaveLength(1);
+      expect(creditsEvents[0].detail).toBe(2808);
     });
+
+    dispatchSpy.mockRestore();
   });
 
-  it("does NOT call refreshDashboard() when chat.send fails", async () => {
+  it("does NOT dispatch `credits:update` when chat.send fails", async () => {
     mockSend.mockRejectedValue(new Error("boom"));
+
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
     const user = userEvent.setup();
     render(<ChatView assistantName="Asistente" />);
@@ -170,9 +173,18 @@ describe("ChatView — cache invalidation after send", () => {
       expect(mockSend).toHaveBeenCalled();
     });
 
-    // Explicitly flush pending microtasks so any stray refresh would land.
+    // Explicitly flush pending microtasks so any stray dispatch would land.
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(mockRefreshDashboard).not.toHaveBeenCalled();
+    const stray = dispatchSpy.mock.calls
+      .map(([event]) => event)
+      .some(
+        (event) =>
+          event instanceof CustomEvent && event.type === CREDITS_UPDATE_EVENT,
+      );
+
+    expect(stray).toBe(false);
+
+    dispatchSpy.mockRestore();
   });
 });

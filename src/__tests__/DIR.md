@@ -11,7 +11,9 @@ Vitest test suites organized by feature area, with shared test setup and mocks.
 | Directory | Description |
 |-----------|-------------|
 | `auth/` | Tests for authentication: login, signup, OTP, phone input, recovery, middleware |
+| `chat/` | Tests for the in-app chat view and credits CustomEvent propagation |
 | `credits/` | Tests for the credit balance display component |
+| `dashboard/` | Tests for dashboard widgets (live-updating credits card) |
 | `lib/` | Tests for library/utility functions |
 | `notes/` | Tests for the notes feature |
 | `reminders/` | Tests for the reminders feature |
