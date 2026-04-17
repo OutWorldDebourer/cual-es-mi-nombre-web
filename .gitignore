@@ -48,3 +48,8 @@ next-env.d.ts
 .mcp.json
 
 .env*.local
+
+# Audit screenshots + temporary artifacts from Chrome MCP e2e runs
+_audit_chat/
+tmp/
+qa-console-screenshot.png
