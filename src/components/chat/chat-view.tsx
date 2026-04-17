@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
@@ -19,6 +20,7 @@ interface ChatViewProps {
 const PAGE_SIZE = 50;
 
 export function ChatView({ assistantName }: ChatViewProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -151,9 +153,16 @@ export function ChatView({ assistantName }: ChatViewProps) {
       // Next.js 16 was not invalidated when the mutation targeted the
       // external FastAPI backend. A Server Action running
       // `revalidatePath("/dashboard", "layout")` invalidates both the
-      // Full Route Cache and the Client Router Cache reliably.
-      // See audit chat web 2026-04-17 Bug #1 (iter3).
+      // Full Route Cache server-side. Follow with router.refresh()
+      // so the client discards its Router Cache for the current
+      // segment and re-fetches the revalidated payload. The Server
+      // Action alone is not enough in Next.js 16: revalidatePath
+      // invalidates the server, but the browser keeps serving the
+      // prior RSC payload until a navigation event flushes the
+      // Client Router Cache — router.refresh() is that event.
+      // See audit chat web 2026-04-17 Bug #1 (iter4).
       await refreshDashboard();
+      router.refresh();
     } catch (err) {
       const detail =
         err instanceof ApiError
@@ -170,7 +179,7 @@ export function ChatView({ assistantName }: ChatViewProps) {
     } finally {
       setIsSending(false);
     }
-  }, []);
+  }, [router]);
 
   // ── Initial loading state ─────────────────────────────────────────────
   if (isInitialLoad) {
