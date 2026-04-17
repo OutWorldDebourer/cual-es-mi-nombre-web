@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
@@ -18,6 +19,7 @@ interface ChatViewProps {
 const PAGE_SIZE = 50;
 
 export function ChatView({ assistantName }: ChatViewProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -102,7 +104,8 @@ export function ChatView({ assistantName }: ChatViewProps) {
   }, [isLoadingMore, hasMore]);
 
   // ── Send message ──────────────────────────────────────────────────────
-  // Deps are empty: uses only setters (stable), refs, and toast (module-level)
+  // Deps: router (stable across renders per Next.js docs). Setters, refs,
+  // and toast are stable / module-level so not tracked.
   const handleSend = useCallback(async (text: string) => {
     const optimisticId = `opt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const optimisticMsg: ChatMessage = {
@@ -138,6 +141,13 @@ export function ChatView({ assistantName }: ChatViewProps) {
 
         return [...confirmed, assistantMsg];
       });
+
+      // Invalidate Server Component cache so the dashboard card
+      // ("Créditos restantes") and the sidebar credits badge re-read
+      // `profile.credits_remaining` from the DB. Without this the numbers
+      // stay stale until a manual reload. See audit chat web 2026-04-17
+      // Bug #1.
+      router.refresh();
     } catch (err) {
       const detail =
         err instanceof ApiError
@@ -154,7 +164,7 @@ export function ChatView({ assistantName }: ChatViewProps) {
     } finally {
       setIsSending(false);
     }
-  }, []);
+  }, [router]);
 
   // ── Initial loading state ─────────────────────────────────────────────
   if (isInitialLoad) {
