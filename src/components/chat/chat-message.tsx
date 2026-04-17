@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { formatRelativeTime } from "@/lib/dates";
 import type { ChatMessage as ChatMessageType } from "@/types/chat";
 
 interface ChatMessageProps {
@@ -21,20 +22,17 @@ const AGENT_LABELS: Record<string, string> = {
   register: "Registro",
 };
 
-function formatTime(iso: string): string {
+/**
+ * Format a message timestamp as a consistent, relative Spanish string.
+ *
+ * Delegates to the shared `formatRelativeTime` helper so the chat list
+ * and other surfaces (notes, etc.) agree on the "hace X min/h/d" format.
+ * Falls back to an empty string for invalid input.
+ */
+function formatMessageTime(iso: string): string {
   try {
-    const date = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMin = Math.floor(diffMs / 60_000);
-
-    if (diffMin < 1) return "Ahora";
-    if (diffMin < 60) return `${diffMin}m`;
-
-    const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return `${diffHr}h`;
-
-    return date.toLocaleDateString("es", { day: "numeric", month: "short" });
+    if (Number.isNaN(new Date(iso).getTime())) return "";
+    return formatRelativeTime(iso);
   } catch {
     return "";
   }
@@ -84,14 +82,15 @@ export function ChatMessage({ message, shouldAnimate = false }: ChatMessageProps
         )}
 
         {/* Timestamp */}
-        <p
+        <time
+          dateTime={message.created_at}
           className={cn(
-            "mt-1 text-[10px]",
+            "mt-1 block text-[10px]",
             isUser ? "text-primary-foreground/60" : "text-muted-foreground",
           )}
         >
-          {formatTime(message.created_at)}
-        </p>
+          {formatMessageTime(message.created_at)}
+        </time>
       </div>
     </motion.div>
   );

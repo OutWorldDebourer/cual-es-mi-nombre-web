@@ -50,11 +50,14 @@ export function formatDate(
 
 /**
  * Format a UTC ISO string into a relative time string (e.g., "hace 5 min").
+ *
+ * Future timestamps (clock drift between client and server) collapse to
+ * "hace un momento" so the UI never leaks nonsensical negative offsets.
  */
 export function formatRelativeTime(utcDate: string): string {
   const now = Date.now();
   const then = new Date(utcDate).getTime();
-  const diffMs = now - then;
+  const diffMs = Math.max(0, now - then);
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHour = Math.floor(diffMin / 60);

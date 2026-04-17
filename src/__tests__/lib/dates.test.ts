@@ -61,6 +61,15 @@ describe("formatRelativeTime", () => {
     const result = formatRelativeTime("2026-03-01T12:00:00Z");
     expect(result).toBe("hace 2d");
   });
+
+  it("clamps future timestamps (clock drift) to 'hace un momento'", () => {
+    const now = new Date("2026-03-01T12:00:00Z").getTime();
+    vi.spyOn(Date, "now").mockReturnValue(now);
+
+    // Message timestamp 10s in the future relative to "now"
+    const result = formatRelativeTime("2026-03-01T12:00:10Z");
+    expect(result).toBe("hace un momento");
+  });
 });
 
 describe("isPast", () => {
