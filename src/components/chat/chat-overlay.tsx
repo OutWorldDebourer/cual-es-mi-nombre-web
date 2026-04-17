@@ -26,11 +26,13 @@ import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerTitle,
 } from "@/components/ui/drawer";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
 
@@ -211,6 +213,7 @@ export function ChatOverlay({ isOpen, onClose, assistantName }: ChatOverlayProps
       <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
         <SheetContent side="right" className="w-[400px] p-0 sm:max-w-[400px] [&>button]:hidden">
           <SheetTitle className="sr-only">Chat con {assistantName}</SheetTitle>
+          <SheetDescription className="sr-only">Conversa con tu asistente virtual</SheetDescription>
           {chatContent}
         </SheetContent>
       </Sheet>
@@ -221,6 +224,7 @@ export function ChatOverlay({ isOpen, onClose, assistantName }: ChatOverlayProps
     <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DrawerContent className="max-h-[85vh]">
         <DrawerTitle className="sr-only">Chat con {assistantName}</DrawerTitle>
+        <DrawerDescription className="sr-only">Conversa con tu asistente virtual</DrawerDescription>
         <div className="h-[85vh]">
           {chatContent}
         </div>
