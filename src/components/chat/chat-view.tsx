@@ -105,6 +105,9 @@ export function ChatView({ assistantName }: ChatViewProps) {
   // ── Send message ──────────────────────────────────────────────────────
   // Deps: none. Setters, refs, toast and the CustomEvent dispatcher are
   // all module-level / stable, so nothing is tracked here.
+  // iter5 hash bust 2026-04-17: Vercel served a stale chat-view chunk
+  // that lacked the dispatch. Editing this comment forces a fresh
+  // compile of the chunk so the event reaches CreditsCard.
   const handleSend = useCallback(async (text: string) => {
     const optimisticId = `opt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const optimisticMsg: ChatMessage = {
