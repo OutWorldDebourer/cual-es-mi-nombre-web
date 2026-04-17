@@ -16,6 +16,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
+import { CREDITS_UPDATE_EVENT } from "@/components/dashboard/credits-card";
 import type { ChatMessage } from "@/types/chat";
 import { ChatHeader } from "./chat-header";
 import { ChatMessageList } from "./chat-message-list";
@@ -161,6 +162,20 @@ export function ChatOverlay({ isOpen, onClose, assistantName }: ChatOverlayProps
         };
         return [...confirmed, assistantMsg];
       });
+
+      // Propagate the fresh balance to the CreditsCard (dashboard +
+      // sidebar). Backend already returned the authoritative
+      // `credits_remaining` in the send response, so we skip every
+      // Next.js cache invalidation layer and just notify the listener
+      // directly via a window CustomEvent. See audit chat web
+      // 2026-04-17 Bug #1 (iter5 final — correct component this time).
+      if (typeof res.credits_remaining === "number") {
+        window.dispatchEvent(
+          new CustomEvent(CREDITS_UPDATE_EVENT, {
+            detail: res.credits_remaining,
+          }),
+        );
+      }
     } catch (err) {
       const detail =
         err instanceof ApiError

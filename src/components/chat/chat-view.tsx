@@ -160,10 +160,12 @@ export function ChatView({ assistantName }: ChatViewProps) {
       //
       // See audit chat web 2026-04-17 Bug #1 (iter5).
       if (typeof res.credits_remaining === "number") {
+        const nextBalance: number = res.credits_remaining;
+        console.info(
+          `[chat-view] dispatch credits:update detail=${nextBalance}`,
+        );
         window.dispatchEvent(
-          new CustomEvent(CREDITS_UPDATE_EVENT, {
-            detail: res.credits_remaining,
-          }),
+          new CustomEvent(CREDITS_UPDATE_EVENT, { detail: nextBalance }),
         );
       }
     } catch (err) {
