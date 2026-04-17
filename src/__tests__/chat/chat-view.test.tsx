@@ -7,7 +7,10 @@
  * badge re-fetch `profile.credits_remaining` from the DB.
  *
  * See audit chat web 2026-04-17, Bug #1 (dashboard card stale after
- * sending a message until manual F5).
+ * sending a message until manual F5). Iter3 replaced the client-side
+ * `router.refresh()` with the `refreshDashboard` Server Action, so
+ * this suite now asserts the Server Action is invoked instead of the
+ * router.
  *
  * @module __tests__/chat/chat-view.test
  */
@@ -16,20 +19,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// ── Router mock ───────────────────────────────────────────────────────────
+// ── Server Action mock ────────────────────────────────────────────────────
 
-const mockRefresh = vi.fn();
+// `vi.mock` is hoisted to the top of the file, so referenced identifiers
+// must also be hoisted via `vi.hoisted`. See
+// https://vitest.dev/api/vi.html#vi-mock
+const { mockRefreshDashboard } = vi.hoisted(() => ({
+  mockRefreshDashboard: vi.fn(),
+}));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-    refresh: mockRefresh,
-  }),
-  usePathname: () => "/dashboard/chat",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: vi.fn(),
+vi.mock("@/app/dashboard/actions", () => ({
+  refreshDashboard: mockRefreshDashboard,
 }));
 
 // ── motion/react mock — avoid IntersectionObserver / animation frames ────
@@ -110,10 +110,11 @@ if (!("scrollIntoView" in Element.prototype)) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockHistory.mockResolvedValue({ messages: [], has_more: false });
+  mockRefreshDashboard.mockResolvedValue(undefined);
 });
 
 describe("ChatView — cache invalidation after send", () => {
-  it("calls router.refresh() after a successful chat.send to re-fetch Server Component data (credits card + sidebar)", async () => {
+  it("calls refreshDashboard() Server Action after a successful chat.send to re-fetch Server Component data (credits card + sidebar)", async () => {
     mockSend.mockResolvedValue({
       response: "Hola, ¿en qué te ayudo?",
       intent: "smalltalk",
@@ -140,15 +141,16 @@ describe("ChatView — cache invalidation after send", () => {
       expect(mockSend).toHaveBeenCalledWith("Hola");
     });
 
-    // The critical assertion: Server Components must be invalidated so the
-    // dashboard credits card and the sidebar badge re-render with the new
+    // The critical assertion: the Server Action must run so the Full
+    // Route Cache and Client Router Cache of /dashboard are invalidated
+    // and the credits card + sidebar badge re-render with the new
     // balance instead of the stale prop.
     await waitFor(() => {
-      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(mockRefreshDashboard).toHaveBeenCalledTimes(1);
     });
   });
 
-  it("does NOT call router.refresh() when chat.send fails", async () => {
+  it("does NOT call refreshDashboard() when chat.send fails", async () => {
     mockSend.mockRejectedValue(new Error("boom"));
 
     const user = userEvent.setup();
@@ -171,6 +173,6 @@ describe("ChatView — cache invalidation after send", () => {
     // Explicitly flush pending microtasks so any stray refresh would land.
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(mockRefresh).not.toHaveBeenCalled();
+    expect(mockRefreshDashboard).not.toHaveBeenCalled();
   });
 });

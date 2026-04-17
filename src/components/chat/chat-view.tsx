@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { backendApi, ApiError } from "@/lib/api";
+import { refreshDashboard } from "@/app/dashboard/actions";
 import type { ChatMessage } from "@/types/chat";
 import { motion } from "motion/react";
 import { ChatHeader } from "./chat-header";
@@ -19,7 +19,6 @@ interface ChatViewProps {
 const PAGE_SIZE = 50;
 
 export function ChatView({ assistantName }: ChatViewProps) {
-  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -104,8 +103,9 @@ export function ChatView({ assistantName }: ChatViewProps) {
   }, [isLoadingMore, hasMore]);
 
   // ── Send message ──────────────────────────────────────────────────────
-  // Deps: router (stable across renders per Next.js docs). Setters, refs,
-  // and toast are stable / module-level so not tracked.
+  // Deps: none. Setters, refs, toast, and the imported Server Action
+  // (`refreshDashboard`) are all module-level / stable so nothing is
+  // tracked here.
   const handleSend = useCallback(async (text: string) => {
     const optimisticId = `opt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const optimisticMsg: ChatMessage = {
@@ -145,9 +145,15 @@ export function ChatView({ assistantName }: ChatViewProps) {
       // Invalidate Server Component cache so the dashboard card
       // ("Créditos restantes") and the sidebar credits badge re-read
       // `profile.credits_remaining` from the DB. Without this the numbers
-      // stay stale until a manual reload. See audit chat web 2026-04-17
-      // Bug #1.
-      router.refresh();
+      // stay stale until a manual reload.
+      //
+      // Iter1 used `router.refresh()` but the Client Router Cache of
+      // Next.js 16 was not invalidated when the mutation targeted the
+      // external FastAPI backend. A Server Action running
+      // `revalidatePath("/dashboard", "layout")` invalidates both the
+      // Full Route Cache and the Client Router Cache reliably.
+      // See audit chat web 2026-04-17 Bug #1 (iter3).
+      await refreshDashboard();
     } catch (err) {
       const detail =
         err instanceof ApiError
@@ -164,7 +170,7 @@ export function ChatView({ assistantName }: ChatViewProps) {
     } finally {
       setIsSending(false);
     }
-  }, [router]);
+  }, []);
 
   // ── Initial loading state ─────────────────────────────────────────────
   if (isInitialLoad) {
