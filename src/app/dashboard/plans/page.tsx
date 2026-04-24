@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPlans } from "@/lib/api";
 import { PlanGrid } from "@/components/plans/plan-grid";
+import { PostPaymentTracker } from "@/components/plans/post-payment-tracker";
 import type { SubscriptionPlan, SubscriptionStatus } from "@/types/database";
 
 export default async function PlansPage() {
@@ -117,6 +118,7 @@ export default async function PlansPage() {
 
   return (
     <div className="space-y-6 stagger-children">
+      <PostPaymentTracker />
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Planes</h1>
         <p className="text-muted-foreground mt-1">

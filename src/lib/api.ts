@@ -341,6 +341,60 @@ function subscriptionApi(supabase: SupabaseClient) {
   };
 }
 
+// ── Funnel Tracking API ─────────────────────────────────────────────────────
+
+/**
+ * Post-payment funnel events tracked from the web.
+ * Must stay aligned with the backend allowlist in
+ * ``POST /api/funnel/track``.
+ */
+export type FunnelEvent =
+  | "post_payment_web_visit"
+  | "signup_completed"
+  | "login_succeeded_post_payment";
+
+function funnelApi(supabase: SupabaseClient) {
+  return {
+    /**
+     * POST /api/funnel/track
+     *
+     * Fire-and-forget analytics event. Errors (network, 4xx, 5xx) are
+     * swallowed — analytics MUST NEVER break the user flow.
+     *
+     * The backend returns ``204 No Content`` on success, so we avoid
+     * ``authFetch`` (which expects a JSON body) and call ``fetch`` directly.
+     */
+    async track(
+      event: FunnelEvent,
+      metadata?: Record<string, unknown>,
+    ): Promise<void> {
+      try {
+        if (!API_URL) {
+          throw new ApiError(
+            503,
+            "Backend no configurado. Contacta al administrador.",
+          );
+        }
+        const token = await getAccessToken(supabase);
+        const res = await fetch(`${API_URL}/api/funnel/track`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ event, metadata: metadata ?? null }),
+        });
+        if (!res.ok) {
+          throw new ApiError(res.status, `Error ${res.status}`);
+        }
+      } catch (err) {
+        // Fire-and-forget: analytics must never break user flows.
+        console.warn("funnel.track failed", err);
+      }
+    },
+  };
+}
+
 // ── Chat API ────────────────────────────────────────────────────────────────
 
 function chatApi(supabase: SupabaseClient) {
@@ -393,5 +447,6 @@ export function backendApi(supabase: SupabaseClient) {
     payments: paymentsApi(supabase),
     subscription: subscriptionApi(supabase),
     chat: chatApi(supabase),
+    funnel: funnelApi(supabase),
   };
 }

@@ -19,7 +19,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { preserveNext, sanitizeNextUrl } from "@/lib/auth/next-url";
-import { phoneAuthApi } from "@/lib/api";
+import { backendApi, phoneAuthApi } from "@/lib/api";
 import type { CheckPhoneStatusResponse } from "@/lib/api";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { OTPInput, useOTPTimer } from "@/components/auth/otp-input";
@@ -240,6 +240,13 @@ export function SignupForm() {
         setExistingAction("login");
         setExistingChannel(null);
         return;
+      }
+
+      // Funnel: signup_completed — fire-and-forget (errors swallowed inside).
+      if (data?.user?.id) {
+        await backendApi(supabase).funnel.track("signup_completed", {
+          phone: data.user.phone ?? null,
+        });
       }
 
       // Success — transition to OTP verification

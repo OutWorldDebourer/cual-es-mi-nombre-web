@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /**
  * Build the CSP connect-src directive with robust fallbacks.
@@ -61,4 +62,16 @@ const analyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default analyzer(nextConfig);
+export default withSentryConfig(analyzer(nextConfig), {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  widenClientFileUpload: true,
+  // Webpack-only options (ignored under Turbopack but silences deprecation warnings).
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+    automaticVercelMonitors: false,
+  },
+});

@@ -54,3 +54,7 @@ _audit_chat/
 audit/
 tmp/
 qa-console-screenshot.png
+
+# Sentry
+.sentryclirc
+

@@ -38,10 +38,18 @@ vi.mock("next/navigation", () => ({
 // Mock phoneAuthApi.checkStatus — pre-login phone check
 const mockCheckStatus = vi.fn();
 
+// Mock backendApi — only ``funnel.track`` is consumed by login-form.
+const mockFunnelTrack = vi.fn().mockResolvedValue(undefined);
+
 vi.mock("@/lib/api", () => ({
   phoneAuthApi: {
     checkStatus: (...args: unknown[]) => mockCheckStatus(...args),
   },
+  backendApi: () => ({
+    funnel: {
+      track: (...args: unknown[]) => mockFunnelTrack(...args),
+    },
+  }),
 }));
 
 const mockSignInWithPassword = vi.fn();

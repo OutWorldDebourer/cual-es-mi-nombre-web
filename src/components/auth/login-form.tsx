@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/ui/form-error";
 import { isValidE164 } from "@/lib/phone-utils";
-import { phoneAuthApi } from "@/lib/api";
+import { backendApi, phoneAuthApi } from "@/lib/api";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -137,6 +137,16 @@ export function LoginForm() {
 
       // Session created — redirect to ?next or /dashboard
       const next = sanitizeNextUrl(searchParams.get("next"));
+
+      // Funnel: login_succeeded_post_payment — only when the `next` URL points
+      // to the post-payment landing. Fire-and-forget (errors swallowed inside).
+      const isPostPaymentContext = next?.includes("plans?status=approved") ?? false;
+      if (isPostPaymentContext) {
+        await backendApi(supabase).funnel.track("login_succeeded_post_payment", {
+          next_path: next,
+        });
+      }
+
       router.push(next ?? "/dashboard");
       router.refresh();
     } catch {

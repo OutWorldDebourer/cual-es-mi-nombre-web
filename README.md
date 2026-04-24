@@ -75,6 +75,17 @@ npm run dev
 3. Configurar variables de entorno en Vercel Dashboard
 4. Deploy automático en cada push a `main`
 
+## Observabilidad (Sentry)
+
+Sentry está configurado en cliente/server/edge. Para activarlo, setear estas env vars en Vercel (Preview + Production):
+
+- `NEXT_PUBLIC_SENTRY_DSN` — DSN del cliente (público, se inyecta al bundle)
+- `SENTRY_DSN` — DSN del servidor
+- `SENTRY_ORG`, `SENTRY_PROJECT` — para source map upload
+- `SENTRY_AUTH_TOKEN` — token de API con permiso `project:releases`, solo en build
+
+Sin estas env vars, Sentry queda deshabilitado (no-op) y la app funciona normalmente.
+
 ## Relación con el Backend
 
 Este frontend es la contraparte web del sistema **"Cuál es mi nombre"**.  
