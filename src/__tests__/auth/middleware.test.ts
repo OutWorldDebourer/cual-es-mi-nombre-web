@@ -34,8 +34,14 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
-function makeRequest(path: string): NextRequest {
-  return new NextRequest(new URL(path, "http://localhost:3000"));
+function makeRequest(pathAndQuery: string): NextRequest {
+  return new NextRequest(new URL(pathAndQuery, "http://localhost:3000"));
+}
+
+function getRedirectLocation(response: NextResponse): URL | null {
+  const location = response.headers.get("location");
+  if (!location) return null;
+  return new URL(location);
 }
 
 function setAuthenticated(authenticated: boolean) {
@@ -118,5 +124,73 @@ describe("updateSession middleware", () => {
     const location = response.headers.get("location");
     expect(location).toBeNull();
     expect(response.status).toBe(200);
+  });
+
+  // ── intent + next preservation for post-MercadoPago returns ─────────
+
+  it("redirects to /signup when intent=signup and user not authenticated", async () => {
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?status=approved&intent=signup"),
+    );
+    const redirect = getRedirectLocation(response);
+    expect(response.status).toBe(307);
+    expect(redirect?.pathname).toBe("/signup");
+  });
+
+  it("redirects to /login when intent is missing and user not authenticated", async () => {
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?status=approved"),
+    );
+    const redirect = getRedirectLocation(response);
+    expect(response.status).toBe(307);
+    expect(redirect?.pathname).toBe("/login");
+  });
+
+  it("redirects to /login when intent is an unknown value", async () => {
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?intent=unknown"),
+    );
+    const redirect = getRedirectLocation(response);
+    expect(response.status).toBe(307);
+    expect(redirect?.pathname).toBe("/login");
+  });
+
+  it("preserves original path and query in ?next param", async () => {
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?status=approved&intent=signup"),
+    );
+    const redirect = getRedirectLocation(response);
+    expect(redirect?.searchParams.get("next")).toBe(
+      "/dashboard/plans?status=approved&intent=signup",
+    );
+  });
+
+  it("encodes special characters in next correctly", async () => {
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?status=approved&token=a%20b%26c"),
+    );
+    const location = response.headers.get("location");
+    // Raw encoded value lives in the Location header so the browser preserves it.
+    expect(location).toContain(
+      `next=${encodeURIComponent("/dashboard/plans?status=approved&token=a%20b%26c")}`,
+    );
+  });
+
+  // ── Happy path: authenticated user lands on post-payment URL ────────
+
+  it("authenticated user accessing /dashboard/plans?status=approved&intent=signup passes through without redirect", async () => {
+    setAuthenticated(true);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?status=approved&intent=signup"),
+    );
+
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.status).not.toBe(307);
+    expect(response.status).not.toBe(308);
   });
 });

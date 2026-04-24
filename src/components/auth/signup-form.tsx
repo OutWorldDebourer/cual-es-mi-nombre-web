@@ -15,9 +15,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeNextUrl } from "@/lib/auth/next-url";
 import { phoneAuthApi } from "@/lib/api";
 import type { CheckPhoneStatusResponse } from "@/lib/api";
 import { PhoneInput } from "@/components/auth/phone-input";
@@ -134,6 +135,7 @@ const SIGNUP_STEPS = [
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // --- Step state ---
   const [step, setStep] = useState<SignupStep>("phone_password");
@@ -271,8 +273,9 @@ export function SignupForm() {
         return;
       }
 
-      // OTP verified — session created, redirect to dashboard
-      router.push("/dashboard");
+      // OTP verified — session created, redirect to ?next or /dashboard
+      const next = sanitizeNextUrl(searchParams.get("next"));
+      router.push(next ?? "/dashboard");
       router.refresh();
     } catch {
       setError("Error inesperado. Intenta de nuevo.");

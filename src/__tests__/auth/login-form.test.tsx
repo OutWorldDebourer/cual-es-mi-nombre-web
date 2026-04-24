@@ -20,6 +20,9 @@ import { mockSupabaseClient } from "../setup";
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 
+// Mutable search params override per test — reset in beforeEach
+let mockSearchParams = new URLSearchParams();
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
@@ -28,7 +31,7 @@ vi.mock("next/navigation", () => ({
     refresh: mockRefresh,
   }),
   usePathname: () => "/login",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearchParams,
   redirect: vi.fn(),
 }));
 
@@ -36,6 +39,7 @@ const mockSignInWithPassword = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockSearchParams = new URLSearchParams();
   mockSupabaseClient.auth.signInWithPassword = mockSignInWithPassword;
   mockSignInWithPassword.mockResolvedValue({
     data: {
@@ -275,6 +279,61 @@ describe("LoginForm — Error handling", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Some unknown error from Supabase")).toBeInTheDocument();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ?next post-login redirect
+// ---------------------------------------------------------------------------
+
+describe("LoginForm — ?next post-login redirect", () => {
+  async function completeLoginFlow() {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await typePhone(user, "999888777");
+    await typePassword(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
+  }
+
+  it("redirects to next URL after successful login when ?next is valid", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await completeLoginFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard/plans?status=approved");
+    });
+  });
+
+  it("falls back to /dashboard when ?next is external/malicious", async () => {
+    mockSearchParams = new URLSearchParams("next=https://evil.com/steal");
+
+    await completeLoginFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    });
+  });
+
+  it("falls back to /dashboard when ?next is missing", async () => {
+    mockSearchParams = new URLSearchParams();
+
+    await completeLoginFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    });
+  });
+
+  it("falls back to /dashboard when ?next is protocol-relative", async () => {
+    mockSearchParams = new URLSearchParams("next=//evil.com/steal");
+
+    await completeLoginFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
 });

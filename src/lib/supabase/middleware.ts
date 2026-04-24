@@ -46,15 +46,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /dashboard routes — redirect to /login if not authenticated
+  // Protect /dashboard routes — redirect to /signup or /login if not authenticated.
+  // The `intent=signup` param is emitted by the MercadoPago back_url when the
+  // backend knows the user has no web account yet; every other case lands on /login.
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    const intent = request.nextUrl.searchParams.get("intent");
+    const originalPathAndQuery =
+      request.nextUrl.pathname + request.nextUrl.search;
+
+    url.pathname = intent === "signup" ? "/signup" : "/login";
+    url.search = `?next=${encodeURIComponent(originalPathAndQuery)}`;
     return NextResponse.redirect(url);
   }
 
   // Redirect authenticated users away from auth pages to dashboard.
-  // All public auth routes — if a user already has a session, these are unreachable states.
+  // `next` is intentionally dropped here: an authenticated user on /login has
+  // no original destination to preserve — /dashboard is always the right target.
   const AUTH_ROUTES = ["/login", "/signup", "/recovery", "/set-password"];
   if (user && AUTH_ROUTES.includes(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();

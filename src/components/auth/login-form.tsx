@@ -13,9 +13,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeNextUrl } from "@/lib/auth/next-url";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,7 @@ function mapLoginError(message: string): string {
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // --- Form fields ---
   const [phone, setPhone] = useState("");
@@ -133,8 +135,9 @@ export function LoginForm() {
         return;
       }
 
-      // Session created — redirect to dashboard
-      router.push("/dashboard");
+      // Session created — redirect to ?next or /dashboard
+      const next = sanitizeNextUrl(searchParams.get("next"));
+      router.push(next ?? "/dashboard");
       router.refresh();
     } catch {
       setError("Error inesperado. Intenta de nuevo.");

@@ -21,6 +21,9 @@ import { mockSupabaseClient } from "../setup";
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 
+// Mutable search params override per test — reset in beforeEach
+let mockSearchParams = new URLSearchParams();
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
@@ -29,7 +32,7 @@ vi.mock("next/navigation", () => ({
     refresh: mockRefresh,
   }),
   usePathname: () => "/signup",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearchParams,
   redirect: vi.fn(),
 }));
 
@@ -48,6 +51,7 @@ const mockVerifyOtp = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockSearchParams = new URLSearchParams();
   mockSupabaseClient.auth.signUp = mockSignUp;
   mockSupabaseClient.auth.verifyOtp = mockVerifyOtp;
 
@@ -554,6 +558,72 @@ describe("SignupForm — Error mapping", () => {
       expect(
         screen.getByText("No se pudo enviar el código de verificación. Intenta de nuevo."),
       ).toBeInTheDocument();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ?next post-OTP redirect
+// ---------------------------------------------------------------------------
+
+describe("SignupForm — ?next post-OTP redirect", () => {
+  /** Advance through phone + password + OTP to trigger the redirect. */
+  async function completeSignupFlow() {
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("+51999888777")).toBeInTheDocument();
+    });
+
+    const otpInputs = screen
+      .getAllByRole("textbox")
+      .filter((el) => el.getAttribute("aria-label")?.includes("Dígito"));
+    await user.click(otpInputs[0]);
+    await user.paste("123456");
+  }
+
+  it("redirects to next URL after successful OTP verification when ?next is valid", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await completeSignupFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard/plans?status=approved");
+    });
+  });
+
+  it("falls back to /dashboard when ?next is external/malicious", async () => {
+    mockSearchParams = new URLSearchParams("next=//evil.com/steal");
+
+    await completeSignupFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    });
+  });
+
+  it("falls back to /dashboard when ?next is missing", async () => {
+    mockSearchParams = new URLSearchParams();
+
+    await completeSignupFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    });
+  });
+
+  it("falls back to /dashboard when ?next uses javascript: scheme", async () => {
+    mockSearchParams = new URLSearchParams("next=javascript:alert(1)");
+
+    await completeSignupFlow();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
 });
