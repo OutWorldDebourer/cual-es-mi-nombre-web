@@ -15,10 +15,10 @@
  */
 
 import { Suspense } from "react";
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SignupForm } from "@/components/auth/signup-form";
+import { AuthFooterLink } from "@/components/auth/auth-footer-link";
 import { MotionReveal } from "@/components/landing/motion-reveal";
 import { AuthFormSkeleton } from "@/components/auth/auth-form-skeleton";
 
@@ -35,16 +35,16 @@ export default function SignupPage() {
         <CardContent>
           <Suspense fallback={<AuthFormSkeleton />}>
             <SignupForm />
+
+            <Separator className="my-6" />
+
+            <p className="text-center text-sm text-muted-foreground">
+              ¿Ya tienes cuenta?{" "}
+              <AuthFooterLink href="/login" className="text-primary underline">
+                Inicia sesión
+              </AuthFooterLink>
+            </p>
           </Suspense>
-
-          <Separator className="my-6" />
-
-          <p className="text-center text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-primary underline">
-              Inicia sesión
-            </Link>
-          </p>
         </CardContent>
       </Card>
     </MotionReveal>

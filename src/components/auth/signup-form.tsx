@@ -18,7 +18,7 @@ import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { sanitizeNextUrl } from "@/lib/auth/next-url";
+import { preserveNext, sanitizeNextUrl } from "@/lib/auth/next-url";
 import { phoneAuthApi } from "@/lib/api";
 import type { CheckPhoneStatusResponse } from "@/lib/api";
 import { PhoneInput } from "@/components/auth/phone-input";
@@ -385,7 +385,14 @@ export function SignupForm() {
   // =========================================================================
 
   if (existingUser) {
-    const setPasswordHref = `/set-password?phone=${encodeURIComponent(phone)}&from=signup`;
+    // Preserve any `?next=` from the current URL so lateral links (login,
+    // recovery, set-password) don't drop the original post-auth destination.
+    const setPasswordHref = preserveNext(
+      `/set-password?phone=${encodeURIComponent(phone)}&from=signup`,
+      searchParams,
+    );
+    const loginHref = preserveNext("/login", searchParams);
+    const recoveryHref = preserveNext("/recovery", searchParams);
     const isWaFirst = existingChannel === "whatsapp";
     const needsPassword = existingAction === "set_password";
 
@@ -414,18 +421,18 @@ export function SignupForm() {
 
         {!needsPassword && (
           <Button asChild className="w-full">
-            <Link href="/login">Iniciar sesión</Link>
+            <Link href={loginHref}>Iniciar sesión</Link>
           </Button>
         )}
 
         <div className="flex gap-2">
           {needsPassword && (
             <Button asChild variant="outline" className="flex-1">
-              <Link href="/login">Iniciar sesión</Link>
+              <Link href={loginHref}>Iniciar sesión</Link>
             </Button>
           )}
           <Button asChild variant="outline" className={needsPassword ? "flex-1" : "w-full"}>
-            <Link href="/recovery">Recuperar contraseña</Link>
+            <Link href={recoveryHref}>Recuperar contraseña</Link>
           </Button>
         </div>
 

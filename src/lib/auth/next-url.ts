@@ -4,6 +4,8 @@
  * @module lib/auth/next-url
  */
 
+import type { ReadonlyURLSearchParams } from "next/navigation";
+
 const DUMMY_ORIGIN = "http://dummy.local";
 
 // Dangerous URI schemes that could execute code if ever handed to `router.push`
@@ -67,4 +69,45 @@ export function buildAuthRedirect(
   const params = new URLSearchParams();
   params.set("next", originalPathAndQuery);
   return `${target}?${params.toString()}`;
+}
+
+/**
+ * Build a target URL that preserves the current `?next=` param if present.
+ *
+ * Use for lateral links within auth flows (e.g., signup → login → recovery)
+ * so the original post-auth destination isn't lost when users pivot
+ * between auth screens.
+ *
+ * The `next` param is always appended as the last query key, BEFORE any hash
+ * fragment on `target` — that matches URL grammar (`path?query#fragment`).
+ * Invalid or missing `next` values are silently ignored (target returned
+ * unchanged); sanitization follows the same rules as `sanitizeNextUrl`.
+ *
+ * @example
+ *   // Current URL: /signup?next=/dashboard/plans
+ *   preserveNext("/login", searchParams)
+ *   // → "/login?next=%2Fdashboard%2Fplans"
+ *
+ *   preserveNext("/set-password?phone=123", searchParams)
+ *   // → "/set-password?phone=123&next=%2Fdashboard%2Fplans"
+ *
+ *   preserveNext("/login#section", searchParams)
+ *   // → "/login?next=%2Fdashboard%2Fplans#section"
+ */
+export function preserveNext(
+  target: string,
+  searchParams: URLSearchParams | ReadonlyURLSearchParams,
+): string {
+  const rawNext = searchParams.get("next");
+  const next = sanitizeNextUrl(rawNext);
+  if (!next) return target;
+
+  // Split target into [path+query, hash] so the query param lands BEFORE
+  // the hash fragment, matching RFC 3986 grammar.
+  const hashIndex = target.indexOf("#");
+  const base = hashIndex === -1 ? target : target.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? "" : target.slice(hashIndex);
+
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}next=${encodeURIComponent(next)}${hash}`;
 }

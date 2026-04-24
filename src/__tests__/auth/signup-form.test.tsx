@@ -627,3 +627,103 @@ describe("SignupForm — ?next post-OTP redirect", () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Existing-user banner — lateral links preserve ?next
+// ---------------------------------------------------------------------------
+
+describe("SignupForm — existingUser banner preserves ?next in lateral links", () => {
+  /** Force the existingUser branch (set_password action) and fill the form. */
+  async function triggerExistingUserSetPassword() {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: "whatsapp",
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Tu asistente de WhatsApp ya está activo")).toBeInTheDocument();
+    });
+  }
+
+  /** Force the existingUser branch (login action — already has password). */
+  async function triggerExistingUserLogin() {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "login",
+      channel_origin: "whatsapp",
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm />);
+
+    await typePhone(user, "999888777");
+    await fillPasswordFields(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Crear cuenta" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Este número ya tiene una cuenta")).toBeInTheDocument();
+    });
+  }
+
+  it("login link preserves ?next when user already has a password", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await triggerExistingUserLogin();
+
+    expect(screen.getByRole("link", { name: "Iniciar sesión" })).toHaveAttribute(
+      "href",
+      "/login?next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("recovery link preserves ?next in set_password branch", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await triggerExistingUserSetPassword();
+
+    expect(screen.getByRole("link", { name: "Recuperar contraseña" })).toHaveAttribute(
+      "href",
+      "/recovery?next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("set-password href preserves ?next in set_password branch", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await triggerExistingUserSetPassword();
+
+    expect(
+      screen.getByRole("link", { name: "Crear contraseña para la web" }),
+    ).toHaveAttribute(
+      "href",
+      "/set-password?phone=%2B51999888777&from=signup&next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("drops invalid ?next (external URL) from all lateral links", async () => {
+    mockSearchParams = new URLSearchParams("next=https://evil.com/steal");
+
+    await triggerExistingUserSetPassword();
+
+    expect(
+      screen.getByRole("link", { name: "Crear contraseña para la web" }),
+    ).toHaveAttribute(
+      "href",
+      "/set-password?phone=%2B51999888777&from=signup",
+    );
+    expect(screen.getByRole("link", { name: "Iniciar sesión" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
+    expect(screen.getByRole("link", { name: "Recuperar contraseña" })).toHaveAttribute(
+      "href",
+      "/recovery",
+    );
+  });
+});

@@ -22,6 +22,9 @@ import { phoneAuthApi, ApiError } from "@/lib/api";
 
 const mockPush = vi.fn();
 
+// Mutable search params override per test — reset in beforeEach
+let mockSearchParams = new URLSearchParams();
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
@@ -30,7 +33,7 @@ vi.mock("next/navigation", () => ({
     refresh: vi.fn(),
   }),
   usePathname: () => "/recovery",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearchParams,
   redirect: vi.fn(),
 }));
 
@@ -42,6 +45,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
       requestOtp: vi.fn(),
       setPassword: vi.fn(),
       resetPassword: vi.fn(),
+      checkStatus: vi.fn(),
     },
   };
 });
@@ -49,12 +53,19 @@ vi.mock("@/lib/api", async (importOriginal) => {
 const mockRequestOtp = phoneAuthApi.requestOtp as ReturnType<typeof vi.fn>;
 const mockSetPassword = phoneAuthApi.setPassword as ReturnType<typeof vi.fn>;
 const mockResetPassword = phoneAuthApi.resetPassword as ReturnType<typeof vi.fn>;
+const mockCheckStatus = phoneAuthApi.checkStatus as ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockSearchParams = new URLSearchParams();
   mockRequestOtp.mockResolvedValue({ status: "ok", message: "OTP sent" });
   mockSetPassword.mockResolvedValue({ status: "ok", message: "Password set" });
   mockResetPassword.mockResolvedValue({ status: "ok", message: "Password reset" });
+  // Default: phone has a password → proceed with requestOtp in recovery mode
+  mockCheckStatus.mockResolvedValue({
+    action: "login",
+    channel_origin: "web",
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -468,5 +479,146 @@ describe("RecoveryForm — Resend OTP", () => {
     await goToOtpStep(user);
 
     expect(screen.getByRole("button", { name: "Reenviar código" })).toBeDisabled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ?next preservation — lateral links + post-success router.push
+// ---------------------------------------------------------------------------
+
+describe("RecoveryForm — ?next preservation in lateral links", () => {
+  /**
+   * Drive the form all the way to success so the "Ir a iniciar sesión"
+   * button is rendered and can assert the preserved next in router.push.
+   */
+  async function completeRecoveryFlow() {
+    const user = userEvent.setup();
+    render(<RecoveryForm purpose="recovery" />);
+
+    await goToPasswordStep(user);
+    await user.type(screen.getByLabelText("Nueva contraseña"), "newpassword123");
+    await user.type(screen.getByLabelText("Confirmar contraseña"), "newpassword123");
+    await user.click(screen.getByRole("button", { name: "Cambiar contraseña" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Ir a iniciar sesión" }),
+      ).toBeInTheDocument();
+    });
+
+    return user;
+  }
+
+  it("router.push preserves ?next after successful recovery", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    const user = await completeRecoveryFlow();
+    await user.click(screen.getByRole("button", { name: "Ir a iniciar sesión" }));
+
+    expect(mockPush).toHaveBeenCalledWith(
+      "/login?next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("router.push drops invalid external ?next after successful recovery", async () => {
+    mockSearchParams = new URLSearchParams("next=https://evil.com/steal");
+
+    const user = await completeRecoveryFlow();
+    await user.click(screen.getByRole("button", { name: "Ir a iniciar sesión" }));
+
+    expect(mockPush).toHaveBeenCalledWith("/login");
+  });
+
+  it("signup link in 'no account' banner preserves ?next", async () => {
+    // Route recovery → noAccount branch: checkStatus returns action=signup
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "signup",
+      channel_origin: null,
+    });
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    const user = userEvent.setup();
+    render(<RecoveryForm purpose="recovery" />);
+
+    await typePhone(user, "999888777");
+    await submitPhone(user);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("No encontramos una cuenta con ese número"),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("link", { name: "Registrarme" })).toHaveAttribute(
+      "href",
+      "/signup?phone=%2B51999888777&next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("signup link in 'no account' banner drops invalid (javascript:) ?next", async () => {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "signup",
+      channel_origin: null,
+    });
+    mockSearchParams = new URLSearchParams("next=javascript:alert(1)");
+
+    const user = userEvent.setup();
+    render(<RecoveryForm purpose="recovery" />);
+
+    await typePhone(user, "999888777");
+    await submitPhone(user);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("No encontramos una cuenta con ese número"),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("link", { name: "Registrarme" })).toHaveAttribute(
+      "href",
+      "/signup?phone=%2B51999888777",
+    );
+  });
+
+  it("preserves ?next when redirecting to /set-password from checkStatus", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans");
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: "whatsapp",
+    });
+
+    const user = userEvent.setup();
+    render(<RecoveryForm purpose="recovery" />);
+
+    await typePhone(user, "999888777");
+    await submitPhone(user);
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith(
+        "/set-password?phone=%2B51999888777&from=recovery&next=%2Fdashboard%2Fplans",
+      );
+    });
+    expect(mockRequestOtp).not.toHaveBeenCalled();
+  });
+
+  it("drops invalid ?next when redirecting to /set-password from checkStatus", async () => {
+    mockSearchParams = new URLSearchParams("next=//evil.com");
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: null,
+    });
+
+    const user = userEvent.setup();
+    render(<RecoveryForm purpose="recovery" />);
+
+    await typePhone(user, "999888777");
+    await submitPhone(user);
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith(
+        "/set-password?phone=%2B51999888777&from=recovery",
+      );
+    });
+    expect(mockRequestOtp).not.toHaveBeenCalled();
   });
 });

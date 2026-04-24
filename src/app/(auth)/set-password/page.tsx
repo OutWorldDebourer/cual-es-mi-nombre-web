@@ -24,6 +24,7 @@ import { RecoveryForm } from "@/components/auth/recovery-form";
 import { MotionReveal } from "@/components/landing/motion-reveal";
 import { AuthFormSkeleton } from "@/components/auth/auth-form-skeleton";
 import { isValidE164 } from "@/lib/phone-utils";
+import { preserveNext } from "@/lib/auth/next-url";
 
 // ---------------------------------------------------------------------------
 // Inner component — uses useSearchParams (requires Suspense boundary)
@@ -38,6 +39,10 @@ function SetPasswordContent() {
   // Only pass phone if it's valid E.164 — prevents injection
   const initialPhone = isValidE164(rawPhone) ? rawPhone : undefined;
   const showSignupBanner = from === "signup";
+
+  // Preserve `?next=` on the lateral login link so users who pivot from
+  // set-password to login don't lose their original post-auth destination.
+  const loginHref = preserveNext("/login", searchParams);
 
   return (
     <>
@@ -56,7 +61,7 @@ function SetPasswordContent() {
 
       <p className="text-center text-sm text-muted-foreground">
         ¿Ya tienes contraseña?{" "}
-        <Link href="/login" className="text-primary underline">
+        <Link href={loginHref} className="text-primary underline">
           Iniciar sesión
         </Link>
       </p>

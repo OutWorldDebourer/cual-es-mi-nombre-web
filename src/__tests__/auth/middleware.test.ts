@@ -193,4 +193,30 @@ describe("updateSession middleware", () => {
     expect(response.status).not.toBe(307);
     expect(response.status).not.toBe(308);
   });
+
+  // ── Adversarial: intent param edge cases ─────────────────────────────
+
+  it("redirects to /login when intent=SIGNUP uppercase (strict case match)", async () => {
+    // The middleware compares intent strictly against the lowercase literal
+    // "signup"; any other casing must NOT route to /signup.
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?status=approved&intent=SIGNUP"),
+    );
+    const redirect = getRedirectLocation(response);
+    expect(response.status).toBe(307);
+    expect(redirect?.pathname).toBe("/login");
+  });
+
+  it("uses first intent value when duplicated in query (URLSearchParams.get semantics)", async () => {
+    // URLSearchParams.get("intent") returns the FIRST value, so ?intent=signup&intent=login
+    // → "signup" → /signup.
+    setAuthenticated(false);
+    const response = await updateSession(
+      makeRequest("/dashboard/plans?intent=signup&intent=login"),
+    );
+    const redirect = getRedirectLocation(response);
+    expect(response.status).toBe(307);
+    expect(redirect?.pathname).toBe("/signup");
+  });
 });

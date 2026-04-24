@@ -17,7 +17,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { OTPInput, useOTPTimer } from "@/components/auth/otp-input";
@@ -30,6 +30,7 @@ import { StepIndicator } from "@/components/auth/step-indicator";
 import { isValidE164 } from "@/lib/phone-utils";
 import { phoneAuthApi, ApiError } from "@/lib/api";
 import type { PhoneAuthPurpose } from "@/lib/api";
+import { preserveNext } from "@/lib/auth/next-url";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -153,6 +154,7 @@ const RECOVERY_STEPS = [
 
 export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const copy = COPY[purpose];
 
   // --- Form fields ---
@@ -202,7 +204,12 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
         try {
           const status = await phoneAuthApi.checkStatus(phone);
           if (status.action === "set_password") {
-            router.push(`/set-password?phone=${encodeURIComponent(phone)}&from=recovery`);
+            router.push(
+              preserveNext(
+                `/set-password?phone=${encodeURIComponent(phone)}&from=recovery`,
+                searchParams,
+              ),
+            );
             return;
           }
           if (status.action === "signup") {
@@ -322,10 +329,13 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
 
   // --- Success view ---
   if (success) {
+    // Preserve `?next=` so the post-recovery login click lands back on the
+    // user's original destination (e.g. /dashboard/plans?status=approved).
+    const loginHref = preserveNext("/login", searchParams);
     return (
       <div className="space-y-4 text-center">
         <p className="text-sm text-muted-foreground">{copy.successMessage}</p>
-        <Button className="w-full" onClick={() => router.push("/login")}>
+        <Button className="w-full" onClick={() => router.push(loginHref)}>
           Ir a iniciar sesión
         </Button>
       </div>
@@ -337,6 +347,11 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
 
   // --- Step: PHONE — "no account" informational state (recovery only) ---
   if (step === "phone" && noAccount) {
+    // Preserve `?next=` across the recovery→signup pivot.
+    const signupHref = preserveNext(
+      `/signup?phone=${encodeURIComponent(phone)}`,
+      searchParams,
+    );
     return (
       <div className="space-y-4">
         <StepIndicator steps={RECOVERY_STEPS} currentStep={stepIndex} />
@@ -347,7 +362,7 @@ export function RecoveryForm({ purpose, initialPhone }: RecoveryFormProps) {
           </p>
         </div>
         <Button asChild className="w-full">
-          <Link href={`/signup?phone=${encodeURIComponent(phone)}`}>Registrarme</Link>
+          <Link href={signupHref}>Registrarme</Link>
         </Button>
         <Button type="button" variant="ghost" className="w-full" onClick={() => setNoAccount(false)}>
           Usar otro número

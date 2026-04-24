@@ -16,7 +16,7 @@ import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { sanitizeNextUrl } from "@/lib/auth/next-url";
+import { preserveNext, sanitizeNextUrl } from "@/lib/auth/next-url";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -155,7 +155,12 @@ export function LoginForm() {
 
   // --- Banner: WA-first user needs password ---
   if (needsPassword) {
-    const setPasswordHref = `/set-password?phone=${encodeURIComponent(phone)}&from=login`;
+    // Preserve `?next=` so the WA-first user's original post-auth destination
+    // (e.g. /dashboard/plans?status=approved) survives the pivot to /set-password.
+    const setPasswordHref = preserveNext(
+      `/set-password?phone=${encodeURIComponent(phone)}&from=login`,
+      searchParams,
+    );
     return (
       <div className="space-y-4">
         <div className="rounded-md bg-success/10 border border-success/20 p-4 text-sm space-y-2 animate-[fade-in-up_0.3s_ease-out_both]">
@@ -179,6 +184,7 @@ export function LoginForm() {
 
   // --- Banner: no account found ---
   if (noAccount) {
+    const signupHref = preserveNext("/signup", searchParams);
     return (
       <div className="space-y-4">
         <div className="rounded-md bg-muted border p-4 text-sm space-y-2 animate-[fade-in-up_0.3s_ease-out_both]">
@@ -189,7 +195,7 @@ export function LoginForm() {
           </p>
         </div>
         <Button asChild className="w-full">
-          <Link href="/signup">Registrarse</Link>
+          <Link href={signupHref}>Registrarse</Link>
         </Button>
         <Button type="button" variant="ghost" className="w-full" onClick={handleReset}>
           Usar otro número
@@ -216,7 +222,7 @@ export function LoginForm() {
         <div className="flex items-center justify-between">
           <Label htmlFor="login-password">Contraseña</Label>
           <Link
-            href="/recovery"
+            href={preserveNext("/recovery", searchParams)}
             className="text-xs text-muted-foreground hover:text-primary transition-colors"
           >
             ¿Olvidaste tu contraseña?

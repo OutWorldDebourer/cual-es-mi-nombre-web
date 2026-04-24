@@ -1,11 +1,11 @@
 /**
- * next-url Tests — sanitizeNextUrl + buildAuthRedirect
+ * next-url Tests — sanitizeNextUrl + buildAuthRedirect + preserveNext
  *
  * @module __tests__/lib/auth/next-url.test
  */
 
 import { describe, it, expect } from "vitest";
-import { sanitizeNextUrl, buildAuthRedirect } from "@/lib/auth/next-url";
+import { sanitizeNextUrl, buildAuthRedirect, preserveNext } from "@/lib/auth/next-url";
 
 describe("sanitizeNextUrl — rejection cases", () => {
   it("returns null for null input", () => {
@@ -142,5 +142,76 @@ describe("buildAuthRedirect", () => {
 
   it("builds a /login redirect with a plain path (no query)", () => {
     expect(buildAuthRedirect("/login", "/dashboard")).toBe("/login?next=%2Fdashboard");
+  });
+});
+
+describe("preserveNext", () => {
+  /** Build URLSearchParams from a query string for readable test setup. */
+  const params = (query: string) => new URLSearchParams(query);
+
+  it("returns target unchanged when no next param", () => {
+    expect(preserveNext("/login", params(""))).toBe("/login");
+  });
+
+  it("returns target unchanged when next is empty string", () => {
+    expect(preserveNext("/login", params("next="))).toBe("/login");
+  });
+
+  it("appends ?next when target has no query", () => {
+    expect(preserveNext("/login", params("next=/dashboard"))).toBe(
+      "/login?next=%2Fdashboard",
+    );
+  });
+
+  it("appends &next when target already has query", () => {
+    expect(
+      preserveNext(
+        "/set-password?phone=%2B51999888777&from=signup",
+        params("next=/dashboard/plans"),
+      ),
+    ).toBe(
+      "/set-password?phone=%2B51999888777&from=signup&next=%2Fdashboard%2Fplans",
+    );
+  });
+
+  it("ignores invalid next (external URL)", () => {
+    expect(preserveNext("/login", params("next=https%3A%2F%2Fevil.com%2Fpath"))).toBe(
+      "/login",
+    );
+  });
+
+  it("ignores invalid next (protocol-relative)", () => {
+    expect(preserveNext("/login", params("next=%2F%2Fevil.com%2Fpath"))).toBe("/login");
+  });
+
+  it("ignores invalid next (javascript scheme)", () => {
+    expect(preserveNext("/login", params("next=javascript%3Aalert(1)"))).toBe("/login");
+  });
+
+  it("places next before a hash fragment on target (query before hash)", () => {
+    // URL grammar: path?query#fragment. The hash MUST come after the query.
+    expect(preserveNext("/login#section", params("next=/x"))).toBe(
+      "/login?next=%2Fx#section",
+    );
+  });
+
+  it("places next before hash when target has both query and hash", () => {
+    expect(preserveNext("/login?a=1#section", params("next=/x"))).toBe(
+      "/login?a=1&next=%2Fx#section",
+    );
+  });
+
+  it("URL-encodes next with special characters (ampersand, equals, slashes)", () => {
+    const result = preserveNext(
+      "/login",
+      params("next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved%26token%3Dabc"),
+    );
+    expect(result).toBe(
+      "/login?next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved%26token%3Dabc",
+    );
+    // Round-trip: decoding the next param yields the original safe path.
+    const [, queryString] = result.split("?");
+    const parsed = new URLSearchParams(queryString);
+    expect(parsed.get("next")).toBe("/dashboard/plans?status=approved&token=abc");
   });
 });

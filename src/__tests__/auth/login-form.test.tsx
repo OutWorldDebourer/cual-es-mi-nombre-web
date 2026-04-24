@@ -35,6 +35,15 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
 }));
 
+// Mock phoneAuthApi.checkStatus — pre-login phone check
+const mockCheckStatus = vi.fn();
+
+vi.mock("@/lib/api", () => ({
+  phoneAuthApi: {
+    checkStatus: (...args: unknown[]) => mockCheckStatus(...args),
+  },
+}));
+
 const mockSignInWithPassword = vi.fn();
 
 beforeEach(() => {
@@ -47,6 +56,11 @@ beforeEach(() => {
       session: { access_token: "tok" },
     },
     error: null,
+  });
+  // Default: phone already has password → proceed to signInWithPassword
+  mockCheckStatus.mockResolvedValue({
+    action: "login",
+    channel_origin: "web",
   });
 });
 
@@ -335,5 +349,113 @@ describe("LoginForm — ?next post-login redirect", () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Pre-check banners (needsPassword / noAccount) preserve ?next
+// ---------------------------------------------------------------------------
+
+describe("LoginForm — noAccount banner preserves ?next in lateral links", () => {
+  async function triggerNoAccount() {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "signup",
+      channel_origin: null,
+    });
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await typePhone(user, "999888777");
+    await typePassword(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("No existe una cuenta con este número"),
+      ).toBeInTheDocument();
+    });
+  }
+
+  it("signup link preserves ?next", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await triggerNoAccount();
+
+    expect(screen.getByRole("link", { name: "Registrarse" })).toHaveAttribute(
+      "href",
+      "/signup?next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("signup link drops invalid (external) ?next", async () => {
+    mockSearchParams = new URLSearchParams("next=https://evil.com/steal");
+
+    await triggerNoAccount();
+
+    expect(screen.getByRole("link", { name: "Registrarse" })).toHaveAttribute(
+      "href",
+      "/signup",
+    );
+  });
+});
+
+describe("LoginForm — needsPassword banner preserves ?next in set-password link", () => {
+  async function triggerNeedsPassword() {
+    mockCheckStatus.mockResolvedValueOnce({
+      action: "set_password",
+      channel_origin: "whatsapp",
+    });
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await typePhone(user, "999888777");
+    await typePassword(user, "password123");
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Tu cuenta fue creada desde WhatsApp"),
+      ).toBeInTheDocument();
+    });
+  }
+
+  it("set-password href preserves ?next alongside phone and from params", async () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+
+    await triggerNeedsPassword();
+
+    expect(
+      screen.getByRole("link", { name: "Crear contraseña para la web" }),
+    ).toHaveAttribute(
+      "href",
+      "/set-password?phone=%2B51999888777&from=login&next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
+  });
+
+  it("set-password href drops javascript: scheme ?next", async () => {
+    mockSearchParams = new URLSearchParams("next=javascript:alert(1)");
+
+    await triggerNeedsPassword();
+
+    expect(
+      screen.getByRole("link", { name: "Crear contraseña para la web" }),
+    ).toHaveAttribute(
+      "href",
+      "/set-password?phone=%2B51999888777&from=login",
+    );
+  });
+});
+
+describe("LoginForm — recovery link preserves ?next", () => {
+  it("preserves ?next on the recovery link", () => {
+    mockSearchParams = new URLSearchParams("next=/dashboard/plans?status=approved");
+    render(<LoginForm />);
+    const recoveryLink = screen.getByRole("link", { name: /olvidaste tu contraseña/i });
+    expect(recoveryLink).toHaveAttribute(
+      "href",
+      "/recovery?next=%2Fdashboard%2Fplans%3Fstatus%3Dapproved",
+    );
   });
 });
