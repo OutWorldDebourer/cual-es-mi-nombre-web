@@ -66,9 +66,7 @@ export function buildAuthRedirect(
   target: "/login" | "/signup",
   originalPathAndQuery: string,
 ): string {
-  const params = new URLSearchParams();
-  params.set("next", originalPathAndQuery);
-  return `${target}?${params.toString()}`;
+  return `${target}?next=${encodeURIComponent(originalPathAndQuery)}`;
 }
 
 /**

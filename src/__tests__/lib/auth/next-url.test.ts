@@ -137,7 +137,7 @@ describe("buildAuthRedirect", () => {
 
   it("encodes special characters deterministically", () => {
     const result = buildAuthRedirect("/login", "/a b/c?x=1&y=2");
-    expect(result).toBe("/login?next=%2Fa+b%2Fc%3Fx%3D1%26y%3D2");
+    expect(result).toBe("/login?next=%2Fa%20b%2Fc%3Fx%3D1%26y%3D2");
   });
 
   it("builds a /login redirect with a plain path (no query)", () => {
