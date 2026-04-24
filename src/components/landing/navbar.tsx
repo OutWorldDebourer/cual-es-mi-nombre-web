@@ -52,15 +52,19 @@ export function LandingNavbar({ isAuthenticated = false }: LandingNavbarProps) {
             ]
           )}
         >
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex min-w-0 items-center gap-2">
             <Sparkles
-              className="size-6 text-accent"
+              className="size-6 shrink-0 text-accent"
               style={{ animation: "sparkle-pulse 3s ease-in-out infinite" }}
             />
-            <span className="text-lg font-bold">Cual es mi nombre</span>
+            <span className="whitespace-nowrap text-base font-bold sm:text-lg">
+              Cual es mi nombre
+            </span>
           </Link>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
             {isAuthenticated ? (
               <Button asChild size="sm">
                 <Link href="/dashboard">
@@ -70,7 +74,12 @@ export function LandingNavbar({ isAuthenticated = false }: LandingNavbarProps) {
               </Button>
             ) : (
               <>
-                <Button asChild variant="ghost" size="sm">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="hidden sm:inline-flex"
+                >
                   <Link href="/login">Iniciar Sesion</Link>
                 </Button>
                 <Button asChild size="sm">

@@ -51,5 +51,6 @@ next-env.d.ts
 
 # Audit screenshots + temporary artifacts from Chrome MCP e2e runs
 _audit_chat/
+audit/
 tmp/
 qa-console-screenshot.png
