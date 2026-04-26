@@ -46,17 +46,33 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /dashboard routes — redirect to /signup or /login if not authenticated.
-  // The `intent=signup` param is emitted by the MercadoPago back_url when the
-  // backend knows the user has no web account yet; every other case lands on /login.
+  // Protect /dashboard routes — redirect to the right auth screen if not authenticated.
+  // MercadoPago back_urls emit `intent` to tell the middleware which screen the
+  // user should land on after payment:
+  //   - intent=signup        → /signup        (phone unknown to backend)
+  //   - intent=set_password  → /set-password  (WA-first user, no web password yet)
+  //   - anything else / none → /login         (user has a password)
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     const intent = request.nextUrl.searchParams.get("intent");
+    const phone = request.nextUrl.searchParams.get("phone");
     const originalPathAndQuery =
       request.nextUrl.pathname + request.nextUrl.search;
 
-    url.pathname = intent === "signup" ? "/signup" : "/login";
-    url.search = `?next=${encodeURIComponent(originalPathAndQuery)}`;
+    const params = new URLSearchParams();
+    params.set("next", originalPathAndQuery);
+
+    if (intent === "signup") {
+      url.pathname = "/signup";
+    } else if (intent === "set_password") {
+      url.pathname = "/set-password";
+      params.set("from", "signup");
+      if (phone) params.set("phone", phone);
+    } else {
+      url.pathname = "/login";
+    }
+
+    url.search = `?${params.toString()}`;
     return NextResponse.redirect(url);
   }
 
