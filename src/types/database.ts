@@ -40,6 +40,9 @@ export interface Profile {
   plan: SubscriptionPlan; // DB column is "plan", not "subscription_plan"
   credits_remaining: number;
   credits_total: number;
+  free_credits_granted_at: string | null;
+  free_credits_expires_at: string | null;
+  free_pool_exhausted_at: string | null;
   google_token_vault_id: string | null; // non-null = Google connected
   google_calendar_id: string;
   message_wait_seconds: number;
