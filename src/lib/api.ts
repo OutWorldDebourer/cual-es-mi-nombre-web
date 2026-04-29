@@ -54,6 +54,17 @@ export interface VerifyResponse {
   message: string;
 }
 
+// ── Types — Credits Window (free-tier throttle) ───────────────────────────
+
+export interface CreditWindow {
+  credits_used: number;
+  credits_limit: number;
+  window_seconds: number;
+  retry_after_seconds: number;
+  resets_at_epoch: number;
+  allowed: boolean;
+}
+
 // ── Internal helpers ───────────────────────────────────────────────────────
 
 /**
@@ -244,6 +255,35 @@ function paymentsApi(supabase: SupabaseClient) {
           body: JSON.stringify({ plan }),
         },
       );
+    },
+
+    /**
+     * POST /api/checkout/topup
+     * Creates a MercadoPago preference for the 100-credit top-up pack
+     * (S/9.90). Returns { init_point, preference_id } — same shape as
+     * `createPreference`.
+     */
+    async createTopupPreference(): Promise<CheckoutPreferenceResponse> {
+      return authFetch<CheckoutPreferenceResponse>(
+        supabase,
+        "/api/checkout/topup",
+        { method: "POST" },
+      );
+    },
+  };
+}
+
+// ── Credits API (free-tier throttle window) ───────────────────────────────
+
+function creditsApi(supabase: SupabaseClient) {
+  return {
+    /**
+     * GET /api/credits/window
+     * Fetch the current rate-limit window state for the authenticated user.
+     * Used by the dashboard to show the free-tier throttle indicator.
+     */
+    async getWindow(): Promise<CreditWindow> {
+      return authFetch<CreditWindow>(supabase, "/api/credits/window");
     },
   };
 }
@@ -448,5 +488,6 @@ export function backendApi(supabase: SupabaseClient) {
     subscription: subscriptionApi(supabase),
     chat: chatApi(supabase),
     funnel: funnelApi(supabase),
+    credits: creditsApi(supabase),
   };
 }

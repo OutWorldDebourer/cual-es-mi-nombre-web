@@ -29,13 +29,19 @@ export default async function CreditsPage() {
   // Fetch profile for balance + plan + timezone
   const { data: profile } = await supabase
     .from("profiles")
-    .select("credits_remaining, credits_total, plan, timezone")
+    .select(
+      "credits_remaining, credits_total, plan, timezone, free_credits_expires_at",
+    )
     .eq("id", user.id)
     .single();
 
   const typedProfile = profile as Pick<
     Profile,
-    "credits_remaining" | "credits_total" | "plan" | "timezone"
+    | "credits_remaining"
+    | "credits_total"
+    | "plan"
+    | "timezone"
+    | "free_credits_expires_at"
   > | null;
 
   // Fetch recent transactions (first page)
@@ -60,6 +66,7 @@ export default async function CreditsPage() {
           creditsRemaining={typedProfile?.credits_remaining ?? 0}
           creditsTotal={typedProfile?.credits_total ?? 0}
           plan={typedProfile?.plan ?? "free"}
+          freeCreditsExpiresAt={typedProfile?.free_credits_expires_at ?? null}
         />
 
         {/* Transaction history */}
